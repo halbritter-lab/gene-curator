@@ -1,5 +1,6 @@
+<!-- CurationModal.vue -->
 <template>
-  <v-dialog v-model="modalOpen" persistent max-width="600px">
+  <v-dialog v-model="isOpen" persistent max-width="600px">
     <v-card>
       <v-card-title>
         Edit Data
@@ -10,7 +11,7 @@
             <v-col cols="12">
               <v-text-field v-model="editedItem.approved_symbol" label="Approved Symbol"></v-text-field>
             </v-col>
-            <!-- Repeat for other fields -->
+            <!-- Add more fields as needed -->
           </v-row>
         </v-container>
       </v-card-text>
@@ -29,31 +30,46 @@ export default {
     item: {
       type: Object,
       required: true
+    },
+    open: {
+      type: Boolean,
+      required: true
     }
   },
   data() {
     return {
-      modalOpen: false,
-      editedItem: {}
+      editedItem: {}, // Initialize editedItem to an empty object
     };
+  },
+  computed: {
+    // Use a computed property to interpret the prop for internal use
+    isOpen: {
+      get() {
+        return this.open;
+      },
+      set(value) {
+        // When trying to close the dialog, emit an event instead of mutating the prop
+        if (!value) {
+          this.close();
+        }
+      }
+    }
   },
   watch: {
     item: {
       handler(newVal) {
         this.editedItem = { ...newVal };
-        this.modalOpen = true;
       },
+      immediate: true, // Trigger the watcher immediately with the current value of `item`
       deep: true
     }
   },
   methods: {
     save() {
-      this.$emit('save', this.editedItem);
-      this.close();
+      this.$emit('save', this.editedItem); // Emit the save event with the edited item
     },
     close() {
-      this.modalOpen = false;
-      this.$emit('close');
+      this.$emit('close'); // Emit the close event to notify the parent to update its state
     }
   }
 };
