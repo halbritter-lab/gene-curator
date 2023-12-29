@@ -5,7 +5,7 @@
       <!-- Logo Image -->
       <v-img
         src="logo.png"
-        class="mr-3"
+        class="mr-3 app-logo"
         contain
         max-height="48"
         max-width="48"
@@ -35,5 +35,25 @@ export default {
 </script>
 
 <style>
-/* Add any additional styles here */
+
+/* Styles for the application logo */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.app-logo {
+  max-width: 92px; /* Fixed maximum width */
+  margin-right: 20px; /* Spacing between logo and title */
+  animation: fadeIn 2s ease-out forwards;
+}
+
+.app-logo:hover {
+  animation: pulse 2s infinite;
+}
+
 </style>
