@@ -25,52 +25,45 @@
 </template>
 
 <script>
+import { ref, watchEffect } from 'vue';
+
 export default {
   props: {
     item: {
       type: Object,
-      required: true
+      required: true,
     },
     open: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
-  data() {
+  setup(props, { emit }) {
+    const editedItem = ref({});
+
+    // Watch for changes in the "item" prop and update the local state
+    watchEffect(() => {
+      editedItem.value = { ...props.item };
+    });
+
+    const isOpen = ref(props.open);
+
+    // When trying to close the dialog, emit an event instead of mutating the prop
+    const close = () => {
+      emit('close');
+    };
+
+    // Emit the save event with the edited item
+    const save = () => {
+      emit('save', editedItem.value);
+    };
+
     return {
-      editedItem: {}, // Initialize editedItem to an empty object
+      isOpen,
+      editedItem,
+      close,
+      save,
     };
   },
-  computed: {
-    // Use a computed property to interpret the prop for internal use
-    isOpen: {
-      get() {
-        return this.open;
-      },
-      set(value) {
-        // When trying to close the dialog, emit an event instead of mutating the prop
-        if (!value) {
-          this.close();
-        }
-      }
-    }
-  },
-  watch: {
-    item: {
-      handler(newVal) {
-        this.editedItem = { ...newVal };
-      },
-      immediate: true, // Trigger the watcher immediately with the current value of `item`
-      deep: true
-    }
-  },
-  methods: {
-    save() {
-      this.$emit('save', this.editedItem); // Emit the save event with the edited item
-    },
-    close() {
-      this.$emit('close'); // Emit the close event to notify the parent to update its state
-    }
-  }
 };
 </script>
