@@ -1,3 +1,4 @@
+<!-- components/AppBar.vue -->
 <template>
   <v-app-bar app color="primary" dark>
     <v-img

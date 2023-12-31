@@ -1,4 +1,4 @@
-<!-- CurationModal.vue -->
+<!-- components/CurationModal.vue -->
 <template>
   <v-dialog v-model="isOpen" persistent max-width="600px">
     <v-card>

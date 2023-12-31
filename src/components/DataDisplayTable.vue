@@ -1,4 +1,4 @@
-<!-- DataDisplayTable.vue -->
+<!-- components/DataDisplayTable.vue -->
 <template>
   <v-data-table :headers="headers" :items="items">
     <template v-slot:[`item.actions`]="{ item }">
@@ -15,15 +15,19 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import CurationModal from './CurationModal.vue';
+
+// import 
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase'
 
 export default {
   components: {
     CurationModal,
   },
   setup() {
-    const items = ref([
+    let items = ref([
       {
           "approved_symbol": "ACE",
           "hgnc_id": 2707,
@@ -273,7 +277,7 @@ export default {
     const headers = [
       { text: 'Approved Symbol', value: 'approved_symbol' },
       { text: 'HGNC ID', value: 'hgnc_id' },
-      // Define headers for other fields...
+      { text: 'Evidence count', value: 'evidence_count' },
       { text: 'Actions', value: 'actions', sortable: false },
     ];
 
@@ -294,6 +298,19 @@ export default {
       // Handle the save operation here...
     };
 
+    const getNotes = async () => {
+      const querySnapshot = await getDocs(collection(db, 'genes'));
+      items.value = []; // Clear existing items
+      querySnapshot.forEach((doc) => {
+        // Push each document into the items array
+        items.value.push({ id: doc.id, ...doc.data() });
+      });
+    };
+
+    onMounted(async () => {
+      await getNotes(); // Call getNotes to fetch and set items when the component mounts
+    });
+
     return {
       items,
       headers,
@@ -302,6 +319,7 @@ export default {
       openModal,
       closeModal,
       saveData,
+      getNotes
     };
   },
 };

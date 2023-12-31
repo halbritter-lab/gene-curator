@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "firebase": "^10.7.1",
     "google-spreadsheet": "^4.1.1",
     "vue": "^3.2.13",
     "vuetify": "^3.4.8"
