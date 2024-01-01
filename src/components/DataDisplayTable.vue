@@ -167,115 +167,6 @@ export default {
           "descartes_kidney_tpm": 204.377287163022,
           "cur_id": "cur_005"
         },
-        {
-          "approved_symbol": "ADCY10",
-          "hgnc_id": 21285,
-          "evidence_count": 4,
-          "source_count_percentile": 2.0714247394040384,
-          "pLI": 0,
-          "oe_lof": 0.84637,
-          "lof_z": 1.2854,
-          "mis_z": 0.45524,
-          "omim_summary": "{Hypercalciuria, absorptive, susceptibility to}[OMIM:143870]-Autosomal dominant inheritance",
-          "gencc_summary": "Strong, Limited (hypercalciuria, absorptive, 2[MONDO:0007748]-Autosomal dominant) | Supportive (idiopathic inherited hypercalciuria[MONDO:0016352]-Autosomal dominant)",
-          "clingen_summary": "NULL",
-          "clinvar": "P:15; LP:3; VUS:139",
-          "clinical_groups_p": "OMIM:143870 (tubulopathy: 0.028 | nephrocalcinosis: 0.021)",
-          "onset_groups_p": "NULL",
-          "syndromic_groups_p": "NULL",
-          "mgi_phenotype": "hm (false); ht (false)",
-          "interaction_score": 0,
-          "stringdb_interaction_sum_score": 300,
-          "stringdb_interaction_normalized_score": 0.07127882599580712,
-          "stringdb_interaction_string": "9606.ENSP00000078429:300",
-          "expression_score": 0,
-          "gtex_kidney_medulla": 0.028280700000000002,
-          "gtex_kidney_cortex": 0.0295587,
-          "descartes_kidney_tpm": 4.05616707548396,
-          "cur_id": "cur_006"
-        },
-        {
-          "approved_symbol": "AFF3",
-          "hgnc_id": 6473,
-          "evidence_count": 2,
-          "source_count_percentile": 1.0390919821927485,
-          "pLI": "NULL",
-          "oe_lof": "NULL",
-          "lof_z": "NULL",
-          "mis_z": "NULL",
-          "omim_summary": "KINSSHIP syndrome[OMIM:619297]-Autosomal dominant inheritance",
-          "gencc_summary": "NULL",
-          "clingen_summary": "NULL",
-          "clinvar": "P:7; LP:4; VUS:56",
-          "clinical_groups_p": "OMIM:619297 (cakut: 0.117 | cancer: 0.1 | cyst_cilio: 0.047 | glomerulopathy: 0.011 | tubulopathy: 0.007)",
-          "onset_groups_p": "NULL",
-          "syndromic_groups_p": "OMIM:619297 (syndromic: 0.163 | growth: 0.421 | skeletal: 0.174 | neurologic: 0.176)",
-          "mgi_phenotype": "hm (false); ht (false)",
-          "interaction_score": 0,
-          "stringdb_interaction_sum_score": 540,
-          "stringdb_interaction_normalized_score": 0.13626834381551362,
-          "stringdb_interaction_string": "9606.ENSP00000356405:540",
-          "expression_score": 1,
-          "gtex_kidney_medulla": 0.765606,
-          "gtex_kidney_cortex": 0.734201,
-          "descartes_kidney_tpm": 1323.30740570324,
-          "cur_id": "cur_007"
-        },
-        {
-          "approved_symbol": "AGT",
-          "hgnc_id": 333,
-          "evidence_count": 5,
-          "source_count_percentile": 4.152697193639472,
-          "pLI": 0,
-          "oe_lof": 0.89384,
-          "lof_z": 0.36045,
-          "mis_z": -0.19921,
-          "omim_summary": "Renal tubular dysgenesis[OMIM:267430]-Autosomal recessive inheritance | {Hypertension, essential, susceptibility to}[OMIM:145500]-Multifactorial inheritance",
-          "gencc_summary": "Supportive (renal tubular dysgenesis of genetic origin[MONDO:0009970]-Autosomal recessive) | Strong (renal tubular dysgenesis[MONDO:0017609]-Autosomal recessive)",
-          "clingen_summary": "NULL",
-          "clinvar": "P:6; LP:5; VUS:76",
-          "clinical_groups_p": "OMIM:267430 (complement: 0.143 | cakut: 0.016 | glomerulopathy: 0.007 | cyst_cilio: 0.003)",
-          "onset_groups_p": "NULL",
-          "syndromic_groups_p": "OMIM:267430 (syndromic: 0.014 | skeletal: 0.05 | neurologic: 0.029)",
-          "mgi_phenotype": "hm (true); ht (true)",
-          "interaction_score": 0.5,
-          "stringdb_interaction_sum_score": 4966,
-          "stringdb_interaction_normalized_score": 0.740041928721174,
-          "stringdb_interaction_string": "9606.ENSP00000272190:961, 9606.ENSP00000269305:229, 9606.ENSP00000350815:614, 9606.ENSP00000315011:693, 9606.ENSP00000290866:700, 9606.ENSP00000346839:292, 9606.ENSP00000347244:229, 9606.ENSP00000260649:910, 9606.ENSP00000339191:175, 9606.ENSP00000237014:163",
-          "expression_score": 0,
-          "gtex_kidney_medulla": 17.4583,
-          "gtex_kidney_cortex": 28.7566,
-          "descartes_kidney_tpm": 1.15796494559246,
-          "cur_id": "cur_008"
-        },
-        {
-          "approved_symbol": "AGTR1",
-          "hgnc_id": 336,
-          "evidence_count": 5,
-          "source_count_percentile": 4.086652680860323,
-          "pLI": "NULL",
-          "oe_lof": "NULL",
-          "lof_z": "NULL",
-          "mis_z": "NULL",
-          "omim_summary": "{Hypertension, essential}[OMIM:145500]-Multifactorial inheritance | Renal tubular dysgenesis[OMIM:267430]-Autosomal recessive inheritance",
-          "gencc_summary": "No Known Disease Relationship (essential hypertension, genetic[MONDO:0007781]-Unknown) | Moderate, Supportive (renal tubular dysgenesis of genetic origin[MONDO:0009970]-Autosomal recessive)",
-          "clingen_summary": "NULL",
-          "clinvar": "P:5; LP:4; VUS:67",
-          "clinical_groups_p": "OMIM:267430 (complement: 0.143 | cakut: 0.016 | glomerulopathy: 0.007 | cyst_cilio: 0.003)",
-          "onset_groups_p": "NULL",
-          "syndromic_groups_p": "OMIM:267430 (syndromic: 0.014 | skeletal: 0.05 | neurologic: 0.029)",
-          "mgi_phenotype": "hm (true); ht (false)",
-          "interaction_score": 0,
-          "stringdb_interaction_sum_score": "NULL",
-          "stringdb_interaction_normalized_score": "NULL",
-          "stringdb_interaction_string": "NULL",
-          "expression_score": 0.5,
-          "gtex_kidney_medulla": 5.070209999999999,
-          "gtex_kidney_cortex": 5.55385,
-          "descartes_kidney_tpm": 36.7676972052136,
-          "cur_id": "cur_009"
-        },
-      // Add more dummy rows if needed...
     ]);
 
     const headers = [
@@ -304,15 +195,15 @@ export default {
 
     const getGenes = async () => {
       const querySnapshot = await getDocs(collection(db, 'genes'));
-      items.value = []; // Clear existing items
+      let fetchedItems = [];
       querySnapshot.forEach((doc) => {
-        // Push each document into the items array
-        items.value.push({ id: doc.id, ...doc.data() });
+        fetchedItems.push({ id: doc.id, ...doc.data() });
       });
+      return fetchedItems; // Return the array of data
     };
 
     onMounted(async () => {
-      await getGenes(); // Call getGenes to fetch and set items when the component mounts
+      items.value = await getGenes(); // Assign the returned data to items
     });
 
     return {
