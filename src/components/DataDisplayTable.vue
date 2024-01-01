@@ -1,6 +1,10 @@
 <!-- components/DataDisplayTable.vue -->
 <template>
-  <v-data-table :headers="headers" :items="items">
+  <v-data-table
+    :headers="headers"
+    :items="items"
+    density="compact"
+  >
     <template v-slot:[`item.actions`]="{ item }">
       <v-btn @click="openModal(item)">Edit</v-btn>
     </template>
@@ -275,10 +279,10 @@ export default {
     ]);
 
     const headers = [
-      { text: 'Approved Symbol', value: 'approved_symbol' },
-      { text: 'HGNC ID', value: 'hgnc_id' },
-      { text: 'Evidence count', value: 'evidence_count' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { title: 'Approved Symbol', value: 'approved_symbol' },
+      { title: 'HGNC ID', value: 'hgnc_id' },
+      { title: 'Evidence count', value: 'evidence_count' },
+      { title: 'Actions', value: 'actions', sortable: false },
     ];
 
     const showModal = ref(false);
@@ -298,7 +302,7 @@ export default {
       // Handle the save operation here...
     };
 
-    const getNotes = async () => {
+    const getGenes = async () => {
       const querySnapshot = await getDocs(collection(db, 'genes'));
       items.value = []; // Clear existing items
       querySnapshot.forEach((doc) => {
@@ -308,7 +312,7 @@ export default {
     };
 
     onMounted(async () => {
-      await getNotes(); // Call getNotes to fetch and set items when the component mounts
+      await getGenes(); // Call getGenes to fetch and set items when the component mounts
     });
 
     return {
@@ -319,7 +323,7 @@ export default {
       openModal,
       closeModal,
       saveData,
-      getNotes
+      getGenes
     };
   },
 };
