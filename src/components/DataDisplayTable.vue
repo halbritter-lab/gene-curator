@@ -21,10 +21,7 @@
 <script>
 import { ref, onMounted } from 'vue';
 import CurationModal from './CurationModal.vue';
-
-// import 
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase'
+import { getGenes } from '@/stores/store';
 
 export default {
   components: {
@@ -191,15 +188,6 @@ export default {
     const saveData = (updatedItem) => {
       console.log(updatedItem);
       // Handle the save operation here...
-    };
-
-    const getGenes = async () => {
-      const querySnapshot = await getDocs(collection(db, 'genes'));
-      let fetchedItems = [];
-      querySnapshot.forEach((doc) => {
-        fetchedItems.push({ id: doc.id, ...doc.data() });
-      });
-      return fetchedItems; // Return the array of data
     };
 
     onMounted(async () => {
