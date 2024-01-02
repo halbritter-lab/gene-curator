@@ -10,7 +10,12 @@
     ></v-img>
 
     <v-toolbar-title>Gene Curator</v-toolbar-title>
-    <!-- Add more toolbar items here as needed -->
+
+    <!-- Navigation Link to Genes View -->
+    <v-btn text to="/">Genes</v-btn>
+
+    <!-- Navigation Link to Upload View -->
+    <v-btn text to="/upload">Upload CSV</v-btn>
   </v-app-bar>
 </template>
 

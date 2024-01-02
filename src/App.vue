@@ -4,16 +4,15 @@
   <v-app>
     <!-- Include the AppBar component -->
     <AppBar/>
-    
-    <!-- Main content area containing the DataDisplayTable component -->
+
+    <!-- Router View -->
     <v-main>
-      <DataDisplayTable />
+      <router-view/>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import DataDisplayTable from './components/DataDisplayTable.vue';
 import AppBar from './components/AppBar.vue';
 
 /**
@@ -34,11 +33,9 @@ export default {
    * Components used by the App component.
    *
    * @type {Object}
-   * @property {object} DataDisplayTable - The DataDisplayTable component.
    * @property {object} AppBar - The AppBar component.
    */
   components: {
-    DataDisplayTable,
     AppBar,
   },
 };
