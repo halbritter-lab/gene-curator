@@ -1,6 +1,6 @@
 // store.js
 
-import { collection, getDocs, addDoc } from 'firebase/firestore'; // Firestore API
+import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
 import Papa from 'papaparse'; // for CSV parsing
 
@@ -14,40 +14,46 @@ import Papa from 'papaparse'; // for CSV parsing
  */
 export const getGenes = async () => {
   const querySnapshot = await getDocs(collection(db, 'genes'));
-  let fetchedItems = [];
+  let fetchedItems = {};
   querySnapshot.forEach((doc) => {
-    // Combine document ID with the document data
-    fetchedItems.push({ id: doc.id, ...doc.data() });
+    const data = doc.data();
+    // Create a unique identifier, e.g., a combination of approved_symbol, hgnc_id, and cur_id
+    const uniqueId = `${data.approved_symbol}-${data.hgnc_id}-${data.cur_id}`;
+    fetchedItems[uniqueId] = { ...data, docId: doc.id };
   });
   return fetchedItems;
 };
 
+
 /**
- * Parses a CSV string and writes each row as a new document in the 'genes' collection.
- *
+ * Parses a CSV string, checks against existing entries, and writes or updates each row as a document in the 'genes' collection.
+ * 
  * @async
  * @function writeGenesFromCSV
  * @param {string} csvString - The CSV file content as a string.
- * @returns {Promise<Array>} A promise that resolves to an array of results, each indicating the success or failure of writing each document.
- * @description This function parses a given CSV string, converts each row to a Firestore document, and writes it to the 'genes' collection. Each row should represent a gene with fields corresponding to the CSV columns.
+ * @param {boolean} overwrite - Indicates whether to overwrite existing entries.
+ * @returns {Promise<Object>} A promise that resolves to an object indicating the number of added, overwritten, and skipped entries.
  */
-export const writeGenesFromCSV = async (csvString) => {
-  // Parse the CSV string
-  const parseResults = Papa.parse(csvString, { header: true });
+export const writeGenesFromCSV = async (csvString, overwrite = false) => {
+  const existingGenes = await getGenes();
+  const rows = Papa.parse(csvString, { header: true }).data;
 
-  // Array to hold write results for each row/document
-  let writeResults = [];
+  let summary = { added: 0, overwritten: 0, skipped: 0 };
 
-  for (const row of parseResults.data) {
-    try {
-      // Add a new document with the row data to the 'genes' collection
-      const docRef = await addDoc(collection(db, 'genes'), row);
-      writeResults.push({ id: docRef.id, status: 'success' });
-    } catch (error) {
-      // In case of error, push the error details
-      writeResults.push({ status: 'error', error: error.message });
+  for (const row of rows) {
+    const uniqueId = `${row.approved_symbol}-${row.hgnc_id}-${row.cur_id}`;
+    if (existingGenes[uniqueId]) {
+      if (overwrite) {
+        await updateDoc(doc(db, 'genes', existingGenes[uniqueId].docId), row);
+        summary.overwritten++;
+      } else {
+        summary.skipped++;
+      }
+    } else {
+      await addDoc(collection(db, 'genes'), row);
+      summary.added++;
     }
   }
 
-  return writeResults;
+  return `Upload Summary: ${summary.added} added, ${summary.overwritten} overwritten, ${summary.skipped} skipped.`;
 };
