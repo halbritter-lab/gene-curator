@@ -32,7 +32,7 @@ export default {
   data: () => ({
     codeLink: 'https://github.com/halbritter-lab/gene-curator', // Replace with your code repository link
     docsLink: 'https://your-documentation-link', // Replace with your documentation link
-    licenseLink: 'https://github.com/halbritter-lab/gene-curator/blob/main/LICENSE', // Replace with your license link
+    licenseLink: 'https://github.com/halbritter-lab/gene-curator/blob/master/LICENSE', // Replace with your license link
   }),
 };
 </script>
