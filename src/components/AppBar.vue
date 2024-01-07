@@ -3,13 +3,16 @@
   <v-app-bar app color="primary" dark>
     <v-img
       src="logo.png"
-      class="mr-3 app-logo"
+      class="mr-3 app-logo clickable"
       contain
       max-height="48"
       max-width="48"
+      @click="$router.push('/')"
     ></v-img>
 
-    <v-toolbar-title>Gene Curator</v-toolbar-title>
+    <v-toolbar-title class="clickable" @click="$router.push('/')">
+      Gene Curator
+    </v-toolbar-title>
 
     <!-- Navigation Link to Genes View -->
     <v-btn text to="/">Genes</v-btn>
@@ -39,11 +42,12 @@ export default {
 
 .app-logo {
   max-width: 92px; /* Fixed maximum width */
-  margin-right: 20px; /* Spacing between logo and title */
+  margin-right: 10px; /* Spacing between logo and title */
   animation: fadeIn 2s ease-out forwards;
 }
 
-.app-logo:hover {
+.app-logo:hover, .clickable:hover {
   animation: pulse 2s infinite;
+  cursor: pointer; /* Adds a pointer cursor on hover */
 }
 </style>
