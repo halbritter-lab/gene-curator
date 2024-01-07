@@ -9,11 +9,15 @@
     <v-main>
       <router-view/>
     </v-main>
+
+    <!-- Include the FooterBar component -->
+    <FooterBar/>
   </v-app>
 </template>
 
 <script>
 import AppBar from './components/AppBar.vue';
+import FooterBar from './components/FooterBar.vue';
 
 /**
  * The main App component.
@@ -37,6 +41,7 @@ export default {
    */
   components: {
     AppBar,
+    FooterBar,
   },
 };
 </script>
