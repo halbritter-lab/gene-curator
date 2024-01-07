@@ -1,30 +1,32 @@
 // store.js
 
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore'; // Firestore API
+import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
 import Papa from 'papaparse'; // for CSV parsing
 
 /**
- * Fetches and returns a dictionary of gene data from the Firestore 'genes' collection, indexed by a unique identifier.
+ * Fetches and returns a dictionary of gene data from the Firestore 'genes' collection, 
+ * indexed by a unique identifier created from specified columns.
  * 
  * @async
  * @function getGenes
- * @param {Array<string>} [uniqueColumns=['hgnc_id', 'cur_id']] - The columns used to create a unique identifier for each gene.
- * @returns {Promise<Object>} - A promise that resolves to an object where each key is a unique identifier constructed from the specified columns, and each value is the gene data along with its Firestore document ID.
- * @description This function asynchronously retrieves all documents from the 'genes' collection in Firestore and indexes them using a unique identifier created from the specified columns.
+ * @param {Array<string>} [uniqueColumns=['hgnc_id', 'cur_id']] - Columns to create a unique identifier for each gene.
+ * @returns {Promise<Object>} - An object mapping unique identifiers to gene data with document IDs.
+ * @description Retrieves all documents from the 'genes' collection in Firestore and indexes them using a unique identifier.
  */
 export const getGenes = async (uniqueColumns = ['hgnc_id', 'cur_id']) => {
-  const querySnapshot = await getDocs(collection(db, 'genes'));
-  let fetchedItems = {};
+  const querySnapshot = await getDocs(collection(db, 'genes')); // Fetch all documents in the 'genes' collection
+  let fetchedItems = {}; // Initialize an empty object to hold fetched items
 
+  // Iterate through each document in the collection
   querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    // Construct the unique identifier using specified columns
-    const uniqueId = uniqueColumns.map(column => data[column]).join('-');
-    fetchedItems[uniqueId] = { ...data, docId: doc.id };
+    const data = doc.data(); // Get document data
+    // Construct a unique identifier using the specified columns
+    const uniqueId = uniqueColumns.map(column => data[column]).join('-'); 
+    fetchedItems[uniqueId] = { ...data, docId: doc.id }; // Add document data and ID to fetched items
   });
 
-  return fetchedItems;
+  return fetchedItems; // Return the fetched items
 };
 
 
@@ -41,7 +43,8 @@ export const getGenes = async (uniqueColumns = ['hgnc_id', 'cur_id']) => {
 export const createGene = async (geneData) => {
   try {
     validateGeneData(geneData); // Validate gene data before creating
-    const docRef = await addDoc(collection(db, 'genes'), geneData);
+    const timestampedData = addCreationTimestamp(geneData); // Add creation timestamp
+    const docRef = await addDoc(collection(db, 'genes'), timestampedData);
     return docRef.id; // Returns the new document's ID
   } catch (error) {
     throw new Error(`Failed to create gene: ${error.message}`);
@@ -86,8 +89,9 @@ export const updateGene = async (docId, updatedData) => {
   try {
     if (!docId) throw new Error("Document ID is required for updating.");
     validateGeneData(updatedData); // Optionally validate data for update as well
+    const timestampedUpdate = updateLastUpdatedTimestamp(updatedData); // Update lastUpdated timestamp
     const geneRef = doc(db, 'genes', docId);
-    await updateDoc(geneRef, updatedData);
+    await updateDoc(geneRef, timestampedUpdate);
   } catch (error) {
     throw new Error(`Failed to update gene: ${error.message}`);
   }
@@ -116,46 +120,48 @@ export const deleteGene = async (docId) => {
 
 
 /**
- * Parses a CSV string, checks against existing entries based on a set of unique columns, and writes or updates each row as a document in the 'genes' collection.
+ * Parses a CSV string, checks against existing entries based on unique columns, 
+ * and writes or updates each row as a document in the 'genes' collection with timestamps.
  * 
  * @async
  * @function writeGenesFromCSV
- * @param {string} csvString - The CSV file content as a string.
- * @param {Array<string>} [uniqueColumns=['hgnc_id', 'cur_id']] - The columns used to create a unique identifier for each gene.
- * @param {boolean} [overwrite=true] - Indicates whether to overwrite existing entries with the same unique identifier.
- * @returns {Promise<Object>} - A promise that resolves to an object indicating the number of added, overwritten, and skipped entries.
- * @throws {Error} - Throws an error if the CSV parsing or processing fails.
- * @description This function parses a CSV string, converts each row to a Firestore document, and writes or updates it in the 'genes' collection based on the unique identifier constructed from the specified columns.
+ * @param {string} csvString - The CSV content as a string.
+ * @param {Array<string>} [uniqueColumns=['hgnc_id', 'cur_id']] - Columns to create a unique identifier for each gene.
+ * @param {boolean} [overwrite=true] - Whether to overwrite existing entries with the same unique identifier.
+ * @returns {Promise<Object>} - An object indicating the number of added, overwritten, and skipped entries.
+ * @throws {Error} - If CSV parsing or processing fails.
+ * @description Parses a CSV string and writes or updates each row in the 'genes' collection with timestamps.
  */
-export const writeGenesFromCSV = async (csvString, uniqueColumns = ['hgnc_id', 'cur_id'], overwrite = false) => {
+export const writeGenesFromCSV = async (csvString, uniqueColumns = ['hgnc_id', 'cur_id'], overwrite = true) => {
   try {
-    const existingGenes = await getGenes(uniqueColumns);
-    const rows = Papa.parse(csvString, { header: true }).data;
-    let summary = { added: 0, overwritten: 0, skipped: 0 };
+    const existingGenes = await getGenes(uniqueColumns); // Fetch existing genes for comparison
+    const rows = Papa.parse(csvString, { header: true }).data; // Parse CSV string into rows
+    let summary = { added: 0, overwritten: 0, skipped: 0 }; // Initialize a summary of operations
 
+    // Iterate through each row from the CSV
     for (const row of rows) {
-      // Construct the unique identifier using specified columns
-      const uniqueId = uniqueColumns.map(column => row[column]).join('-');
+      const uniqueId = uniqueColumns.map(column => row[column]).join('-'); // Construct a unique identifier
+      validateGeneData(row, uniqueColumns); // Validate the gene data
 
-      // Validate the gene data
-      validateGeneData(row, uniqueColumns);
-
+      // Check if a gene with the same unique identifier already exists
       if (existingGenes[uniqueId]) {
         if (overwrite) {
-          await updateDoc(doc(db, 'genes', existingGenes[uniqueId].docId), row);
-          summary.overwritten++;
+          const updatedRow = updateLastUpdatedTimestamp(row); // Update the last updated timestamp
+          await updateDoc(doc(db, 'genes', existingGenes[uniqueId].docId), updatedRow); // Update the document
+          summary.overwritten++; // Increment the overwritten counter
         } else {
-          summary.skipped++;
+          summary.skipped++; // Increment the skipped counter
         }
       } else {
-        await addDoc(collection(db, 'genes'), row);
-        summary.added++;
+        const newRow = addCreationTimestamp(row); // Add a creation timestamp to the new row
+        await addDoc(collection(db, 'genes'), newRow); // Create a new document
+        summary.added++; // Increment the added counter
       }
     }
 
-    return `Upload Summary: ${summary.added} added, ${summary.overwritten} overwritten, ${summary.skipped} skipped.`;
+    return `Upload Summary: ${summary.added} added, ${summary.overwritten} overwritten, ${summary.skipped} skipped.`; // Return a summary of the operations
   } catch (error) {
-    throw new Error(`Failed to process CSV: ${error.message}`);
+    throw new Error(`Failed to process CSV: ${error.message}`); // Throw an error if processing fails
   }
 };
 
@@ -177,4 +183,29 @@ const validateGeneData = (geneData) => {
     throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
   }
   // Add more validation as necessary
+};
+
+
+// Utility function to add timestamps to gene data
+/**
+ * Adds a creation timestamp to the gene data.
+ *
+ * @param {Object} geneData - An object containing the data for the gene.
+ * @returns {Object} The gene data object augmented with a 'createdAt' timestamp.
+ * @description This function adds a 'createdAt' timestamp to the gene data object, using the current date and time.
+ */
+const addCreationTimestamp = (geneData) => {
+  return { ...geneData, createdAt: Timestamp.fromDate(new Date()) };
+};
+
+
+/**
+ * Updates the 'lastUpdated' timestamp in the gene data.
+ *
+ * @param {Object} geneData - An object containing the data for the gene.
+ * @returns {Object} The gene data object augmented with an updated 'lastUpdated' timestamp.
+ * @description This function updates the 'lastUpdated' timestamp in the gene data object, using the current date and time.
+ */
+const updateLastUpdatedTimestamp = (geneData) => {
+  return { ...geneData, lastUpdated: Timestamp.fromDate(new Date()) };
 };
