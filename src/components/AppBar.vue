@@ -3,7 +3,7 @@
   <v-app-bar app color="primary" dark>
     <v-img
       src="logo.png"
-      class="mr-3 app-logo clickable"
+      class="mr-3 app-logo"
       contain
       max-height="48"
       max-width="48"
@@ -46,8 +46,14 @@ export default {
   animation: fadeIn 2s ease-out forwards;
 }
 
-.app-logo:hover, .clickable:hover {
+.app-logo:hover {
   animation: pulse 2s infinite;
+  cursor: pointer; /* Adds a pointer cursor on hover */
+}
+
+.clickable:hover {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
   cursor: pointer; /* Adds a pointer cursor on hover */
 }
 </style>
