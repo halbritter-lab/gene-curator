@@ -18,7 +18,7 @@
     <v-btn text to="/">Genes</v-btn>
 
     <!-- Navigation Link to Upload View -->
-    <v-btn text to="/upload">Upload CSV</v-btn>
+    <v-btn text to="/upload">Gene Admin</v-btn>
   </v-app-bar>
 </template>
 

@@ -1,7 +1,7 @@
 // router/index.js
 import { createWebHistory, createRouter } from "vue-router";
 import Genes from "@/views/GenesTable.vue";
-import UploadGenes  from '@/views/UploadCSV.vue'; // Adjust the path as necessary
+import UploadGenes  from '@/views/GeneAdmin.vue'; // Adjust the path as necessary
 
 const routes = [
   {
