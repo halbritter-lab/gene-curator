@@ -37,7 +37,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import CurationModal from './CurationModal.vue';
-import { getGenes } from '@/stores/store';
+import { getGenes } from '@/stores/geneStore';
 
 export default {
   components: {

@@ -1,4 +1,4 @@
-// store.js
+// geneStore.js
 
 import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
@@ -166,6 +166,42 @@ export const writeGenesFromCSV = async (csvString, uniqueColumns = ['hgnc_id', '
 };
 
 
+/**
+ * Deletes all gene documents from the Firestore 'genes' collection.
+ * @async
+ * @function deleteAllGenes
+ * @description This function deletes all documents in the 'genes' collection.
+ * @throws {Error} - Throws an error if the deletion fails or is unauthorized.
+ */
+export const deleteAllGenes = async () => {
+  try {
+    // Security check: Ensure the user is authorized
+    if (!isUserAuthorized()) {
+      throw new Error("Unauthorized access to delete all genes.");
+    }
+
+    // Fetch all documents in the 'genes' collection
+    const querySnapshot = await getDocs(collection(db, 'genes'));
+    
+    // Initialize a batch operation
+    const batch = db.batch();
+
+    // Iterate through each document and schedule it for deletion
+    querySnapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    // Commit the batch deletion
+    await batch.commit();
+    
+    // Log the deletion operation
+    console.log(`All genes deleted by ${getCurrentUserID()} at ${new Date().toISOString()}`);
+  } catch (error) {
+    throw new Error(`Failed to delete all genes: ${error.message}`);
+  }
+};
+
+
 // Utility function to validate gene data
 /**
  * Validates the provided gene data against required fields.
@@ -208,4 +244,20 @@ const addCreationTimestamp = (geneData) => {
  */
 const updateLastUpdatedTimestamp = (geneData) => {
   return { ...geneData, lastUpdated: Timestamp.fromDate(new Date()) };
+};
+
+
+// Mock implementation of isUserAuthorized
+const isUserAuthorized = () => {
+  // For now, return true to simulate an authorized user
+  // In a real application, implement actual authentication and authorization checks here
+  return true;
+};
+
+
+// Mock implementation of getCurrentUserID
+const getCurrentUserID = () => {
+  // For now, return a static user ID to simulate a user
+  // In a real application, retrieve the actual user ID from your authentication system
+  return "mockUserID123";
 };

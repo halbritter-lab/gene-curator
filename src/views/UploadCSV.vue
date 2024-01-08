@@ -17,7 +17,7 @@
 
 <script>
 import { ref } from 'vue';
-import { writeGenesFromCSV } from '@/stores/store'; // Import the store functions
+import { writeGenesFromCSV } from '@/stores/geneStore'; // Import the store functions
 
 export default {
   name: 'UploadGenes',
