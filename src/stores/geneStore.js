@@ -1,6 +1,6 @@
 // geneStore.js
 
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore'; // Firestore API
+import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, writeBatch } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
 import Papa from 'papaparse'; // for CSV parsing
 
@@ -175,7 +175,6 @@ export const writeGenesFromCSV = async (csvString, uniqueColumns = ['hgnc_id', '
  */
 export const deleteAllGenes = async () => {
   try {
-    // Security check: Ensure the user is authorized
     if (!isUserAuthorized()) {
       throw new Error("Unauthorized access to delete all genes.");
     }
@@ -183,8 +182,8 @@ export const deleteAllGenes = async () => {
     // Fetch all documents in the 'genes' collection
     const querySnapshot = await getDocs(collection(db, 'genes'));
     
-    // Initialize a batch operation
-    const batch = db.batch();
+    // Initialize a batch operation using writeBatch instead of db.batch()
+    const batch = writeBatch(db);
 
     // Iterate through each document and schedule it for deletion
     querySnapshot.forEach((doc) => {
