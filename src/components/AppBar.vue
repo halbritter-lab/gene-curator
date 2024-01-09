@@ -11,15 +11,17 @@
       @click="$router.push('/')"
     ></v-img>
 
-    <!-- Toolbar Title -->
+    <!-- Toolbar Title and Version Info -->
     <v-toolbar-title class="clickable" @click="$router.push('/')">
       Gene Curator
+      <br> <!-- Line break for version info -->
+      <span class="version-info">
+        Version: {{ version }} - Commit: {{ lastCommitHash }}
+      </span>
     </v-toolbar-title>
 
-    <!-- Navigation Link to Genes View -->
+    <!-- Navigation Links -->
     <v-btn text to="/">Genes</v-btn>
-
-    <!-- Navigation Link to Upload View -->
     <v-btn text to="/upload">Gene Admin</v-btn>
 
     <!-- Theme Toggle Button -->
@@ -34,6 +36,8 @@
 <script>
 import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
+import packageInfo from '../../package.json'; // Adjust the path to your package.json
+import appConfig from '../config/appConfig.json'; // Adjust the path to your appConfig.json
 
 export default {
   name: 'AppBar',
@@ -56,11 +60,40 @@ export default {
       darkTheme.value = isDark; // Update the darkTheme state
     };
 
+    // Extract the version from the package.json
+    const version = packageInfo.version;
+
+    // Reference for the last commit hash
+    const lastCommitHash = ref('loading...');
+
+    // Reference for the last commit hash
+    const fetchError = ref(false);
+
+    // Function to fetch last commit hash
+    const fetchLastCommit = async () => {
+      try {
+        const repoName = appConfig.repoName; // Fetching repo name from config file
+        const response = await fetch(`https://api.github.com/repos/${repoName}/commits?per_page=1`);
+        if (!response.ok) throw new Error('Network response was not ok.');
+
+        const commits = await response.json();
+        if (commits.length) {
+          lastCommitHash.value = commits[0].sha.substring(0, 7);
+        }
+      } catch (error) {
+        console.error('Error fetching last commit:', error);
+        fetchError.value = true;
+        lastCommitHash.value = 'offline';
+      }
+    };
+
     /**
      * Lifecycle hook that runs when component is mounted.
      * Retrieves and applies the saved theme preference from localStorage.
      */
-    onMounted(() => {
+    onMounted(async () => {
+      await fetchLastCommit();
+
       const savedTheme = localStorage.getItem('darkTheme');
       if (savedTheme !== null) {
         const isDark = savedTheme === 'true';
@@ -70,8 +103,10 @@ export default {
     });
 
     return {
+      darkTheme,
       toggleTheme,
-      darkTheme, // Return darkTheme to make it available in the template
+      version,
+      lastCommitHash,
     };
   },
 };
@@ -123,5 +158,18 @@ export default {
   opacity: 0.8; /* Slightly reduces opacity to indicate interactivity */
   transition: opacity 0.3s ease; /* Smooth transition for the opacity change */
   cursor: pointer; /* Indicates the element is clickable */
+}
+
+/**
+ * Styles for the version info.
+ * Adds right padding and decreases the top margin to bring it closer to the app name.
+ */
+.version-info {
+  display: block; /* Ensures the version info is on a new line */
+  margin-left: auto;
+  padding-right: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-top: -10px; /* Decrease the top margin to bring it closer to the app name */
 }
 </style>
