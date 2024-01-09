@@ -33,6 +33,9 @@
       :length="totalPages"
     ></v-pagination>
 
+    <!-- Data export component -->
+    <data-export :data-to-export="exportableItems" filename="my-genes-data" />
+
     <!-- Curation Modal for editing items -->
     <CurationModal
       v-if="showModal"
@@ -47,15 +50,23 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import CurationModal from './CurationModal.vue';
+import DataExport from '@/components/DataExport.vue';
 import { getGenes } from '@/stores/geneStore';
 
 export default {
   components: {
     CurationModal, // Curation modal component
+    DataExport, // Data export component
   },
   setup() {
     // State for raw items from the database
     const rawItems = ref({});
+
+    // Computed property that transforms rawItems into an array for export
+    const exportableItems = computed(() => {
+      return Object.values(rawItems.value);
+    });
+
     // Loading state to show progress indicator
     const loading = ref(false);
 
@@ -110,6 +121,7 @@ export default {
 
     // Return all reactive states and functions to the template
     return {
+      exportableItems,
       paginatedItems,
       page,
       itemsPerPage,

@@ -9,12 +9,16 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "file-saver": "^2.0.5",
     "firebase": "^10.7.1",
     "google-spreadsheet": "^4.1.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.1",
     "papaparse": "^5.4.1",
     "vue": "^3.2.13",
     "vue-router": "^4.2.5",
-    "vuetify": "^3.4.8"
+    "vuetify": "^3.4.8",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
