@@ -11,6 +11,16 @@
       class="elevation-1"
       density="compact"
     >
+      <!-- Scoped slot for the 'Approved Symbol' column -->
+      <template v-slot:[`item.approved_symbol`]="{ item }">
+        <router-link :to="`/gene/${item.hgnc_id}`">{{ item.approved_symbol }}</router-link>
+      </template>
+
+      <!-- Scoped slot for the 'HGNC ID' column -->
+      <template v-slot:[`item.hgnc_id`]="{ item }">
+        <router-link :to="`/gene/${item.hgnc_id}`">{{ item.hgnc_id }}</router-link>
+      </template>
+
       <!-- Slot for actions like edit on each item -->
       <template v-slot:[`item.actions`]="{ item }">
         <v-btn @click="openModal(item)">Edit</v-btn>

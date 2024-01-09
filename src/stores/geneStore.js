@@ -120,6 +120,36 @@ export const deleteGene = async (docId) => {
 
 
 /**
+ * Retrieves a specific gene document from the Firestore 'genes' collection by HGNC ID or symbol.
+ *
+ * @async
+ * @function getGeneByHGNCIdOrSymbol
+ * @param {string} identifier - The HGNC ID or approved_symbol of the gene to retrieve.
+ * @returns {Promise<Object>} - A promise that resolves to an object containing the gene data.
+ * @throws {Error} - Throws an error if the document doesn't exist or the retrieval fails.
+ * @description This function retrieves a specific gene document from the Firestore 'genes' collection using the provided HGNC ID or symbol.
+ */
+export const getGeneByHGNCIdOrSymbol = async (identifier) => {
+  const genesRef = collection(db, 'genes');
+  const querySnapshot = await getDocs(genesRef);
+  
+  let geneData = null;
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.hgnc_id === identifier || data.approved_symbol === identifier) {
+      geneData = { docId: doc.id, ...data };
+    }
+  });
+
+  if (geneData) {
+    return geneData;
+  } else {
+    throw new Error("Gene not found!");
+  }
+};
+
+
+/**
  * Parses a CSV string, checks against existing entries based on unique columns, 
  * and writes or updates each row as a document in the 'genes' collection with timestamps.
  * 
