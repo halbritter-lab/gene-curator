@@ -21,7 +21,7 @@
     </v-toolbar-title>
 
     <!-- Navigation Links -->
-    <v-btn text to="/">Genes</v-btn>
+    <v-btn text to="/genes">Genes</v-btn>
     <v-btn text to="/upload">Gene Admin</v-btn>
 
     <!-- Theme Toggle Button -->

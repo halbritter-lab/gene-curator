@@ -1,0 +1,27 @@
+{
+    "title": "Welcome to Gene Curator",
+    "sections": [
+      {
+        "header": "What is Gene Curator?",
+        "content": "Gene Curator is a comprehensive tool for gene data management...",
+        "image": "logo.png"
+      },
+      {
+        "header": "Getting Started",
+        "content": "Start by exploring the gene database or uploading new gene data...",
+        "links": [
+          { "title": "Explore Genes", "url": "/genes" },
+          { "title": "Upload Data", "url": "/upload" }
+        ]
+      },
+      {
+        "header": "Learn More",
+        "content": "Read our FAQs or contact us for more information...",
+        "links": [
+          { "title": "FAQ", "url": "/faq" },
+          { "title": "Contact Us", "url": "/about" }
+        ]
+      }
+    ]
+  }
+  
