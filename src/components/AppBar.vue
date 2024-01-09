@@ -20,9 +20,13 @@
       </span>
     </v-toolbar-title>
 
-    <!-- Navigation Links -->
-    <v-btn text to="/genes">Genes</v-btn>
-    <v-btn text to="/upload">Gene Admin</v-btn>
+    <!-- Dynamic Menu Items -->
+    <template v-for="item in menuItems" :key="item.text">
+      <v-btn :to="item.to" text>
+        <v-icon left v-if="item.icon">{{ item.icon }}</v-icon>
+        {{ item.text }}
+      </v-btn>
+    </template>
 
     <!-- Theme Toggle Button -->
     <v-btn icon @click="toggleTheme">
@@ -38,6 +42,7 @@ import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import packageInfo from '../../package.json'; // Adjust the path to your package.json
 import appConfig from '../config/appConfig.json'; // Adjust the path to your appConfig.json
+import menuConfig from '../config/menuConfig.json'; // Adjust the path to your menuConfig.json
 
 export default {
   name: 'AppBar',
@@ -47,8 +52,12 @@ export default {
    * @returns {Object} The reactive properties and methods for the component.
    */
   setup() {
+    // Reactive property for dark theme state
     const theme = useTheme();
     const darkTheme = ref(theme.global.current.value.dark); // Reactive property for dark theme state
+
+    // Menu items for the toolbar
+    const menuItems = ref(menuConfig.items); // Reactive property for menu items
 
     /**
      * Toggles the application theme between light and dark.
@@ -105,6 +114,7 @@ export default {
     return {
       darkTheme,
       toggleTheme,
+      menuItems,
       version,
       lastCommitHash,
     };

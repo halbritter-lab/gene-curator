@@ -1,0 +1,20 @@
+{
+    "links": [
+      {
+        "icon": "mdi-github",
+        "href": "https://github.com/halbritter-lab/gene-curator",
+        "text": "GitHub"
+      },
+      {
+        "icon": "mdi-file-document-outline",
+        "href": "https://your-documentation-link",
+        "text": "Documentation"
+      },
+      {
+        "icon": "mdi-certificate",
+        "href": "https://github.com/halbritter-lab/gene-curator/blob/master/LICENSE",
+        "text": "License"
+      }
+    ]
+  }
+  
