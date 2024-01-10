@@ -32,10 +32,11 @@
   </v-container>
 </template>
 
+
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
-import { geneDetailsConfig as config } from '@/config/geneDetailsConfig'; // Adjust the path accordingly
+import { geneDetailsConfig as config } from '@/config/geneDetailsConfig';
 
 export default {
   props: {
@@ -57,14 +58,17 @@ export default {
     const formattedGeneDetails = computed(() => {
       if (!gene.value) return [];
 
-      return Object.keys(config).map(key => {
-        const value = gene.value[key];
-        return {
-          label: config[key].label,
-          description: config[key].description,
-          formattedValue: formatValue(value, key)
-        };
-      }).filter(detail => detail.formattedValue !== undefined);
+      return Object.keys(config)
+        .filter(key => config[key].visibility.standardView) // Filter out keys not visible in standard view
+        .map(key => {
+          const value = gene.value[key];
+          return {
+            label: config[key].label,
+            description: config[key].description,
+            formattedValue: formatValue(value, key)
+          };
+        })
+        .filter(detail => detail.formattedValue !== undefined);
     });
 
     // for now objects and arrays are formatted into a readable string format

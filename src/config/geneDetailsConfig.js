@@ -6,6 +6,12 @@ export const geneDetailsConfig = {
     description: 'The official symbol provided by HGNC.',
     visibility: { standardView: true, curationView: true }
   },
+  hgnc_id: {
+    label: 'HGNC ID',
+    format: 'text',
+    description: 'Unique identifier provided by the HGNC.',
+    visibility: { standardView: true, curationView: true }
+  },
   clingen_summary: {
     label: 'ClinGen Summary',
     format: 'text',
@@ -30,13 +36,13 @@ export const geneDetailsConfig = {
     label: 'Created At',
     format: 'date',
     description: 'Timestamp of when the gene record was created.',
-    visibility: { standardView: true, curationView: true }
+    visibility: { standardView: false, curationView: false }
   },
   cur_id: {
     label: 'CUR ID',
     format: 'text',
     description: 'Unique identifier for the gene within the curation system.',
-    visibility: { standardView: true, curationView: true }
+    visibility: { standardView: false, curationView: true }
   },
   descartes_kidney_tpm: {
     label: 'Descartes Kidney TPM',
@@ -73,12 +79,6 @@ export const geneDetailsConfig = {
     format: 'number',
     description: 'Expression score from GTEx Kidney Medulla data.',
     visibility: { standardView: false, curationView: true }
-  },
-  hgnc_id: {
-    label: 'HGNC ID',
-    format: 'text',
-    description: 'Unique identifier provided by the HGNC.',
-    visibility: { standardView: true, curationView: true }
   },
   interaction_score: {
     label: 'Interaction Score',
