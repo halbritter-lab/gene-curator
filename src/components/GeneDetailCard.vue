@@ -1,9 +1,10 @@
+<!-- components/GeneDetailCard.vue -->
 <template>
   <v-container>
     <v-card v-if="gene" class="mx-auto my-4" max-width="800">
       <v-card-title class="headline">{{ gene.approved_symbol }}</v-card-title>
       <v-card-text>
-        <v-simple-table dense>
+        <v-table dense>
           <tbody>
             <template v-for="(value, key) in formattedGeneDetails" :key="key">
               <tr>
@@ -12,7 +13,7 @@
               </tr>
             </template>
           </tbody>
-        </v-simple-table>
+        </v-table>
       </v-card-text>
     </v-card>
     <v-alert v-else type="error">
@@ -55,15 +56,20 @@ export default {
       }).filter(detail => detail.formattedValue !== undefined);
     });
 
+    // for now objects and arrays are formatted into a readable string format
+    // TODO: add support for formatting objects and arrays into a table
     const formatValue = (value, key) => {
       const fieldConfig = config[key];
-      if (!fieldConfig) return value.toString();
+      if (!fieldConfig) return JSON.stringify(value);
 
       switch (fieldConfig.format) {
         case 'date':
           return value && new Date(value.seconds * 1000).toLocaleDateString();
         case 'number':
           return value && parseFloat(value).toFixed(2);
+        case 'array':
+        case 'map':
+          return JSON.stringify(value);
         case 'text':
         default:
           if (typeof value === 'string' && value.startsWith('http')) {

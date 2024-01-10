@@ -1,8 +1,9 @@
-// geneStore.js
+// stores/geneStore.js
 
 import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, writeBatch } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
 import Papa from 'papaparse'; // for CSV parsing
+import { geneDetailsConfig } from '@/config/geneDetailsConfig'; // Import the geneDetailsConfig
 
 /**
  * Fetches and returns a dictionary of gene data from the Firestore 'genes' collection, 
@@ -170,6 +171,13 @@ export const writeGenesFromCSV = async (csvString, uniqueColumns = ['hgnc_id', '
 
     // Iterate through each row from the CSV
     for (const row of rows) {
+      // Convert and format each field based on geneDetailsConfig
+      for (const [key, config] of Object.entries(geneDetailsConfig)) {
+        if (row[key] !== undefined) {
+          row[key] = parseValue(row[key], config);
+        }
+      }
+
       const uniqueId = uniqueColumns.map(column => row[column]).join('-'); // Construct a unique identifier
       validateGeneData(row, uniqueColumns); // Validate the gene data
 
@@ -276,6 +284,8 @@ const updateLastUpdatedTimestamp = (geneData) => {
 };
 
 
+// TODO: Implement actual authentication and authorization checks here
+// TODO: move to authStore.js
 // Mock implementation of isUserAuthorized
 const isUserAuthorized = () => {
   // For now, return true to simulate an authorized user
@@ -284,9 +294,32 @@ const isUserAuthorized = () => {
 };
 
 
+// TODO: Implement actual authentication and authorization checks here
+// TODO: move to authStore.js
 // Mock implementation of getCurrentUserID
 const getCurrentUserID = () => {
   // For now, return a static user ID to simulate a user
   // In a real application, retrieve the actual user ID from your authentication system
   return "mockUserID123";
+};
+
+
+// Utility functions to parse and format values from flattened input based on config
+export const parseValue = (value, config) => {
+  switch (config.format) {
+    case 'number':
+      return parseFloat(value);
+    case 'date':
+      return new Date(value);
+    case 'array':
+      return value.split(config.separator);
+    case 'map':
+      return value.split(config.separator).reduce((acc, item) => {
+        const [key, val] = item.split(config.keyValueSeparator);
+        acc[key.trim()] = val.trim();
+        return acc;
+      }, {});
+    default:
+      return value;
+  }
 };

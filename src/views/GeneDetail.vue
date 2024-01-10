@@ -1,3 +1,4 @@
+<!-- views/GenesDetail.vue -->
 <template>
   <v-container>
     <GeneDetailCard :id="id" />

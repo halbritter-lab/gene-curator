@@ -1,4 +1,4 @@
-<!-- /views/GenesTable.vue -->
+<!-- views/GenesTable.vue -->
 <template>
   <v-container>
     <h1>Data Table View</h1>

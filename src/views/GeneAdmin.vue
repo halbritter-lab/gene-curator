@@ -1,3 +1,4 @@
+<!-- views/GenesAdmin.vue -->
 <template>
   <v-container>
     <h1>Admin Panel: Gene Management</h1>
