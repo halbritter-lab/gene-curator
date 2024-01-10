@@ -8,7 +8,17 @@
           <tbody>
             <template v-for="(value, key) in formattedGeneDetails" :key="key">
               <tr>
-                <td><strong>{{ value.label }}</strong></td>
+                <td>
+                  <strong>
+                    <span class="label-hover" :title="value.description">{{ value.label }}</span>
+                    <v-tooltip
+                      activator="parent"
+                      location="start"
+                    >
+                      {{ value.description }}
+                    </v-tooltip>
+                  </strong>
+                </td>
                 <td v-html="value.formattedValue"></td>
               </tr>
             </template>
@@ -51,6 +61,7 @@ export default {
         const value = gene.value[key];
         return {
           label: config[key].label,
+          description: config[key].description,
           formattedValue: formatValue(value, key)
         };
       }).filter(detail => detail.formattedValue !== undefined);
@@ -83,3 +94,12 @@ export default {
   },
 };
 </script>
+
+
+<style scoped>
+/* Styles for hoverable labels */
+.label-hover {
+  cursor: pointer;
+  text-decoration: underline; /* Optional, for visual indication */
+}
+</style>
