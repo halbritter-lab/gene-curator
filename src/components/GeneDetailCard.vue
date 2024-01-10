@@ -2,11 +2,11 @@
 <template>
   <v-container>
     <v-card v-if="gene" class="mx-auto my-4" max-width="800">
-      <v-card-title class="headline">{{ gene.approved_symbol }}</v-card-title>
+      <v-card-title v-if="showTitle" class="headline">{{ gene.approved_symbol }}</v-card-title>
       <v-card-text>
         <v-table dense>
           <tbody>
-            <template v-for="(value, key) in formattedGeneDetails" :key="key">
+            <template v-for="(value, key) in filteredGeneDetails" :key="key">
               <tr>
                 <td>
                   <strong>
@@ -32,7 +32,6 @@
   </v-container>
 </template>
 
-
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
@@ -41,69 +40,74 @@ import { geneDetailsConfig as config } from '@/config/geneDetailsConfig';
 export default {
   props: {
     id: String,
+    visibilityScope: {
+      type: String,
+      default: 'standardView', // or 'curationView'
+    },
+    showTitle: { // New prop for showing the card title
+      type: Boolean,
+      default: true,
+    },
   },
   setup(props) {
     const gene = ref(null);
 
     onMounted(async () => {
       if (props.id) {
-        try {
-          gene.value = await getGeneByHGNCIdOrSymbol(props.id);
-        } catch (error) {
+        gene.value = await getGeneByHGNCIdOrSymbol(props.id).catch(error => {
           console.error(error.message);
-        }
+        });
       }
     });
 
-    const formattedGeneDetails = computed(() => {
+    const filteredGeneDetails = computed(() => {
       if (!gene.value) return [];
 
-      return Object.keys(config)
-        .filter(key => config[key].visibility.standardView) // Filter out keys not visible in standard view
-        .map(key => {
+      return Object.entries(config)
+        .filter(([, fieldConfig]) => fieldConfig.visibility[props.visibilityScope])
+        .map(([key, fieldConfig]) => {
           const value = gene.value[key];
           return {
-            label: config[key].label,
-            description: config[key].description,
-            formattedValue: formatValue(value, key)
+            label: fieldConfig.label,
+            description: fieldConfig.description || '',
+            formattedValue: formatValue(value, fieldConfig),
           };
-        })
-        .filter(detail => detail.formattedValue !== undefined);
+        });
     });
 
     // for now objects and arrays are formatted into a readable string format
     // TODO: add support for formatting objects and arrays into a table
-    const formatValue = (value, key) => {
-      const fieldConfig = config[key];
-      if (!fieldConfig) return JSON.stringify(value);
+    function formatValue(value, fieldConfig) {
+      if (value == null) return 'N/A'; // Handle null and undefined values
 
       switch (fieldConfig.format) {
         case 'date':
-          return value && new Date(value.seconds * 1000).toLocaleDateString();
+          return new Date(value.seconds * 1000).toLocaleDateString();
         case 'number':
-          return value && parseFloat(value).toFixed(2);
+          return parseFloat(value).toFixed(2);
         case 'array':
+          return value.join(', ');
         case 'map':
-          return JSON.stringify(value);
+          return Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(', ');
         case 'text':
+          return value;
         default:
-          if (typeof value === 'string' && value.startsWith('http')) {
-            return `<a href="${value}" target="_blank">${value}</a>`;
-          }
-          return value && value.toString();
+          return JSON.stringify(value);
       }
-    };
+    }
 
-    return { gene, formattedGeneDetails };
+    return { gene, filteredGeneDetails };
   },
 };
 </script>
 
-
 <style scoped>
-/* Styles for hoverable labels */
 .label-hover {
-  cursor: pointer;
-  text-decoration: underline; /* Optional, for visual indication */
+  cursor: help;
+}
+
+.v-simple-table {
+  max-height: 300px;
+  overflow-y: auto;
 }
 </style>

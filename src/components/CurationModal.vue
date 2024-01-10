@@ -1,19 +1,12 @@
 <!-- components/CurationModal.vue -->
 <template>
-  <v-dialog v-model="isOpen" persistent max-width="600px">
+  <v-dialog v-model="isOpen" persistent max-width="1200px">
     <v-card>
       <v-card-title>
-        Edit Data
+        Gene Curation - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
       </v-card-title>
       <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field v-model="editedItem.approved_symbol" label="Approved Symbol"></v-text-field>
-            </v-col>
-            <!-- Add more fields as needed -->
-          </v-row>
-        </v-container>
+        <GeneDetailCard :id="editedItem.hgnc_id" visibilityScope="curationView" :showTitle="false" />
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -26,8 +19,12 @@
 
 <script>
 import { ref, watchEffect } from 'vue';
+import GeneDetailCard from './GeneDetailCard.vue'; // Adjust the path to where your GeneDetailCard component is located
 
 export default {
+  components: {
+    GeneDetailCard
+  },
   props: {
     item: {
       type: Object,
@@ -39,24 +36,16 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const editedItem = ref({});
+    const isOpen = ref(props.open);
+    const editedItem = ref({ ...props.item });
 
-    // Watch for changes in the "item" prop and update the local state
     watchEffect(() => {
+      isOpen.value = props.open;
       editedItem.value = { ...props.item };
     });
 
-    const isOpen = ref(props.open);
-
-    // When trying to close the dialog, emit an event instead of mutating the prop
-    const close = () => {
-      emit('close');
-    };
-
-    // Emit the save event with the edited item
-    const save = () => {
-      emit('save', editedItem.value);
-    };
+    const close = () => emit('close');
+    const save = () => emit('save', editedItem.value);
 
     return {
       isOpen,
@@ -67,3 +56,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Add styles if needed */
+</style>

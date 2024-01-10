@@ -1,7 +1,7 @@
 <!-- views/GenesDetail.vue -->
 <template>
   <v-container>
-    <GeneDetailCard :id="id" />
+    <GeneDetailCard :id="id" visibilityScope="standardView" />
   </v-container>
 </template>
 

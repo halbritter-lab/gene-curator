@@ -1,3 +1,4 @@
+<!-- components/DataDisplayTable.vue -->
 <template>
   <!-- Container for the data table and pagination components -->
   <v-container>
@@ -23,7 +24,7 @@
 
       <!-- Slot for actions like edit on each item -->
       <template v-slot:[`item.actions`]="{ item }">
-        <v-btn @click="openModal(item)">Edit</v-btn>
+        <v-btn @click="openModal(item)">Curate</v-btn>
       </template>
     </v-data-table>
 
