@@ -61,6 +61,12 @@
 </template>
 
 <script>
+import {
+  getPrecurationByHGNCIdOrSymbol,
+  createPrecuration,
+  updatePrecuration
+} from "@/stores/precurationsStore";
+
 export default {
   name: 'PrecurationForm',
   props: {
@@ -88,14 +94,22 @@ export default {
         { key: 'mechanism_difference', label: 'Mechanism', color: 'red', activeColor: 'orange' },
         { key: 'phenotypic_variability', label: 'Variability', color: 'blue', activeColor: 'cyan' },
       ],
+      existingPrecurationId: null,
     };
   },
   methods: {
-    submitPrecuration() {
-      // Set the timestamps when the accept button is clicked
+    async submitPrecuration() {
       const currentTime = new Date().toISOString();
-      this.precurationData.createdAt = currentTime;
       this.precurationData.updatedAt = currentTime;
+
+      if (!this.existingPrecurationId) {
+        this.precurationData.createdAt = currentTime;
+        const newId = await createPrecuration(this.precurationData);
+        console.log('New precuration created with ID:', newId);
+      } else {
+        await updatePrecuration(this.existingPrecurationId, this.precurationData);
+        console.log('Precuration updated:', this.existingPrecurationId);
+      }
 
       this.$emit('precuration-accepted', this.precurationData);
     },
@@ -103,6 +117,17 @@ export default {
       return value ? 'Yes' : 'No';
     },
   },
+  async created() {
+    try {
+      const precuration = await getPrecurationByHGNCIdOrSymbol(this.approvedSymbol || this.hgncId);
+      if (precuration) {
+        this.existingPrecurationId = precuration.id;
+        Object.assign(this.precurationData, precuration);
+      }
+    } catch (error) {
+      console.error('Error fetching precuration:', error.message);
+    }
+  }
 };
 </script>
 
