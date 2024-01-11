@@ -6,15 +6,29 @@
         Gene Curation - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
       </v-card-title>
       <v-card-text>
-        <!-- Gene Detail Card Component -->
-        <GeneDetailCard :id="editedItem.hgnc_id" visibilityScope="curationView" :showTitle="false" />
+        <v-tabs v-model="tab" grow>
+          <v-tab>Pre-Curation</v-tab>
+          <v-tab v-if="showCurationTab">Curation</v-tab>
+        </v-tabs>
 
-        <!-- Precuration Form Component -->
-        <PrecurationForm
-          :approvedSymbol="editedItem.approved_symbol"
-          :hgncId="editedItem.hgnc_id"
-          @precuration-accepted="handlePrecurationAccepted"
-        />
+         <v-window v-model="tab" style="min-height: 500px;">
+          <v-window-item>
+            <!-- Gene Detail Card Component -->
+            <GeneDetailCard :id="editedItem.hgnc_id" visibilityScope="curationView" :showTitle="false" />
+
+            <!-- Precuration Form Component -->
+            <PrecurationForm
+              :approvedSymbol="editedItem.approved_symbol"
+              :hgncId="editedItem.hgnc_id"
+              @precuration-accepted="handlePrecurationAccepted"
+            />
+          </v-window-item>
+
+          <v-window-item v-if="showCurationTab">
+            <!-- Curation Component Here -->
+            <!-- Add your curation component or other content here -->
+          </v-window-item>
+        </v-window>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -25,10 +39,12 @@
   </v-dialog>
 </template>
 
+
 <script>
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect, onMounted } from 'vue';
 import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
+import { getPrecurationByHGNCIdOrSymbol } from '@/stores/precurationsStore';
 
 export default {
   components: {
@@ -48,31 +64,47 @@ export default {
   setup(props, { emit }) {
     const isOpen = ref(props.open);
     const editedItem = ref({ ...props.item });
+    const showCurationTab = ref(false); // Controls the visibility of the curation tab
+    const tab = ref(0); // Controls the active tab
 
     watchEffect(() => {
       isOpen.value = props.open;
       editedItem.value = { ...props.item };
     });
 
-    // Mock method to handle the precuration accepted event
-    // TODO: Implement your own logic here
     const handlePrecurationAccepted = (precurationData) => {
-      // You would implement your logic here to handle the precuration data
-      // For example, you might want to save this data to your database
       console.log('Precuration accepted:', precurationData);
-      // Emit an event or call an API endpoint
+      showCurationTab.value = true; // Show the curation tab
+      tab.value = 1; // Switch to the curation tab
     };
 
     const close = () => emit('close');
     const save = () => emit('save', editedItem.value);
 
-    // Return the method so it can be used in the template
+    const checkExistingCuration = async () => {
+      try {
+        const existingCuration = await getPrecurationByHGNCIdOrSymbol(editedItem.value.hgnc_id || editedItem.value.approved_symbol);
+        if (existingCuration) {
+          showCurationTab.value = true;
+          tab.value = 1; // Open Curation tab if curation exists
+        }
+      } catch (error) {
+        console.error("Error checking existing curation:", error);
+      }
+    };
+
+    onMounted(() => {
+      checkExistingCuration();
+    });
+
     return {
       isOpen,
       editedItem,
       close,
       save,
-      handlePrecurationAccepted, // Make sure to return this method
+      handlePrecurationAccepted,
+      showCurationTab,
+      tab
     };
   },
 };
