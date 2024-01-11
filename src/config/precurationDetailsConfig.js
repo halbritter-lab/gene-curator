@@ -42,6 +42,11 @@ export const precurationDetailsConfig = {
       description: 'The decision made during precuration, such as "lump" or "split".',
       visibility: { standardView: true, curationView: true }
     },
+    comment: {
+      label: 'Comment',
+      format: 'text',
+      description: 'Curator’s comment about the decision made regarding the gene.'
+    },
     createdAt: {
       label: 'Created At',
       format: 'date',
@@ -59,11 +64,6 @@ export const precurationDetailsConfig = {
       format: 'array',
       description: 'A list of user identifiers who have worked on this precuration record.',
       visibility: { standardView: true, curationView: true }
-    },
-    comment: {
-      label: 'Comment',
-      format: 'text',
-      description: 'Curator’s comment about the decision made regarding the gene.'
     },
     // Add additional fields as needed based on the specific requirements of the precuration workflow.
   };
