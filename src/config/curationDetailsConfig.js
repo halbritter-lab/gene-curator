@@ -50,6 +50,44 @@ export const curationDetailsConfig = {
         }
       }
     },
+    points: {
+      label: 'Points',
+      format: 'object',
+      description: 'Quantitative and qualitative assessment points for the gene.',
+      visibility: { standardView: true, curationView: true },
+      subfields: {
+        variants: {
+          label: 'Variants',
+          format: 'number',
+          description: 'Number of variants identified.',
+          visibility: { standardView: true, curationView: true }
+        },
+        models: {
+          label: 'Models',
+          format: 'number',
+          description: 'Number of animal or cellular models studied.',
+          visibility: { standardView: true, curationView: true }
+        },
+        functional: {
+          label: 'Functional',
+          format: 'number',
+          description: 'Number of functional studies performed.',
+          visibility: { standardView: true, curationView: true }
+        },
+        rescue: {
+          label: 'Rescue',
+          format: 'number',
+          description: 'Number of rescue experiments performed.',
+          visibility: { standardView: true, curationView: true }
+        },
+        replication: {
+          label: 'Replication',
+          format: 'array',
+          description: 'References to replication studies.',
+          visibility: { standardView: true, curationView: true }
+        },
+      }
+    },
     users: {
       label: 'Users',
       format: 'array',

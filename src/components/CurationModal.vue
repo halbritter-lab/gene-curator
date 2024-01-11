@@ -25,8 +25,11 @@
           </v-window-item>
 
           <v-window-item v-if="showCurationTab">
-            <!-- Curation Component Here -->
-            <!-- Add your curation component or other content here -->
+            <!-- CurationForm Component -->
+            <CurationForm
+              :approvedSymbol="editedItem.approved_symbol"
+              :hgncId="editedItem.hgnc_id"
+            />
           </v-window-item>
         </v-window>
       </v-card-text>
@@ -44,12 +47,14 @@
 import { ref, watchEffect, onMounted } from 'vue';
 import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
+import CurationForm from './CurationForm.vue'; // Import the CurationForm component
 import { getPrecurationByHGNCIdOrSymbol } from '@/stores/precurationsStore';
 
 export default {
   components: {
     GeneDetailCard,
-    PrecurationForm
+    PrecurationForm,
+    CurationForm
   },
   props: {
     item: {
