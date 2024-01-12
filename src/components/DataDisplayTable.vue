@@ -24,7 +24,7 @@
 
       <!-- Slot for actions like edit on each item -->
       <template v-slot:[`item.actions`]="{ item }">
-        <v-btn @click="openModal(item)">Curate</v-btn>
+        <v-btn v-if="isLoggedIn" @click="openModal(item)">Curate</v-btn>
       </template>
     </v-data-table>
 
@@ -50,9 +50,11 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import CurationModal from './CurationModal.vue';
 import DataExport from '@/components/DataExport.vue';
 import { getGenes } from '@/stores/geneStore';
+
 
 export default {
   components: {
@@ -113,6 +115,25 @@ export default {
       // TODO: Handle the save operation here...
     };
 
+    const auth = getAuth(); // Get Firebase auth instance
+    const user = ref(null); // Reactive property for the current user
+
+    // Computed property to determine if user is logged in
+    const isLoggedIn = computed(() => !!user.value);
+
+    // Listen for auth state changes
+    onAuthStateChanged(auth, (loggedInUser) => {
+      user.value = loggedInUser;
+    });
+
+    // ... existing functions like openModal, closeModal, etc. ...
+
+    onMounted(async () => {
+      loading.value = true;
+      rawItems.value = await getGenes();
+      loading.value = false;
+    });
+
     // Fetch initial data on mount and set loading state
     onMounted(async () => {
       loading.value = true;
@@ -136,6 +157,7 @@ export default {
       closeModal,
       saveData,
       getGenes,
+      isLoggedIn
     };
   },
 };
