@@ -27,6 +27,7 @@
 
 <script>
 import AuthService from '@/stores/AuthService';
+import { useRouter } from 'vue-router'; // Import useRouter
 
 export default {
   name: 'LoginUser',
@@ -36,13 +37,18 @@ export default {
       password: ''
     };
   },
+  setup() {
+    const router = useRouter(); // Use the useRouter hook
+
+    return { router }; // Return router to use it inside methods
+  },
   methods: {
     async loginWithEmail() {
       try {
         const user = await AuthService.loginWithEmail(this.email, this.password);
         // Handle successful login
-        console.log(user);
         this.saveUserToLocalStorage(user);
+        this.router.push('/'); // Redirect to home page after successful login
       } catch (error) {
         // Handle login error
         console.error(error);
@@ -54,6 +60,7 @@ export default {
         console.log(user);
         // Handle successful login
         this.saveUserToLocalStorage(user);
+        this.router.push('/'); // Redirect to home page after successful login
       } catch (error) {
         // Handle login error
         console.error(error);
