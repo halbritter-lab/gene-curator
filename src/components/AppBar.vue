@@ -65,13 +65,14 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watchEffect } from 'vue';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import { useTheme } from 'vuetify';
 import packageInfo from '../../package.json';
 import appConfig from '../config/appConfig.json';
 import menuConfig from '../config/menuConfig.json';
+import { getUserByEmail } from '@/stores/usersStore'; // Import getUserByEmail function
 
 export default {
   name: 'AppBar',
@@ -88,6 +89,7 @@ export default {
     const fetchError = ref(false); // Reference for the last commit hash
     const auth = getAuth(); // Firebase auth instance
     const user = ref(null); // Reactive property for the current user
+    const userRole = ref(null); // To store the user's role
     const router = useRouter(); // Vue router instance
     const isLoggedIn = computed(() => !!user.value); // Computed property to determine if user is logged in
     const userAvatar = computed(() => user.value?.photoURL || 'logo.png'); // User avatar URL (default or user's photoURL)
@@ -124,6 +126,27 @@ export default {
     const openUserProfile = () => {
       router.push('/user');
     };
+
+    const fetchUserRole = async () => {
+      if (user.value) {
+        const userData = await getUserByEmail(user.value.email);
+        userRole.value = userData.role;
+      }
+    };
+
+    onAuthStateChanged(auth, (loggedInUser) => {
+      user.value = loggedInUser;
+      fetchUserRole(); // Fetch user role whenever the auth state changes
+    });
+
+    // Watching the user value to update role
+    watchEffect(() => {
+      if (user.value) {
+        fetchUserRole();
+      } else {
+        userRole.value = null;
+      }
+    });
 
     // Redirect to login page
     const redirectToLogin = () => {
@@ -166,6 +189,10 @@ export default {
     // Computed property for menu items based on login status and roles
     const menuItems = computed(() => {
       return menuConfig.items.filter(item => {
+        // Check for role-based visibility
+        if (item.requiredRoles && !item.requiredRoles.includes(userRole.value)) {
+          return false;
+        }
         if (item.visibility === 'loggedIn' && !user.value) {
           return false;
         }
@@ -183,6 +210,7 @@ export default {
       darkTheme,
       toggleTheme,
       menuItems,
+      userRole,
       version,
       lastCommitHash,
       isLoggedIn,
