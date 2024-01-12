@@ -83,7 +83,6 @@ export default {
   setup() {
     const theme = useTheme(); // Reactive property for dark theme state
     const darkTheme = ref(theme.global.current.value.dark);
-    const menuItems = ref(menuConfig.items); // Reactive property for menu items
     const version = packageInfo.version; // Extract the version from the package.json
     const lastCommitHash = ref('loading...'); // Reference for the last commit hash
     const fetchError = ref(false); // Reference for the last commit hash
@@ -156,6 +155,28 @@ export default {
         theme.global.name.value = savedTheme === 'true' ? 'dark' : 'light';
         darkTheme.value = savedTheme === 'true';
       }
+    });
+
+    const userRoles = computed(() => {
+      // Logic to derive user roles. For simplicity, let's assume it's an array of strings.
+      // This needs to be replaced with actual logic to get user roles.
+      return user.value ? ["admin"] : []; 
+    });
+
+    // Computed property for menu items based on login status and roles
+    const menuItems = computed(() => {
+      return menuConfig.items.filter(item => {
+        if (item.visibility === 'loggedIn' && !user.value) {
+          return false;
+        }
+        if (item.visibility === 'loggedOut' && user.value) {
+          return false;
+        }
+        if (item.requiredRoles && item.requiredRoles.some(role => !userRoles.value.includes(role))) {
+          return false;
+        }
+        return true;
+      });
     });
 
     return {

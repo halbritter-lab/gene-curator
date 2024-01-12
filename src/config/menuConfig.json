@@ -1,15 +1,17 @@
 {
     "items": [
-        {
-            "text": "Genes",
-            "to": "/genes",
-            "icon": "mdi-dna"
-        },
-        {
-            "text": "Gene Admin",
-            "to": "/upload",
-            "icon": "mdi-upload"
-        }
-        ]
-}
-  
+      {
+        "text": "Genes",
+        "to": "/genes",
+        "icon": "mdi-dna",
+        "visibility": "all"
+      },
+      {
+        "text": "Gene Admin",
+        "to": "/upload",
+        "icon": "mdi-upload",
+        "visibility": "loggedIn",
+        "requiredRoles": ["admin"]
+      }
+    ]
+  }
