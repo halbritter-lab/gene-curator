@@ -36,8 +36,6 @@
     </v-btn>
 
     <!-- User Avatar with Dropdown Menu -->
-
-    <!-- User Avatar with Dropdown Menu -->
     <template v-if="isLoggedIn">
       <v-menu offset-y>
         <template v-slot:activator="{ props }">

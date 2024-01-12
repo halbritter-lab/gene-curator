@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
+import { getAuth } from "firebase/auth";
 import HomePage from "@/views/HomePage.vue";
 import FAQ from "@/views/FAQ.vue";
 import About from "@/views/About.vue";
@@ -34,6 +35,7 @@ const routes = [
     path: '/upload',
     name: 'UploadGenes',
     component: UploadGenes,
+    meta: { requiresAuth: true }
   },
   {
     path: '/gene/:id',
@@ -56,14 +58,26 @@ const routes = [
   {
     path: '/user',
     name: 'UserPage',
-    component: UserPage
-  },
+    component: UserPage,
+    meta: { requiresAuth: true }
+  }
   // Add any additional routes here
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isAuthenticated = getAuth().currentUser;
+
+  if (requiresAuth && !isAuthenticated) {
+    next({ name: 'Login' });
+  } else {
+    next();
+  }
 });
 
 export default router;
