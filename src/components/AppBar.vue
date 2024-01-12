@@ -40,8 +40,7 @@
       <v-menu offset-y>
         <template v-slot:activator="{ props }">
           <v-btn icon v-bind="props">
-            <v-avatar>
-              <img :src="userAvatar" alt="user-avatar">
+            <v-avatar :image="userAvatar">
             </v-avatar>
           </v-btn>
         </template>
