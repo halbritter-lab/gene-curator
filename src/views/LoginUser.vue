@@ -57,7 +57,6 @@ export default {
     async signInWithGoogle() {
       try {
         const user = await AuthService.signInWithGoogle();
-        console.log(user);
         // Handle successful login
         this.saveUserToLocalStorage(user);
         this.router.push('/'); // Redirect to home page after successful login
