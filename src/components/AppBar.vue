@@ -34,15 +34,46 @@
         {{ darkTheme ? 'mdi-weather-night' : 'mdi-white-balance-sunny' }}
       </v-icon>
     </v-btn>
+
+    <!-- User Avatar with Dropdown Menu -->
+
+    <!-- User Avatar with Dropdown Menu -->
+    <template v-if="isLoggedIn">
+      <v-menu offset-y>
+        <template v-slot:activator="{ props }">
+          <v-btn icon v-bind="props">
+            <v-avatar>
+              <img :src="userAvatar" alt="user-avatar">
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="openUserProfile">
+            <v-list-item-title>User Page</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="logout">
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </template>
+    
+    <!-- Login Icon (shown when not logged in) -->
+    <v-btn icon v-else @click="redirectToLogin">
+      <v-icon>mdi-account-circle</v-icon>
+    </v-btn>
+
   </v-app-bar>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { useRouter } from 'vue-router';
 import { useTheme } from 'vuetify';
-import packageInfo from '../../package.json'; // Adjust the path to your package.json
-import appConfig from '../config/appConfig.json'; // Adjust the path to your appConfig.json
-import menuConfig from '../config/menuConfig.json'; // Adjust the path to your menuConfig.json
+import packageInfo from '../../package.json';
+import appConfig from '../config/appConfig.json';
+import menuConfig from '../config/menuConfig.json';
 
 export default {
   name: 'AppBar',
@@ -52,12 +83,17 @@ export default {
    * @returns {Object} The reactive properties and methods for the component.
    */
   setup() {
-    // Reactive property for dark theme state
-    const theme = useTheme();
-    const darkTheme = ref(theme.global.current.value.dark); // Reactive property for dark theme state
-
-    // Menu items for the toolbar
+    const theme = useTheme(); // Reactive property for dark theme state
+    const darkTheme = ref(theme.global.current.value.dark);
     const menuItems = ref(menuConfig.items); // Reactive property for menu items
+    const version = packageInfo.version; // Extract the version from the package.json
+    const lastCommitHash = ref('loading...'); // Reference for the last commit hash
+    const fetchError = ref(false); // Reference for the last commit hash
+    const auth = getAuth(); // Firebase auth instance
+    const user = ref(null); // Reactive property for the current user
+    const router = useRouter(); // Vue router instance
+    const isLoggedIn = computed(() => !!user.value); // Computed property to determine if user is logged in
+    const userAvatar = computed(() => user.value?.photoURL || 'logo.png'); // User avatar URL (default or user's photoURL)
 
     /**
      * Toggles the application theme between light and dark.
@@ -68,15 +104,6 @@ export default {
       localStorage.setItem('darkTheme', isDark.toString());
       darkTheme.value = isDark; // Update the darkTheme state
     };
-
-    // Extract the version from the package.json
-    const version = packageInfo.version;
-
-    // Reference for the last commit hash
-    const lastCommitHash = ref('loading...');
-
-    // Reference for the last commit hash
-    const fetchError = ref(false);
 
     // Function to fetch last commit hash
     const fetchLastCommit = async () => {
@@ -96,18 +123,40 @@ export default {
       }
     };
 
-    /**
-     * Lifecycle hook that runs when component is mounted.
-     * Retrieves and applies the saved theme preference from localStorage.
-     */
+    // Open user profile page
+    const openUserProfile = () => {
+      router.push('/user');
+    };
+
+    // Redirect to login page
+    const redirectToLogin = () => {
+      router.push('/login');
+    };
+
+    // Logout function
+    const logout = async () => {
+      try {
+        await signOut(auth);
+        user.value = null;
+        localStorage.removeItem('user');
+        router.push('/');
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    };
+
+    // Auth state change listener
+    onAuthStateChanged(auth, (loggedInUser) => {
+      user.value = loggedInUser;
+    });
+
+    // Apply saved theme preference
     onMounted(async () => {
       await fetchLastCommit();
-
       const savedTheme = localStorage.getItem('darkTheme');
       if (savedTheme !== null) {
-        const isDark = savedTheme === 'true';
-        theme.global.name.value = isDark ? 'dark' : 'light'; // Corrected to set the theme according to saved value
-        darkTheme.value = isDark; // Update the darkTheme state
+        theme.global.name.value = savedTheme === 'true' ? 'dark' : 'light';
+        darkTheme.value = savedTheme === 'true';
       }
     });
 
@@ -117,6 +166,11 @@ export default {
       menuItems,
       version,
       lastCommitHash,
+      isLoggedIn,
+      userAvatar,
+      openUserProfile,
+      redirectToLogin,
+      logout
     };
   },
 };

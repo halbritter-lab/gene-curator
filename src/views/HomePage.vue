@@ -1,3 +1,4 @@
+<!-- views/HomePage.vue -->
 <template>
   <StaticContent :config="startPageConfig" />
 </template>
