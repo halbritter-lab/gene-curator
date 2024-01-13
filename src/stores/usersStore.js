@@ -1,18 +1,38 @@
 // stores/usersStore.js
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  Timestamp,
+  query,
+  where
+} from 'firebase/firestore';
 import { db } from '@/firebase';
 import { userRolesConfig } from '@/config/userRolesConfig'; // Import the roles configuration
 
+
+/**
+ * Retrieves all user documents from Firestore.
+ * @returns {Promise<Object>} A promise that resolves to an object containing user data keyed by document IDs.
+ */
 export const getUsers = async () => {
   const querySnapshot = await getDocs(collection(db, 'users'));
   let users = {};
 
   querySnapshot.forEach((docSnapshot) => {
-    users[docSnapshot.id] = docSnapshot.data();
+    users[docSnapshot.id] = {
+      id: docSnapshot.id, // Include the document ID
+      ...docSnapshot.data() // Spread the rest of the user data
+    };
   });
 
   return users;
 };
+
 
 /**
  * Creates a new user document in Firestore with the provided user data.
@@ -34,6 +54,12 @@ export const createUser = async (userData) => {
     return docRef.id;
   };
 
+
+/**
+ * Retrieves a specific user document from Firestore by document ID.
+ * @param {string} docId - The document ID of the user.
+ * @returns {Promise<Object>} A promise that resolves to the user data.
+ */
 export const getUser = async (docId) => {
   const userRef = doc(db, 'users', docId);
   const docSnap = await getDoc(userRef);
@@ -45,6 +71,13 @@ export const getUser = async (docId) => {
   }
 };
 
+
+/**
+Updates a user document in Firestore.
+@param {string} docId - The document ID of the user to update.
+@param {Object} updatedData - An object containing the updated data for the user.
+@returns {Promise<void>} A promise that resolves when the update is complete.
+*/
 export const updateUser = async (docId, updatedData) => {
   const userRef = doc(db, 'users', docId);
   await updateDoc(userRef, {
@@ -53,10 +86,16 @@ export const updateUser = async (docId, updatedData) => {
   });
 };
 
+/**
+Deletes a user document from Firestore.
+@param {string} docId - The document ID of the user to delete.
+@returns {Promise<void>} A promise that resolves when the deletion is complete.
+*/
 export const deleteUser = async (docId) => {
   const userRef = doc(db, 'users', docId);
   await deleteDoc(userRef);
 };
+
 
 /**
  * Retrieves a user document from Firestore based on the email address.
