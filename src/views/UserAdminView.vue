@@ -14,7 +14,7 @@
         <v-select
           :items="['admin', 'curator', 'viewer']"
           v-model="item.role"
-          @change="updateUserRole(item)"
+          @update:modelValue="(newRole) => updateUserRole(item, newRole)"
           dense
         ></v-select>
       </template>
@@ -27,7 +27,8 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import DataDisplayTable from '@/components/DataDisplayTable.vue';
-import { getUsers } from '@/stores/usersStore';
+import { getUsers, updateUser } from '@/stores/usersStore';
+import { userRolesConfig } from '@/config/userRolesConfig';
 
 export default {
   name: 'UserAdminView',
@@ -44,6 +45,7 @@ export default {
     onMounted(async () => {
       loading.value = true;
       users.value = await getUsers();
+      console.log('users', users.value);
       loading.value = false;
     });
 
@@ -56,36 +58,45 @@ export default {
     });
 
     const headers = [
-    { title: 'User Name', value: 'name' },
+    { title: 'User ID', value: 'uid' },
     { title: 'Email', value: 'email' },
     { title: 'Created Date', value: 'createdAt' },
     { title: 'Role', value: 'role' }
     ];
 
     const tableConfig = {
-    columns: [
-        {
-        name: 'name',
-        type: 'text'
-        },
-        {
-        name: 'email',
-        type: 'text'
-        },
-        {
-        name: 'createdAt',
-        type: 'text',
-        // Additional formatting for the date can be added here
-        },
-        {
-        name: 'role',
-        type: 'slot',
-        slotName: 'role-slot'
-        }
-    ]
+      columns: [
+          {
+          name: 'name',
+          type: 'text'
+          },
+          {
+          name: 'email',
+          type: 'text'
+          },
+          {
+          name: 'createdAt',
+          type: 'date',
+          // Additional formatting for the date can be added here
+          },
+          {
+          name: 'role',
+          type: 'slot',
+          slotName: 'role-slot'
+          }
+      ]
     };
 
-    // TODO: Implement logic to assign roles
+    // Method to update user role
+    const updateUserRole = async (user, newRole) => {
+      try {
+        const permissions = userRolesConfig[newRole];
+        await updateUser(user.id, { role: newRole, permissions });
+        user.role = newRole; // Update the local state
+      } catch (error) {
+        console.error('Error updating user role:', error);
+      }
+    };
 
     return {
       users,
@@ -93,7 +104,8 @@ export default {
       headers,
       paginatedUsers,
       totalUsers,
-      tableConfig
+      tableConfig,
+      updateUserRole
     };
   },
 };
