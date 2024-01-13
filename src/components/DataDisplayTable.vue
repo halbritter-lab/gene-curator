@@ -11,12 +11,19 @@
       density="compact"
     >
       <template v-for="column in config.columns" v-slot:[`item.${column.name}`]="{ item }" :key="column.name">
+        <!-- Handle text formatting -->
         <div v-if="column.type === 'text'">
           {{ item[column.name] }}
         </div>
+        <!-- Handle date formatting -->
+        <div v-else-if="column.type === 'date'">
+          {{ formatTimestamp(item[column.name]) }}
+        </div>
+        <!-- Handle boolean formatting -->
         <router-link v-else-if="column.type === 'link'" :to="column.to(item)">
           {{ item[column.name] }}
         </router-link>
+        <!-- Handle boolean formatting -->
         <template v-else-if="column.type === 'slot'">
           <slot :name="column.slotName" :item="item"></slot>
         </template>
@@ -57,6 +64,13 @@ export default {
     // Compute the total number of pages
     const totalPages = computed(() => Math.ceil(props.totalItems / itemsPerPage.value));
 
+    // Method to format Firestore Timestamp
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp) return '';
+      const date = new Date(timestamp.seconds * 1000);
+      return date.toLocaleDateString(); // Adjust format as needed
+    };
+
     // Watch for changes in page and itemsPerPage and emit events
     watch(page, () => {
       emit('page-changed', page.value);
@@ -69,7 +83,8 @@ export default {
     return {
       page,
       itemsPerPage,
-      totalPages
+      totalPages,
+      formatTimestamp
     };
   },
 };
