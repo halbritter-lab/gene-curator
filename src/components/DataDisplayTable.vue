@@ -49,7 +49,6 @@ export default {
     config: Object, // Configuration for the columns
     totalItems: Number, // Total number of items for pagination
     loading: Boolean, // Loading state
-    isLoggedIn: Boolean // User login state
   },
   setup(props, { emit }) {
     const page = ref(1); // Current page number

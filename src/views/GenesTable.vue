@@ -8,7 +8,6 @@
       :config="tableConfig"
       :total-items="totalItems"
       :loading="loading"
-      :is-logged-in="isLoggedIn"
       @action="handleAction"
       @page-changed="updatePage"
       @items-per-page-changed="updateItemsPerPage"
