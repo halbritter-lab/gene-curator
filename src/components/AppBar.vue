@@ -87,7 +87,7 @@ export default {
     const lastCommitHash = ref('loading...'); // Reference for the last commit hash
     const fetchError = ref(false); // Reference for the last commit hash
     const auth = getAuth(); // Firebase auth instance
-    const user = ref(null); // Reactive property for the current user
+    const user = ref(JSON.parse(localStorage.getItem('user'))); // Reactive property for the current user
     const userRole = ref(null); // To store the user's role
     const router = useRouter(); // Vue router instance
     const isLoggedIn = computed(() => !!user.value); // Computed property to determine if user is logged in
@@ -163,11 +163,6 @@ export default {
         console.error('Logout error:', error);
       }
     };
-
-    // Auth state change listener
-    onAuthStateChanged(auth, (loggedInUser) => {
-      user.value = loggedInUser;
-    });
 
     // Apply saved theme preference
     onMounted(async () => {

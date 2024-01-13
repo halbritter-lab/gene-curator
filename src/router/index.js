@@ -1,6 +1,6 @@
 // router/index.js
 import { createWebHistory, createRouter } from "vue-router";
-import { getAuth } from "firebase/auth";
+import { getUserByEmail } from "@/stores/usersStore";
 import HomePage from "@/views/HomePage.vue";
 import FAQ from "@/views/FAQ.vue";
 import About from "@/views/About.vue";
@@ -12,6 +12,7 @@ import Register from "@/views/RegisterUser.vue";
 import UserPage from '@/views/UserPage.vue';
 import NotAuthorized from '@/views/NotAuthorized.vue'; // Import NotAuthorized component
 import PageNotFound from '@/views/PageNotFound.vue'; // Import PageNotFound component
+import UserAdminView from '@/views/UserAdminView.vue'; // Import UserAdminView component
 
 const routes = [
   {
@@ -52,7 +53,6 @@ const routes = [
     name: 'Login',
     component: Login
   },
-  // Define new route for registration
   {
     path: '/register',
     name: 'Register',
@@ -63,6 +63,12 @@ const routes = [
     name: 'UserPage',
     component: UserPage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/useradmin',
+    name: 'UserAdminView',
+    component: UserAdminView,
+    meta: { requiresAuth: true, requiredRole: 'admin' }
   },
   {
     path: '/not-authorized',
@@ -82,19 +88,35 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const requiredRole = to.meta.role;
-  const isAuthenticated = getAuth().currentUser;
-  const userRole = localStorage.getItem('userRole'); // Assuming the role is stored in local storage
+  const requiredRole = to.meta.requiredRole;
+  const currentUser = JSON.parse(localStorage.getItem('user'));
 
-  if (requiresAuth && !isAuthenticated) {
-    next({ name: 'Login' });
-  } else if (requiresAuth && requiredRole && userRole !== requiredRole) {
+  if (requiresAuth && !currentUser) {
+  // User is not authenticated, redirect to login page
+  next({ name: 'Login' });
+  } else if (requiresAuth && requiredRole) {
+  try {
+  // Fetch user data from the database to get the latest role information
+  const userData = await getUserByEmail(currentUser.email);
+  if (userData && userData.role === requiredRole) {
+  // User has the required role, proceed to the route
+  next();
+  }
+  else {
+    // User does not have the required role, redirect to 'Not Authorized' page
     next({ name: 'NotAuthorized' });
+  }
+  } catch (error) {
+    // Handle errors that occur while fetching user data
+    console.error('Error fetching user role:', error);
+    next({ name: 'NotAuthorized' });
+  }
   } else {
+    // No specific role required, proceed to the route
     next();
   }
-});
+  });
 
 export default router;
