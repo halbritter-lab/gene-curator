@@ -12,11 +12,14 @@
     ></v-img>
 
     <!-- Toolbar Title and Version Info -->
-    <v-toolbar-title class="clickable" @click="$router.push('/')">
-      Gene Curator
+    <v-toolbar-title>
+      <span class="clickable" @click="$router.push('/')">
+        Gene Curator
+      </span>
       <br> <!-- Line break for version info -->
-      <span class="version-info">
+      <span class="version-info" @mouseenter="showCopyIcon = true" @mouseleave="showCopyIcon = false">
         Version: {{ version }} - Commit: {{ lastCommitHash }}
+        <v-icon v-if="showCopyIcon" @click="copyCitation">mdi-content-copy</v-icon>
       </span>
     </v-toolbar-title>
 
@@ -61,6 +64,18 @@
     </v-btn>
 
   </v-app-bar>
+
+  <!-- Snackbar for feedback -->
+  <v-snackbar
+    v-model="snackbarVisible"
+    :timeout="snackbarTimeout"
+    :color="snackbarColor"
+    variant="tonal"
+    vertical
+  >
+    {{ snackbarMessage }}
+  </v-snackbar>
+
 </template>
 
 <script>
@@ -92,6 +107,28 @@ export default {
     const router = useRouter(); // Vue router instance
     const isLoggedIn = computed(() => !!user.value); // Computed property to determine if user is logged in
     const userAvatar = computed(() => user.value?.photoURL || 'logo.png'); // User avatar URL (default or user's photoURL)
+
+    // Data properties for snackbar
+    const snackbarVisible = ref(false);
+    const snackbarMessage = ref('');
+    const snackbarTimeout = 6000;
+    const snackbarColor = 'success';
+    const showCopyIcon = ref(false);
+
+    // Method to copy citation to clipboard
+    const copyCitation = () => {
+      const citation = `Gene Curator, Version: ${version} - Commit: ${lastCommitHash.value}, an open-source platform designed for the curation and management of genetic information. Code available at https://github.com/halbritter-lab/gene-curator (accessed ${new Date().toISOString().split('T')[0]}).`;
+      navigator.clipboard.writeText(citation)
+        .then(() => {
+          snackbarMessage.value = `Citation copied to clipboard!`;
+          snackbarVisible.value = true;
+        })
+        .catch((error) => {
+          console.error('Error copying citation:', error);
+          snackbarMessage.value = 'Error copying citation!';
+          snackbarVisible.value = true;
+      })
+    };
 
     /**
      * Toggles the application theme between light and dark.
@@ -211,7 +248,13 @@ export default {
       userAvatar,
       openUserProfile,
       redirectToLogin,
-      logout
+      logout,
+      snackbarVisible,
+      snackbarMessage,
+      snackbarTimeout,
+      snackbarColor,
+      copyCitation,
+      showCopyIcon
     };
   },
 };
@@ -276,5 +319,20 @@ export default {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.8rem;
   margin-top: -10px; /* Decrease the top margin to bring it closer to the app name */
+}
+
+/**
+ * Show the copy icon when hovering over the version info.
+ */
+.version-info:hover v-icon {
+  display: block;
+}
+
+/**
+ * Styles for the copy icon.
+ * Initially, set it to be hidden.
+ */
+.version-info v-icon {
+  display: none;
 }
 </style>
