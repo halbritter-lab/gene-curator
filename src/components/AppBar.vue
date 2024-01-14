@@ -23,9 +23,27 @@
       </span>
     </v-toolbar-title>
 
-    <!-- Dynamic Menu Items -->
+    <!-- Dynamic Menu Items with Nested Dropdowns -->
     <template v-for="item in menuItems" :key="item.text">
-      <v-btn :to="item.to" text>
+      <v-menu offset-y v-if="item.children">
+        <template v-slot:activator="{ props }">
+          <v-btn text v-bind="props">
+            <v-icon left v-if="item.icon">{{ item.icon }}</v-icon>
+            {{ item.text }}
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item v-for="childItem in item.children" :key="childItem.text" :to="childItem.to">
+            <v-list-item-title>
+              <v-icon v-if="childItem.icon">
+                {{ childItem.icon }}
+              </v-icon>
+              {{ childItem.text }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-btn :to="item.to" text v-else>
         <v-icon left v-if="item.icon">{{ item.icon }}</v-icon>
         {{ item.text }}
       </v-btn>

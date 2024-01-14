@@ -1,24 +1,38 @@
 {
-    "items": [
-      {
-        "text": "Gene Admin",
-        "to": "/upload",
-        "icon": "mdi-upload",
-        "visibility": "loggedIn",
-        "requiredRoles": ["admin"]
-      },
-      {
-        "text": "User Admin",
-        "to": "/useradmin",
-        "icon": "mdi-account-supervisor",
-        "visibility": "loggedIn",
-        "requiredRoles": ["admin"]
-      },
-      {
-        "text": "Genes",
-        "to": "/genes",
-        "icon": "mdi-dna",
-        "visibility": "all"
-      }
-    ]
-  }
+  "items": [
+    {
+      "text": "Admin",
+      "icon": "mdi-cog",
+      "visibility": "loggedIn",
+      "requiredRoles": ["admin"],
+      "children": [
+        {
+          "text": "Gene Admin",
+          "to": "/upload",
+          "icon": "mdi-upload",
+          "visibility": "loggedIn",
+          "requiredRoles": ["admin"]
+        },
+        {
+          "text": "User Admin",
+          "to": "/useradmin",
+          "icon": "mdi-account-supervisor",
+          "visibility": "loggedIn",
+          "requiredRoles": ["admin"]
+        }
+      ]
+    },
+    {
+      "text": "Genes",
+      "to": "/genes",
+      "icon": "mdi-dna",
+      "visibility": "all"
+    },
+    {
+      "text": "Help",
+      "icon": "mdi-help-circle",
+      "to": "/help",
+      "visibility": "all"
+    }
+  ]
+}

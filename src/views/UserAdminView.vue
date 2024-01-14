@@ -45,7 +45,6 @@ export default {
     onMounted(async () => {
       loading.value = true;
       users.value = await getUsers();
-      console.log('users', users.value);
       loading.value = false;
     });
 
