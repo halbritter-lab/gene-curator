@@ -2,6 +2,14 @@
 <template>
   <v-container>
     <h1>Data Table View</h1>
+
+    <!-- Data export component -->
+    <DataExport 
+      :data-to-export="paginatedItems" 
+      filename="GenesDataExport"
+    />
+
+    <!-- Data table component -->
     <DataDisplayTable
       :headers="headers"
       :items="paginatedItems"
@@ -30,6 +38,7 @@ import DataDisplayTable from '@/components/DataDisplayTable.vue';
 import { getGenes } from '@/stores/geneStore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import CurationModal from '@/components/CurationModal.vue';
+import DataExport from '@/components/DataExport.vue';
 
 /**
  * GenesTable component responsible for displaying gene data in a table format.
@@ -39,7 +48,8 @@ export default {
   name: 'GenesTable',
   components: {
     DataDisplayTable,
-    CurationModal
+    CurationModal,
+    DataExport
   },
   setup() {
     // State for raw gene data and UI states
