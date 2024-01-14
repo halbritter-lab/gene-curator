@@ -19,11 +19,18 @@
           ></v-text-field>
           <v-btn @click="loginWithEmail">Login</v-btn>
           <v-btn @click="signInWithGoogle">Login with Google</v-btn>
+          
+          <!-- New Registration Link -->
+          <v-btn text @click="navigateToRegister">
+            Don't have an account? Register here
+          </v-btn>
+          
         </v-form>
       </v-card-text>
     </v-card>
   </v-container>
 </template>
+
 
 <script>
 import AuthService from '@/stores/AuthService';
@@ -64,6 +71,9 @@ export default {
         // Handle login error
         console.error(error);
       }
+    },
+    navigateToRegister() {
+      this.router.push('/register'); // Add method to navigate to the registration view
     },
     saveUserToLocalStorage(user) {
       if (user) {
