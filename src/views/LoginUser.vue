@@ -17,14 +17,20 @@
             type="password" 
             required
           ></v-text-field>
+
           <v-btn @click="loginWithEmail">Login</v-btn>
-          <v-btn @click="signInWithGoogle">Login with Google</v-btn>
-          
           <!-- New Registration Link -->
           <v-btn text @click="navigateToRegister">
-            Don't have an account? Register here
+            Don't have an account? Register
           </v-btn>
           
+          <!-- Visual Divider -->
+          <div class="login-divider">
+            OR
+          </div>
+
+          <v-btn @click="signInWithGoogle" color="primary">Login with Google</v-btn>
+
         </v-form>
       </v-card-text>
     </v-card>
@@ -87,3 +93,16 @@ export default {
   }
 };
 </script>
+
+
+<style>
+  /* Updated style for the visual divider */
+  .login-divider {
+    text-align: center;
+    margin: 20px 0;
+    color: #757575;
+    display: flex;
+    align-items: center; /* Vertically align text and Google button */
+  }
+</style>
+
