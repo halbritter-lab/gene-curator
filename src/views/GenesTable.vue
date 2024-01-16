@@ -1,7 +1,7 @@
 <!-- views/GenesTable.vue -->
 <template>
   <v-container>
-    <h1>Data Table View</h1>
+    <h1>Genes Table</h1>
 
     <!-- Data export component -->
     <DataExport 

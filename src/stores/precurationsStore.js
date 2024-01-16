@@ -1,4 +1,4 @@
-// precurationsStore.js
+// stores/precurationsStore.js
 import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 

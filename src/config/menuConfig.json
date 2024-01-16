@@ -23,15 +23,29 @@
       ]
     },
     {
+      "text": "Pre-Curation",
+      "to": "/precuration",
+      "icon": "mdi-table-edit",
+      "visibility": "loggedIn",
+      "requiredRoles": ["admin"]
+    },
+    {
+      "text": "Curation",
+      "to": "/curation",
+      "icon": "mdi-book-open-page-variant",
+      "visibility": "loggedIn",
+      "requiredRoles": ["admin"]
+    },
+    {
       "text": "Genes",
       "to": "/genes",
       "icon": "mdi-dna",
       "visibility": "all"
     },
     {
-      "text": "Help",
+      "text": "FAQ",
       "icon": "mdi-help-circle",
-      "to": "/help",
+      "to": "/faq",
       "visibility": "all"
     }
   ]

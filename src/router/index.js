@@ -13,6 +13,8 @@ import UserPage from '@/views/UserPage.vue';
 import NotAuthorized from '@/views/NotAuthorized.vue'; // Import NotAuthorized component
 import PageNotFound from '@/views/PageNotFound.vue'; // Import PageNotFound component
 import UserAdminView from '@/views/UserAdminView.vue'; // Import UserAdminView component
+import PreCurationTable from '@/views/PreCurationTable.vue'; // Import PreCurationTable component
+import CurationTable from '@/views/CurationTable.vue'; // Import CurationTable component
 
 const routes = [
   {
@@ -79,7 +81,19 @@ const routes = [
     path: '/:catchAll(.*)', // Catch-all route
     name: 'PageNotFound',
     component: PageNotFound
-  }
+  },
+  {
+    path: '/precuration',
+    name: 'PreCuration',
+    component: PreCurationTable,
+    meta: { requiresAuth: true, requiredRole: 'admin' }
+  },
+  {
+    path: '/curation',
+    name: 'Curation',
+    component: CurationTable,
+    meta: { requiresAuth: true, requiredRole: 'admin' }
+  },
   // Add any additional routes here
 ];
 
