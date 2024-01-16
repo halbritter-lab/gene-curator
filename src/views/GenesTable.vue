@@ -78,7 +78,6 @@ export default {
 
     const headers = [
       { title: 'Approved Symbol', value: 'approved_symbol' },
-      { title: 'HGNC ID', value: 'hgnc_id' },
       { title: 'Evidence count', value: 'evidence_count' },
       { title: 'Actions', value: 'actions', sortable: false },
     ];
@@ -91,7 +90,7 @@ export default {
           to: item => `/gene/${item.hgnc_id}` // Function to generate the link
         },
         {
-          name: 'hgnc_id',
+          name: 'evidence_count',
           type: 'text'
         },
         {

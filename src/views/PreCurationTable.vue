@@ -51,13 +51,17 @@ export default {
 
     const headers = [
       { title: 'Approved Symbol', value: 'approved_symbol' },
-      { title: 'HGNC ID', value: 'hgnc_id' },
       { title: 'Decision', value: 'decision' },
-      { title: 'Created At', value: 'createdAt' },
+      { title: 'Created', value: 'createdAt' },
     ];
 
     const tableConfig = {
       columns: [
+        {
+          name: 'approved_symbol',
+          type: 'link', // Types can be 'text', 'link', 'action', etc.
+          to: item => `/gene/${item.hgnc_id}` // Function to generate the link
+        },
         {
           name: 'createdAt',
           type: 'date'
