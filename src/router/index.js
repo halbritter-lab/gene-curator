@@ -41,7 +41,7 @@ const routes = [
     path: '/upload',
     name: 'UploadGenes',
     component: UploadGenes,
-    meta: { requiresAuth: true, requiredRole: 'admin' }
+    meta: { requiresAuth: true, requiredRole: ['admin'] }
   },
   {
     path: '/gene/:id',
@@ -70,7 +70,7 @@ const routes = [
     path: '/useradmin',
     name: 'UserAdminView',
     component: UserAdminView,
-    meta: { requiresAuth: true, requiredRole: 'admin' }
+    meta: { requiresAuth: true, requiredRole: ['admin'] }
   },
   {
     path: '/not-authorized',
@@ -86,13 +86,13 @@ const routes = [
     path: '/precuration',
     name: 'PreCuration',
     component: PreCurationTable,
-    meta: { requiresAuth: true, requiredRole: 'admin' }
+    meta: { requiresAuth: true, requiredRole: ['admin', 'curator'] }
   },
   {
     path: '/curation',
     name: 'Curation',
     component: CurationTable,
-    meta: { requiresAuth: true, requiredRole: 'admin' }
+    meta: { requiresAuth: true, requiredRole: ['admin', 'curator'] }
   },
   // Add any additional routes here
 ];
@@ -104,33 +104,32 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const requiredRole = to.meta.requiredRole;
+  const requiredRoles = to.meta.requiredRole; // This is now expected to be an array
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   if (requiresAuth && !currentUser) {
-  // User is not authenticated, redirect to login page
-  next({ name: 'Login' });
-  } else if (requiresAuth && requiredRole) {
-  try {
-  // Fetch user data from the database to get the latest role information
-  const userData = await getUserByEmail(currentUser.email);
-  if (userData && userData.role === requiredRole) {
-  // User has the required role, proceed to the route
-  next();
-  }
-  else {
-    // User does not have the required role, redirect to 'Not Authorized' page
-    next({ name: 'NotAuthorized' });
-  }
-  } catch (error) {
-    // Handle errors that occur while fetching user data
-    console.error('Error fetching user role:', error);
-    next({ name: 'NotAuthorized' });
-  }
+    // User is not authenticated, redirect to login page
+    next({ name: 'Login' });
+  } else if (requiresAuth && requiredRoles) {
+    try {
+      // Fetch user data from the database to get the latest role information
+      const userData = await getUserByEmail(currentUser.email);
+      if (userData && requiredRoles.includes(userData.role)) {
+        // User has one of the required roles, proceed to the route
+        next();
+      } else {
+        // User does not have any of the required roles, redirect to 'Not Authorized' page
+        next({ name: 'NotAuthorized' });
+      }
+    } catch (error) {
+      // Handle errors that occur while fetching user data
+      console.error('Error fetching user role:', error);
+      next({ name: 'NotAuthorized' });
+    }
   } else {
     // No specific role required, proceed to the route
     next();
   }
-  });
+});
 
 export default router;

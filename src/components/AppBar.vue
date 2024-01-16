@@ -232,7 +232,7 @@ export default {
     const userRoles = computed(() => {
       // Logic to derive user roles. For simplicity, let's assume it's an array of strings.
       // This needs to be replaced with actual logic to get user roles.
-      return user.value ? ["admin"] : []; 
+      return user.value ? ["admin", "curator"] : []; 
     });
 
     // Computed property for menu items based on login status and roles

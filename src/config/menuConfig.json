@@ -27,14 +27,14 @@
       "to": "/precuration",
       "icon": "mdi-table-edit",
       "visibility": "loggedIn",
-      "requiredRoles": ["admin"]
+      "requiredRoles": ["admin", "curator"]
     },
     {
       "text": "Curation",
       "to": "/curation",
       "icon": "mdi-book-open-page-variant",
       "visibility": "loggedIn",
-      "requiredRoles": ["admin"]
+      "requiredRoles": ["admin", "curator"]
     },
     {
       "text": "Genes",
