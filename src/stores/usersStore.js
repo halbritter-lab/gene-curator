@@ -3,7 +3,7 @@ import {
   collection,
   getDocs,
   getDoc,
-  addDoc,
+  setDoc,
   doc,
   updateDoc,
   deleteDoc,
@@ -37,22 +37,27 @@ export const getUsers = async () => {
 /**
  * Creates a new user document in Firestore with the provided user data.
  * @param {Object} userData - The user data including email, role, etc.
- * @returns {Promise<string>} A promise that resolves to the new document's ID.
+ * @param {string} userId - The unique user ID (UID) to use as the document ID.
+ * @returns {Promise<void>} A promise that resolves when the user document is created.
  */
-export const createUser = async (userData) => {
-    const userRole = userData.role || 'viewer'; // Default to 'viewer' if no role is provided
-    const roleConfig = userRolesConfig[userRole]; // Get the role configuration
-  
-    const docRef = await addDoc(collection(db, 'users'), {
-      ...userData,
-      role: userRole,
-      permissions: roleConfig, // Assign permissions based on the role
-      createdAt: Timestamp.fromDate(new Date()),
-      updatedAt: Timestamp.fromDate(new Date()),
-    });
+export const createUser = async (userData, userId) => {
+  const userRole = userData.role || 'viewer'; // Default to 'viewer' if no role is provided
+  const roleConfig = userRolesConfig[userRole]; // Get the role configuration
 
-    return docRef.id;
-  };
+  // Create a reference to the new document with the userId as the document ID
+  const userRef = doc(db, 'users', userId);
+
+  // Use setDoc to create the new document
+  await setDoc(userRef, {
+    ...userData,
+    role: userRole,
+    permissions: roleConfig, // Assign permissions based on the role
+    createdAt: Timestamp.fromDate(new Date()),
+    updatedAt: Timestamp.fromDate(new Date()),
+  });
+
+  // No need to return the document ID since it's provided by the caller
+};
 
 
 /**

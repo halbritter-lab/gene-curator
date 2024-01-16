@@ -69,7 +69,8 @@ async function handleFirstLogin(user) {
       role: role,
       createdAt: new Date(),
       updatedAt: new Date()
-    });
+    },
+    user.uid);
   }
 }
 
