@@ -23,16 +23,16 @@
       ]
     },
     {
-      "text": "Pre-Curation",
-      "to": "/precuration",
-      "icon": "mdi-table-edit",
+      "text": "Curation",
+      "to": "/curation",
+      "icon": "mdi-book-open-page-variant",
       "visibility": "loggedIn",
       "requiredRoles": ["admin", "curator"]
     },
     {
-      "text": "Curation",
-      "to": "/curation",
-      "icon": "mdi-book-open-page-variant",
+      "text": "Pre-Curation",
+      "to": "/precuration",
+      "icon": "mdi-table-edit",
       "visibility": "loggedIn",
       "requiredRoles": ["admin", "curator"]
     },
