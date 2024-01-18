@@ -5,13 +5,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAlK6flaIujhnq9SUa4a3BCnezxZu583fI',
-  authDomain: 'kidney-genetics.firebaseapp.com',
-  projectId: 'kidney-genetics',
-  storageBucket: 'kidney-genetics.appspot.com',
-  messagingSenderId: '363889916499',
-  appId: '1:363889916499:web:f6e81c45d3c2705b0d64a6',
-  measurementId: 'G-XLBPTGJEW3'
+  apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
+  authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VUE_APP_FIREBASE_APP_ID,
+  measurementId: process.env.NODE_ENV
 };
 
 // Initialize Firebase
