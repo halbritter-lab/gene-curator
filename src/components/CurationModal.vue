@@ -97,8 +97,7 @@ export default {
       editedItem.value = { ...props.item };
     });
 
-    const handlePrecurationAccepted = (precurationData) => {
-      showSnackbar("Precuration saved for: " + precurationData.approved_symbol, 'success');
+    const handlePrecurationAccepted = () => {
       showCurationTab.value = true; // Show the curation tab
       tab.value = 1; // Switch to the curation tab
     };

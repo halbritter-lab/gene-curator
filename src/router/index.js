@@ -1,21 +1,26 @@
 // router/index.js
+
+// Import Vue and Vue Router
 import { createWebHistory, createRouter } from "vue-router";
 import { getUserByEmail } from "@/stores/usersStore";
-import HomePage from "@/views/HomePage.vue";
-import FAQ from "@/views/FAQ.vue";
-import About from "@/views/About.vue";
-import Genes from "@/views/GenesTable.vue";
-import UploadGenes from '@/views/GeneAdmin.vue';
-import GeneDetail from "@/views/GeneDetail.vue";
-import Login from "@/views/LoginUser.vue";
-import Register from "@/views/RegisterUser.vue";
-import UserPage from '@/views/UserPage.vue';
-import NotAuthorized from '@/views/NotAuthorized.vue'; // Import NotAuthorized component
-import PageNotFound from '@/views/PageNotFound.vue'; // Import PageNotFound component
-import UserAdminView from '@/views/UserAdminView.vue'; // Import UserAdminView component
-import PreCurationTable from '@/views/PreCurationTable.vue'; // Import PreCurationTable component
-import CurationTable from '@/views/CurationTable.vue'; // Import CurationTable component
 
+// Import all views here
+const HomePage = () => import('@/views/HomePage.vue');
+const FAQ = () => import('@/views/FAQ.vue');
+const About = () => import('@/views/About.vue');
+const Genes = () => import('@/views/GenesTable.vue');
+const UploadGenes = () => import('@/views/GeneAdmin.vue');
+const GeneDetail = () => import('@/views/GeneDetail.vue');
+const Login = () => import('@/views/LoginUser.vue');
+const Register = () => import('@/views/RegisterUser.vue');
+const UserPage = () => import('@/views/UserPage.vue');
+const NotAuthorized = () => import('@/views/NotAuthorized.vue');
+const PageNotFound = () => import('@/views/PageNotFound.vue');
+const UserAdminView = () => import('@/views/UserAdminView.vue');
+const PreCurationTable = () => import('@/views/PreCurationTable.vue');
+const CurationTable = () => import('@/views/CurationTable.vue');
+
+// Define routes
 const routes = [
   {
     path: "/",
