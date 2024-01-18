@@ -88,7 +88,6 @@
     v-model="snackbarVisible"
     :timeout="snackbarTimeout"
     :color="snackbarColor"
-    variant="tonal"
   >
     {{ snackbarMessage }}
   </v-snackbar>
@@ -129,7 +128,7 @@ export default {
     const snackbarVisible = ref(false);
     const snackbarMessage = ref('');
     const snackbarTimeout = 6000;
-    const snackbarColor = 'success';
+    const snackbarColor = ref('success');
     const showCopyIcon = ref(false);
 
     // Method to copy citation to clipboard
@@ -217,15 +216,23 @@ export default {
       router.push('/login');
     };
 
-    // Logout function
+    // Logout function with snackbar feedback
     const logout = async () => {
       try {
         await signOut(auth);
         user.value = null;
         localStorage.removeItem('user');
         router.push('/');
+        // Display success message
+        snackbarMessage.value = 'Successfully logged out';
+        snackbarColor.value = 'success'; // Set color to green for success
+        snackbarVisible.value = true;
       } catch (error) {
         console.error('Logout error:', error);
+        // Display error message
+        snackbarMessage.value = 'Error during logout: ' + error.message;
+        snackbarColor.value = 'error'; // Set color to red for error
+        snackbarVisible.value = true;
       }
     };
 
