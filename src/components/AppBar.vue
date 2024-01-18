@@ -180,13 +180,24 @@ export default {
       router.push('/user');
     };
 
+    // Function to fetch user role
     const fetchUserRole = async () => {
       if (user.value) {
-        const userData = await getUserByEmail(user.value.email);
-        userRole.value = userData.role;
+        try {
+          const userData = await getUserByEmail(user.value.email);
+          // Check if userData is not null and has a 'role' property
+          userRole.value = userData && userData.role ? userData.role : 'viewer';
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          // Set default role to 'viewer' in case of an error
+          userRole.value = 'viewer';
+        }
+      } else {
+        userRole.value = 'viewer'; // Default role when user is not logged in
       }
     };
 
+    // Watch for auth state changes
     onAuthStateChanged(auth, (loggedInUser) => {
       user.value = loggedInUser;
       fetchUserRole(); // Fetch user role whenever the auth state changes
