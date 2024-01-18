@@ -18,7 +18,7 @@ import CurationTable from '@/views/CurationTable.vue'; // Import CurationTable c
 
 const routes = [
   {
-    path: "/",
+    path: "/gene-curator/",
     name: "Home",
     component: HomePage,
   },
