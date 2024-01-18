@@ -83,13 +83,13 @@ const routes = [
     component: PageNotFound
   },
   {
-    path: '/precuration',
+    path: '/precurations',
     name: 'PreCuration',
     component: PreCurationTable,
     meta: { requiresAuth: true, requiredRole: ['admin', 'curator'] }
   },
   {
-    path: '/curation',
+    path: '/curations',
     name: 'Curation',
     component: CurationTable,
     meta: { requiresAuth: true, requiredRole: ['admin', 'curator'] }

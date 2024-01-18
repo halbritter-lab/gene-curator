@@ -8,10 +8,10 @@
       },
       {
         "header": "Getting Started",
-        "content": "Start by exploring the gene database or uploading new gene data...",
+        "content": "Start by exploring the gene and entity curation database...",
         "links": [
           { "title": "Explore Genes", "url": "/genes" },
-          { "title": "Upload Data", "url": "/upload" }
+          { "title": "Explore entities", "url": "/curations" }
         ]
       },
       {
