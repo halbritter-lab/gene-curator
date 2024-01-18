@@ -24,14 +24,14 @@
     },
     {
       "text": "Curation",
-      "to": "/curation",
+      "to": "/curations",
       "icon": "mdi-book-open-page-variant",
       "visibility": "loggedIn",
       "requiredRoles": ["admin", "curator"]
     },
     {
       "text": "Pre-Curation",
-      "to": "/precuration",
+      "to": "/precurations",
       "icon": "mdi-table-edit",
       "visibility": "loggedIn",
       "requiredRoles": ["admin", "curator"]
