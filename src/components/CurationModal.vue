@@ -44,7 +44,7 @@
 
 
 <script>
-import { ref, watchEffect, onMounted } from 'vue';
+import { ref, watchEffect, watch } from 'vue';
 import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
 import CurationForm from './CurationForm.vue'; // Import the CurationForm component
@@ -78,7 +78,7 @@ export default {
     });
 
     const handlePrecurationAccepted = (precurationData) => {
-      console.log('Precuration accepted:', precurationData);
+      console.log("Precuration accepted:", precurationData);
       showCurationTab.value = true; // Show the curation tab
       tab.value = 1; // Switch to the curation tab
     };
@@ -92,14 +92,20 @@ export default {
         if (existingCuration) {
           showCurationTab.value = true;
           tab.value = 1; // Open Curation tab if curation exists
+        } else {
+          showCurationTab.value = false;
+          tab.value = 0; // Open Precuration tab if curation does not exist
         }
       } catch (error) {
         console.error("Error checking existing curation:", error);
       }
     };
 
-    onMounted(() => {
-      checkExistingCuration();
+    // Watch for changes to the 'open' prop
+    watch(() => props.open, async (newVal) => {
+      if (newVal) { // If the modal is being opened
+        await checkExistingCuration();
+      }
     });
 
     return {
