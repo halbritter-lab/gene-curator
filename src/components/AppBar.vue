@@ -89,7 +89,6 @@
     :timeout="snackbarTimeout"
     :color="snackbarColor"
     variant="tonal"
-    vertical
   >
     {{ snackbarMessage }}
   </v-snackbar>

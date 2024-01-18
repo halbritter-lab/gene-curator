@@ -22,6 +22,16 @@
       </v-card-text>
     </v-card>
   </v-container>
+
+  <!-- Snackbar for registration feedback -->
+  <v-snackbar
+    v-model="snackbarVisible"
+    :color="snackbarColor"
+    :timeout="6000"
+  >
+    {{ snackbarMessage }}
+  </v-snackbar>
+
 </template>
 
 <script>
@@ -32,17 +42,35 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      // Snackbar data
+      snackbarVisible: false,
+      snackbarMessage: '',
+      snackbarColor: 'info'
     };
   },
   methods: {
+    displaySnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbarVisible = true;
+    },
+
     async register() {
       try {
         const user = await AuthService.registerWithEmail(this.email, this.password);
         console.log(user);
         // Handle successful registration
+        this.displaySnackbar('Registration successful! Redirecting...', 'success');
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          this.$router.push('/login');
+        }, 3000);
+
       } catch (error) {
         // Handle registration error
+        this.displaySnackbar(error.message, 'error');
       }
     }
   }
