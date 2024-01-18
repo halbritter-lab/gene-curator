@@ -18,6 +18,7 @@
     "vue": "^3.2.13",
     "vue-router": "^4.2.5",
     "vuetify": "^3.4.8",
+    "webpack-plugin-vuetify": "^3.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
