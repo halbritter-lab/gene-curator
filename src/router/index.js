@@ -98,7 +98,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/gene-curator/'),
+  history: createWebHistory(process.env.NODE_ENV === "production" ? "/gene-curator/" : "/"), // set base URL for GitHub Pages
   routes,
 });
 
