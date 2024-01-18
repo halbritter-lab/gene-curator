@@ -1,4 +1,4 @@
-# based onhttps://github.com/horosin/pages-deploy
+# based on https://github.com/horosin/pages-deploy
 name: github pages
 
 on:
