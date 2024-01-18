@@ -40,6 +40,15 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+<v-snackbar
+  v-model="snackbarVisible"
+  :color="snackbarColor"
+  :timeout="6000"
+>
+  {{ snackbarMessage }}
+</v-snackbar>
+
 </template>
 
 
@@ -66,11 +75,22 @@ export default {
       required: true,
     },
   },
+  emits: ['close', 'save'],
   setup(props, { emit }) {
     const isOpen = ref(props.open);
     const editedItem = ref({ ...props.item });
     const showCurationTab = ref(false); // Controls the visibility of the curation tab
     const tab = ref(0); // Controls the active tab
+
+    const snackbarVisible = ref(false);
+    const snackbarMessage = ref('');
+    const snackbarColor = ref('success'); // Default color
+
+    const showSnackbar = (message, color = 'success') => {
+      snackbarMessage.value = message;
+      snackbarColor.value = color;
+      snackbarVisible.value = true;
+    };
 
     watchEffect(() => {
       isOpen.value = props.open;
@@ -78,7 +98,7 @@ export default {
     });
 
     const handlePrecurationAccepted = (precurationData) => {
-      console.log("Precuration accepted:", precurationData);
+      showSnackbar("Precuration saved for: " + precurationData.approved_symbol, 'success');
       showCurationTab.value = true; // Show the curation tab
       tab.value = 1; // Switch to the curation tab
     };
@@ -97,7 +117,7 @@ export default {
           tab.value = 0; // Open Precuration tab if curation does not exist
         }
       } catch (error) {
-        console.error("Error checking existing curation:", error);
+        showSnackbar("Error checking existing curation: " + error.message, 'error');
       }
     };
 
@@ -115,7 +135,11 @@ export default {
       save,
       handlePrecurationAccepted,
       showCurationTab,
-      tab
+      tab,
+      snackbarVisible,
+      snackbarMessage,
+      snackbarColor,
+      showSnackbar,
     };
   },
 };
