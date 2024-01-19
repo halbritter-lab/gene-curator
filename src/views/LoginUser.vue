@@ -23,13 +23,11 @@
             v-model="password"
             type="password"
             :rules="[
-              (v) => !!v || 'Password is required',
-              (v) => (v) =>
-                (v && v.length >= 6) ||
-                'Password must be at least 6 characters',
+              (v) => !!v && v.length >= 6 || 'Password must be at least 6 characters',
             ]"
             variant="outlined"
           ></v-text-field>
+
 
           <div class="d-flex justify-space-between align-center mt-2">
             <v-btn type="submit" color="primary">Login</v-btn>

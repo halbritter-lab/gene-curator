@@ -24,9 +24,8 @@
             type="password"
             :rules="[
               (v) => !!v || 'Password is required',
-              (v) => (v) =>
-                (v && v.length >= 6) ||
-                'Password must be at least 6 characters',
+              (v) => !!v && v.length >= 6 || 'Password must be at least 6 characters',
+
             ]"
             variant="outlined"
           ></v-text-field>
@@ -71,9 +70,11 @@ export default {
       error: false,
       errorVal: {},
       loading: false,
-
       email: "",
       password: "",
+      snackbarVisible: false,
+      snackbarMessage: '',
+      snackbarColor: '',
     };
   },
   methods: {
@@ -97,7 +98,6 @@ export default {
         );
         console.log(user);
         this.loading = false;
-        this.$router.push("/login");
         // Handle successful registration
         this.displaySnackbar('Registration successful! Redirecting...', 'success');
 
