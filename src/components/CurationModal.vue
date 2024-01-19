@@ -40,11 +40,20 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+<v-snackbar
+  v-model="snackbarVisible"
+  :color="snackbarColor"
+  :timeout="6000"
+>
+  {{ snackbarMessage }}
+</v-snackbar>
+
 </template>
 
 
 <script>
-import { ref, watchEffect, onMounted } from 'vue';
+import { ref, watchEffect, watch } from 'vue';
 import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
 import CurationForm from './CurationForm.vue'; // Import the CurationForm component
@@ -66,19 +75,29 @@ export default {
       required: true,
     },
   },
+  emits: ['close', 'save'],
   setup(props, { emit }) {
     const isOpen = ref(props.open);
     const editedItem = ref({ ...props.item });
     const showCurationTab = ref(false); // Controls the visibility of the curation tab
     const tab = ref(0); // Controls the active tab
 
+    const snackbarVisible = ref(false);
+    const snackbarMessage = ref('');
+    const snackbarColor = ref('success'); // Default color
+
+    const showSnackbar = (message, color = 'success') => {
+      snackbarMessage.value = message;
+      snackbarColor.value = color;
+      snackbarVisible.value = true;
+    };
+
     watchEffect(() => {
       isOpen.value = props.open;
       editedItem.value = { ...props.item };
     });
 
-    const handlePrecurationAccepted = (precurationData) => {
-      console.log('Precuration accepted:', precurationData);
+    const handlePrecurationAccepted = () => {
       showCurationTab.value = true; // Show the curation tab
       tab.value = 1; // Switch to the curation tab
     };
@@ -92,14 +111,20 @@ export default {
         if (existingCuration) {
           showCurationTab.value = true;
           tab.value = 1; // Open Curation tab if curation exists
+        } else {
+          showCurationTab.value = false;
+          tab.value = 0; // Open Precuration tab if curation does not exist
         }
       } catch (error) {
-        console.error("Error checking existing curation:", error);
+        showSnackbar("Error checking existing curation: " + error.message, 'error');
       }
     };
 
-    onMounted(() => {
-      checkExistingCuration();
+    // Watch for changes to the 'open' prop
+    watch(() => props.open, async (newVal) => {
+      if (newVal) { // If the modal is being opened
+        await checkExistingCuration();
+      }
     });
 
     return {
@@ -109,7 +134,11 @@ export default {
       save,
       handlePrecurationAccepted,
       showCurationTab,
-      tab
+      tab,
+      snackbarVisible,
+      snackbarMessage,
+      snackbarColor,
+      showSnackbar,
     };
   },
 };

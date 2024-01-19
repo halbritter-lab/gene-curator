@@ -43,6 +43,16 @@
     ></error-dialog>
     <loading-dialog v-model="loading" message="Please wait..." />
   </v-container>
+
+  <!-- Snackbar for registration feedback -->
+  <v-snackbar
+    v-model="snackbarVisible"
+    :color="snackbarColor"
+    :timeout="6000"
+  >
+    {{ snackbarMessage }}
+  </v-snackbar>
+
 </template>
 
 <script>
@@ -67,6 +77,12 @@ export default {
     };
   },
   methods: {
+    displaySnackbar(message, color) {
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbarVisible = true;
+    },
+
     async register() {
       // Validate form
       const { valid } = await this.$refs.registerForm.validate();
@@ -83,8 +99,15 @@ export default {
         this.loading = false;
         this.$router.push("/login");
         // Handle successful registration
+        this.displaySnackbar('Registration successful! Redirecting...', 'success');
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          this.$router.push('/login');
+        }, 3000);
+
       } catch (error) {
-        this.error = true;
+       this.error = true;
         this.errorVal = {
           title: "Error",
           description: "There was an error registering your account",

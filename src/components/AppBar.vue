@@ -88,8 +88,6 @@
     v-model="snackbarVisible"
     :timeout="snackbarTimeout"
     :color="snackbarColor"
-    variant="tonal"
-    vertical
   >
     {{ snackbarMessage }}
   </v-snackbar>
@@ -130,7 +128,7 @@ export default {
     const snackbarVisible = ref(false);
     const snackbarMessage = ref('');
     const snackbarTimeout = 6000;
-    const snackbarColor = 'success';
+    const snackbarColor = ref('success');
     const showCopyIcon = ref(false);
 
     // Method to copy citation to clipboard
@@ -181,13 +179,24 @@ export default {
       router.push('/user');
     };
 
+    // Function to fetch user role
     const fetchUserRole = async () => {
       if (user.value) {
-        const userData = await getUserByEmail(user.value.email);
-        userRole.value = userData.role;
+        try {
+          const userData = await getUserByEmail(user.value.email);
+          // Check if userData is not null and has a 'role' property
+          userRole.value = userData && userData.role ? userData.role : 'viewer';
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          // Set default role to 'viewer' in case of an error
+          userRole.value = 'viewer';
+        }
+      } else {
+        userRole.value = 'viewer'; // Default role when user is not logged in
       }
     };
 
+    // Watch for auth state changes
     onAuthStateChanged(auth, (loggedInUser) => {
       user.value = loggedInUser;
       fetchUserRole(); // Fetch user role whenever the auth state changes
@@ -207,15 +216,23 @@ export default {
       router.push('/login');
     };
 
-    // Logout function
+    // Logout function with snackbar feedback
     const logout = async () => {
       try {
         await signOut(auth);
         user.value = null;
         localStorage.removeItem('user');
         router.push('/');
+        // Display success message
+        snackbarMessage.value = 'Successfully logged out';
+        snackbarColor.value = 'success'; // Set color to green for success
+        snackbarVisible.value = true;
       } catch (error) {
         console.error('Logout error:', error);
+        // Display error message
+        snackbarMessage.value = 'Error during logout: ' + error.message;
+        snackbarColor.value = 'error'; // Set color to red for error
+        snackbarVisible.value = true;
       }
     };
 
