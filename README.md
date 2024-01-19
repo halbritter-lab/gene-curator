@@ -24,6 +24,8 @@ cd gene-curator
 npm install
 ```
 
+Ensure you have `Node.js` version `16.20.0` installed. This is the version that has been tested and is known to work with this project.
+
 ## Setup
 
 To set up the development environment, follow these steps:
@@ -53,9 +55,9 @@ We welcome contributions from the community. Please follow our [contributing gui
 
 The project is built with:
 
-- Vue.js - A progressive JavaScript framework.
-- Vuetify - A Vue UI Library with beautifully handcrafted Material Components.
-- Firebase - Backend-as-a-Service for app development.
+- [Vue.js](https://vuejs.org) (v3.2.13) - A progressive JavaScript framework.
+- [Vuetify](https://vuetifyjs.com) (v3.4.8) - A Vue UI Library with beautifully handcrafted Material Components.
+- [Firebase](https://firebase.google.com) (v10.7.1) - Backend-as-a-Service for app development.
 
 ## Contact
 
