@@ -23,24 +23,25 @@
       ]
     },
     {
-      "text": "Curation",
-      "to": "/curations",
-      "icon": "mdi-book-open-page-variant",
-      "visibility": "loggedIn",
-      "requiredRoles": ["admin", "curator"]
-    },
-    {
-      "text": "Pre-Curation",
-      "to": "/precurations",
-      "icon": "mdi-table-edit",
-      "visibility": "loggedIn",
-      "requiredRoles": ["admin", "curator"]
-    },
-    {
-      "text": "Genes",
-      "to": "/genes",
-      "icon": "mdi-dna",
-      "visibility": "all"
+      "text": "Tables",
+      "icon": "mdi-table",
+      "children": [
+        {
+          "text": "Genes",
+          "to": "/genes",
+          "icon": "mdi-dna"
+        },
+        {
+          "text": "Pre-Curation",
+          "to": "/precurations",
+          "icon": "mdi-table-edit"
+        },
+        {
+          "text": "Curation",
+          "to": "/curations",
+          "icon": "mdi-book-open-page-variant"
+        }
+      ]
     },
     {
       "text": "FAQ",
