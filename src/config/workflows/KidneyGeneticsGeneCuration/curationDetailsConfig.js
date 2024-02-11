@@ -1,5 +1,9 @@
-// config/curationDetailsConfig.js
+// config/workflow/KidneyGeneticsGeneCuration/curationDetailsConfig.js
+
+export const curationDetailsConfigVersion = '0.1.0';
+
 export const curationDetailsConfig = {
+    version: '0.1.0',
     approved_symbol: {
       label: 'Approved Symbol',
       format: 'text',
@@ -38,7 +42,7 @@ export const curationDetailsConfig = {
         },
         onset: {
           label: 'Onset Group',
-          format: 'array',
+          format: 'text',
           description: 'Classifications of the onset group for the gene.',
           visibility: { standardView: true, curationView: true }
         },

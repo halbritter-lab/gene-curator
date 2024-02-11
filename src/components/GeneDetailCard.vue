@@ -35,7 +35,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
-import { geneDetailsConfig as config } from '@/config/geneDetailsConfig';
+import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 export default {
   props: {
@@ -63,7 +63,7 @@ export default {
     const filteredGeneDetails = computed(() => {
       if (!gene.value) return [];
 
-      return Object.entries(config)
+      return Object.entries(geneDetailsConfig)
         .filter(([, fieldConfig]) => fieldConfig.visibility[props.visibilityScope])
         .map(([key, fieldConfig]) => {
           const value = gene.value[key];

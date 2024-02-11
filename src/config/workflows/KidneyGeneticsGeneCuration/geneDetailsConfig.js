@@ -1,4 +1,7 @@
-// config/geneDetailsConfig.js
+// config/workflow/KidneyGeneticsGeneCuration/geneDetailsConfig.js
+
+export const geneDetailsConfigVersion = '0.1.0';
+
 export const geneDetailsConfig = {
   createdAt: {
     label: 'Created At',

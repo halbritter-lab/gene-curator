@@ -3,7 +3,7 @@
 import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, writeBatch } from 'firebase/firestore'; // Firestore API
 import { db } from '@/firebase'; // Firebase app instance
 import Papa from 'papaparse'; // for CSV parsing
-import { geneDetailsConfig } from '@/config/geneDetailsConfig'; // Import the geneDetailsConfig
+import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig'; // Import the geneDetailsConfig
 
 /**
  * Fetches and returns a dictionary of gene data from the Firestore 'genes' collection, 

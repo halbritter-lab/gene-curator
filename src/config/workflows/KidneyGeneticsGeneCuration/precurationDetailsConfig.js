@@ -1,4 +1,7 @@
-// config/precurationDetailsConfig.js
+// config/workflow/KidneyGeneticsGeneCuration/precurationDetailsConfig.js
+
+export const precurationDetailsConfigVersion = '0.1.0';
+
 export const precurationDetailsConfig = {
     approved_symbol: {
       label: 'Approved Symbol',
