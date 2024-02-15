@@ -139,6 +139,9 @@ export default {
           JSON.stringify({
             email: user.email,
             displayName: user.displayName || user.email,
+            uid: user.uid,
+            role: user.role || 'viewer',
+            permissions: user.permissions,
           })
         );
         localStorage.setItem("isLoggedIn", "true");

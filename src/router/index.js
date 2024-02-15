@@ -2,7 +2,6 @@
 
 // Import Vue and Vue Router
 import { createWebHistory, createRouter } from "vue-router";
-import { getUserByEmail } from "@/stores/usersStore";
 
 // Import all views here
 const HomePage = () => import('@/views/HomePage.vue');
@@ -107,32 +106,16 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const requiredRoles = to.meta.requiredRole; // This is now expected to be an array
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isLoggedIn = user && user.uid;
+  const requiredRole = to.meta.requiredRole;
 
-  if (requiresAuth && !currentUser) {
-    // User is not authenticated, redirect to login page
+  if (to.meta.requiresAuth && !isLoggedIn) {
     next({ name: 'Login' });
-  } else if (requiresAuth && requiredRoles) {
-    try {
-      // Fetch user data from the database to get the latest role information
-      const userData = await getUserByEmail(currentUser.email);
-      if (userData && requiredRoles.includes(userData.role)) {
-        // User has one of the required roles, proceed to the route
-        next();
-      } else {
-        // User does not have any of the required roles, redirect to 'Not Authorized' page
-        next({ name: 'NotAuthorized' });
-      }
-    } catch (error) {
-      // Handle errors that occur while fetching user data
-      console.error('Error fetching user role:', error);
-      next({ name: 'NotAuthorized' });
-    }
+  } else if (requiredRole && (!user || !requiredRole.includes(user.role))) {
+    next({ name: 'NotAuthorized' });
   } else {
-    // No specific role required, proceed to the route
     next();
   }
 });

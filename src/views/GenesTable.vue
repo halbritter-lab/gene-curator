@@ -20,7 +20,7 @@
       @page-changed="updatePage"
       @items-per-page-changed="updateItemsPerPage"
     >
-      <template v-slot:action-slot="{ item }">
+      <template v-slot:action-slot="{ item }" v-if="isCuratorOrAdmin">
         <v-btn @click="openModal(item)">Curate</v-btn>
       </template>
 
@@ -76,11 +76,19 @@ export default {
       return Object.values(rawItems.value).slice(start, end);
     });
 
-    const headers = [
-      { title: 'Approved Symbol', value: 'approved_symbol' },
-      { title: 'Evidence count', value: 'evidence_count' },
-      { title: 'Actions', value: 'actions', sortable: false },
-    ];
+    // Dynamically define headers based on user role
+    const headers = computed(() => {
+      const baseHeaders = [
+        { title: 'Approved Symbol', value: 'approved_symbol' },
+        { title: 'Evidence count', value: 'evidence_count' },
+      ];
+
+      if (isCuratorOrAdmin.value) {
+        baseHeaders.push({ title: 'Actions', value: 'actions', sortable: false });
+      }
+
+      return baseHeaders;
+    });
 
     const tableConfig = {
       columns: [
@@ -143,7 +151,13 @@ export default {
     onAuthStateChanged(auth, (loggedInUser) => {
       user.value = loggedInUser; // Update user state on auth change
     });
-    
+
+    // Computed property to check if the user is a curator or admin
+    const isCuratorOrAdmin = computed(() => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      return user && (user.role === 'curator' || user.role === 'admin');
+    });
+
     // Exposing reactive states and functions to the template
     return {
       headers,
@@ -159,7 +173,8 @@ export default {
       saveData,
       updatePage,
       updateItemsPerPage,
-      handleAction
+      handleAction,
+      isCuratorOrAdmin
     };
   },
 };
