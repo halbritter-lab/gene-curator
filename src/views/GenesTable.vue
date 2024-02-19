@@ -39,6 +39,7 @@ import { getGenes } from '@/stores/geneStore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import CurationModal from '@/components/CurationModal.vue';
 import DataExport from '@/components/DataExport.vue';
+import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 /**
  * GenesTable component responsible for displaying gene data in a table format.
@@ -76,18 +77,24 @@ export default {
       return Object.values(rawItems.value).slice(start, end);
     });
 
-    // Dynamically define headers based on user role
+    // Dynamically define headers based on user role and
+    // create headers dynamically based on the geneDetailsConfig
     const headers = computed(() => {
-      const baseHeaders = [
-        { title: 'Approved Symbol', value: 'approved_symbol' },
-        { title: 'Evidence count', value: 'evidence_count' },
-      ];
+      const dynamicHeaders = Object.entries(geneDetailsConfig)
+        .filter(([, config]) => config.visibility.tableView)
+        .map(([key, config]) => ({
+          title: config.label,
+          value: key,
+          sortable: config.format !== 'array' && config.format !== 'map',
+          description: config.description // Add the description for the tooltip
+        }));
 
+      // Add 'Actions' header if user is curator or admin
       if (isCuratorOrAdmin.value) {
-        baseHeaders.push({ title: 'Actions', value: 'actions', sortable: false });
+        dynamicHeaders.push({ title: 'Actions', value: 'actions', sortable: false });
       }
 
-      return baseHeaders;
+      return dynamicHeaders;
     });
 
     const tableConfig = {

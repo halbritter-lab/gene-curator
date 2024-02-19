@@ -10,6 +10,20 @@
       class="elevation-1"
       density="compact"
     >
+      <!-- Header slot -->
+      <template v-for="h in headers" v-slot:[`header.${h.value}`]="{ header }" :key="h.value">
+            <span>{{h.title}}</span>
+            <v-tooltip
+              v-bind:header="header"
+              v-if="h.description"
+              activator="parent"
+              location="top"
+            >
+              {{ h.description }}
+            </v-tooltip>
+      </template>
+
+      <!-- Default slot for items -->
       <template v-for="column in config.columns" v-slot:[`item.${column.name}`]="{ item }" :key="column.name">
         <!-- Handle text formatting -->
         <div v-if="column.type === 'text'">
