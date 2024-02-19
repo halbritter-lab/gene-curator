@@ -1,14 +1,10 @@
 // config/workflow/KidneyGeneticsGeneCuration/geneDetailsConfig.js
 
+// Define the version of the gene details configuration
 export const geneDetailsConfigVersion = '0.1.0';
 
+// Define the gene details configuration
 export const geneDetailsConfig = {
-  createdAt: {
-    label: 'Created At',
-    format: 'date',
-    description: 'Timestamp of when the gene record was created.',
-    visibility: { standardView: false, curationView: false }
-  },
   cur_id: {
     label: 'CUR ID',
     format: 'text',
@@ -162,6 +158,30 @@ export const geneDetailsConfig = {
     label: 'StringDB Interaction Sum Score',
     format: 'number',
     description: 'Sum score of gene interactions from StringDB.',
+    visibility: { standardView: false, curationView: false }
+  },
+  createdAt: {
+    label: 'Created At',
+    format: 'date',
+    description: 'Timestamp of when the gene record was created.',
+    visibility: { standardView: false, curationView: false }
+  },
+  updatedAt: {
+    label: 'Updated At',
+    format: 'date',
+    description: 'The date and time when the gene record was last updated.',
+    visibility: { standardView: true, curationView: true }
+  },
+  hasPrecuration: {
+    label: 'Has Precuration',
+    format: 'boolean',
+    description: 'Indicates if the gene has been precurationed.',
+    visibility: { standardView: false, curationView: false }
+  },
+  hasCuration: {
+    label: 'Has Curation',
+    format: 'boolean',
+    description: 'Indicates if the gene has been curated.',
     visibility: { standardView: false, curationView: false }
   },
   // Add additional fields as needed

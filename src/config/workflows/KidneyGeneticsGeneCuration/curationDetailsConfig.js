@@ -1,9 +1,10 @@
 // config/workflow/KidneyGeneticsGeneCuration/curationDetailsConfig.js
 
+// Define the version of the curation details configuration
 export const curationDetailsConfigVersion = '0.1.0';
 
+// Define the curation details configuration
 export const curationDetailsConfig = {
-    version: '0.1.0',
     approved_symbol: {
       label: 'Approved Symbol',
       format: 'text',
@@ -92,18 +93,42 @@ export const curationDetailsConfig = {
         },
       }
     },
+    createdAt: {
+      label: 'Created At',
+      format: 'date',
+      description: 'The date and time when the curation record was created.',
+      visibility: { standardView: true, curationView: true }
+    },
+    updatedAt: {
+      label: 'Updated At',
+      format: 'date',
+      description: 'The date and time when the curation record was last updated.',
+      visibility: { standardView: true, curationView: true }
+    },
+    comment: {
+      label: 'Comment',
+      format: 'text',
+      description: 'Curator’s comment about this curated entity.',
+      visibility: { standardView: false, curationView: true }
+    },
     users: {
       label: 'Users',
       format: 'array',
       description: 'A list of user identifiers who have worked on this curation record.',
       visibility: { standardView: true, curationView: true }
     },
-    comment: {
-      label: 'Comment',
-      format: 'text',
-      description: 'Curator’s comment about the decision made regarding the gene.',
-      visibility: { standardView: false, curationView: true }
-    }
+    approvedBy: {
+      label: 'Approved By',
+      format: 'array',
+      description: 'A list of user identifiers who have approved this curation.',
+      visibility: { standardView: true, curationView: true }
+    },
+    approvedAt: {
+      label: 'Approved At',
+      format: 'date',
+      description: 'The date and time when the curation record was approved.',
+      visibility: { standardView: true, curationView: true }
+    },
     // Additional fields can be added as per requirements.
   };
   

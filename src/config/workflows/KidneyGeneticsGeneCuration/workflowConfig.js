@@ -5,9 +5,12 @@ import { geneDetailsConfig, geneDetailsConfigVersion } from './geneDetailsConfig
 import { precurationDetailsConfig, precurationDetailsConfigVersion } from './precurationDetailsConfig';
 import { curationDetailsConfig, curationDetailsConfigVersion } from './curationDetailsConfig';
 
+// Defining the workflow configuration version and name
+export const workflowConfigVersion = '0.1.0';
+export const workflowConfigName = 'Kidney Genetics Gene Curation';
+
+// Defining the workflow configuration
 export const workflowConfig = {
-    name: 'Kidney Genetics Gene Curation',
-    version: '0.1.0',
     stages: {
       gene: {
         configFile: 'geneDetailsConfig.js',

@@ -1,7 +1,9 @@
 // config/workflow/KidneyGeneticsGeneCuration/precurationDetailsConfig.js
 
+// Define the version of the precuration details configuration
 export const precurationDetailsConfigVersion = '0.1.0';
 
+// Define the precuration details configuration
 export const precurationDetailsConfig = {
     approved_symbol: {
       label: 'Approved Symbol',
@@ -66,6 +68,18 @@ export const precurationDetailsConfig = {
       label: 'Users',
       format: 'array',
       description: 'A list of user identifiers who have worked on this precuration record.',
+      visibility: { standardView: true, curationView: true }
+    },
+    approvedBy: {
+      label: 'Approved By',
+      format: 'array',
+      description: 'A list of user identifiers who have approved this curation.',
+      visibility: { standardView: true, curationView: true }
+    },
+    approvedAt: {
+      label: 'Approved At',
+      format: 'date',
+      description: 'The date and time when the curation record was approved.',
       visibility: { standardView: true, curationView: true }
     },
     // Add additional fields as needed based on the specific requirements of the precuration workflow.
