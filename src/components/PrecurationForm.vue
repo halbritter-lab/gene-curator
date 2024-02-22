@@ -105,6 +105,7 @@ export default {
       if (!this.existingPrecurationId) {
         this.precurationData.createdAt = currentTime;
         const newId = await createPrecuration(this.precurationData);
+        // TODO: remove this log and handle the newId
         console.log('New precuration created with ID:', newId);
       } else {
         await updatePrecuration(this.existingPrecurationId, this.precurationData);

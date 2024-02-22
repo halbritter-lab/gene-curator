@@ -10,31 +10,51 @@
       :config="tableConfig"
       :total-items="totalItems"
       :loading="loading"
-      @action="handleAction"
       @page-changed="updatePage"
       @items-per-page-changed="updateItemsPerPage"
     >
-      <template v-slot:action-slot="{ item }">
-        <v-btn color="primary" @click="openModal(item)">Edit</v-btn>
+
+      <template v-slot:action-slot="{ item }" v-if="isCuratorOrAdmin">
+        <!-- Replace with appropriate curation actions -->
+        <v-btn color="primary" @click="openModal(item, 'edit')">Edit</v-btn>
+        <v-btn color="green" @click="approveItem(item)">
+          <v-icon left v-if="item.approvedBy">mdi-check</v-icon>
+          Approve
+        </v-btn>
         <v-btn color="error" @click="deleteItem(item)">Delete</v-btn>
       </template>
 
       <template v-slot:modal>
-        <!-- Your modal component here -->
+        <CurationModal :item="selectedItem" :open="showModal" context="curation" @close="closeModal" />
       </template>
+
     </DataDisplayTable>
+
+    <ConfirmationModal
+      :visible="confirmModalVisible"
+      :title="confirmModalTitle"
+      :message="confirmModalMessage"
+      @confirm="onConfirm"
+      @cancel="onCancel"
+    />
   </v-container>
 </template>
 
 <script>
 import { ref, onMounted, computed } from 'vue';
 import DataDisplayTable from '@/components/DataDisplayTable.vue';
-import { getCurations, deleteCuration } from '@/stores/curationsStore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import CurationModal from '@/components/CurationModal.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { getCurations, deleteCuration, updateCuration } from '@/stores/curationsStore';
+import { curationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 export default {
   name: 'CurationTable',
   components: {
-    DataDisplayTable
+    DataDisplayTable,
+    CurationModal,
+    ConfirmationModal
   },
   setup() {
     const rawItems = ref({});
@@ -42,6 +62,16 @@ export default {
     const page = ref(1);
     const itemsPerPage = ref(10);
 
+    // Firebase auth setup
+    const auth = getAuth();
+    const user = ref(null);
+
+    // Modal control state
+    const showModal = ref(false);
+    const selectedItem = ref({});
+
+    // Computed properties for UI
+    const isLoggedIn = computed(() => !!user.value);
     const totalItems = computed(() => Object.keys(rawItems.value).length);
     const paginatedItems = computed(() => {
       const start = (page.value - 1) * itemsPerPage.value;
@@ -49,11 +79,25 @@ export default {
       return Object.values(rawItems.value).slice(start, end);
     });
 
-    const headers = [
-      { title: 'Approved Symbol', value: 'approved_symbol' },
-      { title: 'Verdict', value: 'verdict' },
-      { title: 'Created', value: 'createdAt' },
-    ];
+    // Dynamically define headers based on user role and
+    // create headers dynamically based on the curationDetailsConfig
+    const headers = computed(() => {
+      const dynamicHeaders = Object.entries(curationDetailsConfig)
+        .filter(([, config]) => config.visibility.tableView)
+        .map(([key, config]) => ({
+          title: config.label,
+          value: key,
+          sortable: config.format !== 'array' && config.format !== 'map',
+          description: config.description // Add the description for the tooltip
+        }));
+
+      // Add 'Actions' header if user is curator or admin
+      if (isCuratorOrAdmin.value) {
+        dynamicHeaders.push({ title: 'Actions', value: 'actions', sortable: false });
+      }
+
+      return dynamicHeaders;
+    });
 
     const tableConfig = {
       columns: [
@@ -66,7 +110,23 @@ export default {
           name: 'createdAt',
           type: 'date'
         },
+        {
+          name: 'actions',
+          type: 'slot',
+          slotName: 'action-slot'
+        }
       ]
+    };
+
+    // Function to handle modal opening
+    const openModal = (item) => {
+      selectedItem.value = item;
+      showModal.value = true;
+    };
+
+    // Function to handle modal closure
+    const closeModal = () => {
+      showModal.value = false;
     };
 
     const updatePage = (newPage) => {
@@ -77,22 +137,93 @@ export default {
       itemsPerPage.value = newItemsPerPage;
     };
 
-    const handleAction = (action, item) => {
-      console.log(`Action: ${action} for item:`, item);
-      // Implement action handling logic here
+    const confirmModalVisible = ref(false);
+    const confirmModalTitle = ref('');
+    const confirmModalMessage = ref('');
+    let currentAction = null;
+
+    const openConfirmModal = (title, message, action) => {
+      confirmModalTitle.value = title;
+      confirmModalMessage.value = message;
+      currentAction = action;
+      confirmModalVisible.value = true;
     };
 
+    const onConfirm = () => {
+      if (currentAction) {
+        currentAction();
+      }
+      confirmModalVisible.value = false;
+    };
+
+    const onCancel = () => {
+      confirmModalVisible.value = false;
+    };
+
+    // Function for updating the local state after an item is deleted or approved
+    const updateLocalState = (itemId, updatedData = null) => {
+      if (updatedData) {
+        // Update the item data if it exists (for approval)
+        rawItems.value[itemId] = updatedData;
+      } else {
+        // Delete the item from the local state (for deletion)
+        delete rawItems.value[itemId];
+      }
+      // Trigger reactivity
+      rawItems.value = {...rawItems.value};
+    };
+
+    // Function to delete an item
     const deleteItem = async (item) => {
-      // Implement deletion logic here
-      await deleteCuration(item.id);
-      // Refresh the list or handle UI update
+      openConfirmModal(
+        'Delete Curation',
+        'Are you sure you want to delete this curation?',
+        async () => {
+          if (item && item.id) {
+            await deleteCuration(item.id);
+            updateLocalState(item.id);
+          } else {
+            console.error('Item ID is undefined or invalid');
+          }
+        }
+      );
+    };
+
+    // Function to approve an item
+    const approveItem = async (item) => {
+      openConfirmModal(
+        'Approve Curation',
+        'Are you sure you want to approve this curation?',
+        async () => {
+          if (item && item.id) {
+            const updatedData = {
+              ...item,
+              approvedBy: user.value.uid,
+              approvedAt: new Date()
+            };
+            await updateCuration(item.id, updatedData);
+            updateLocalState(item.id, updatedData);
+          } else {
+            console.error('Item ID is undefined or invalid');
+          }
+        }
+      );
     };
 
     onMounted(async () => {
       loading.value = true;
       rawItems.value = await getCurations();
-      console.log('Curations:', rawItems.value);
       loading.value = false;
+    });
+    
+    onAuthStateChanged(auth, (loggedInUser) => {
+      user.value = loggedInUser; // Update user state on auth change
+    });
+
+    // Computed property to check if the user is a curator or admin
+    const isCuratorOrAdmin = computed(() => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      return user && (user.role === 'curator' || user.role === 'admin');
     });
 
     return {
@@ -101,10 +232,24 @@ export default {
       tableConfig,
       totalItems,
       loading,
+      isLoggedIn,
+      showModal,
+      selectedItem,
+      openModal,
+      closeModal,
       updatePage,
       updateItemsPerPage,
-      handleAction,
-      deleteItem
+      deleteItem,
+      updateCuration,
+      isCuratorOrAdmin,
+      openConfirmModal,
+      onConfirm,
+      onCancel,
+      confirmModalVisible,
+      confirmModalTitle,
+      confirmModalMessage,
+      approveItem,
+      updateLocalState
     };
   },
 };
