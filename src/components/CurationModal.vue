@@ -2,9 +2,14 @@
 <template>
   <v-dialog v-model="isOpen" persistent max-width="1200px">
     <v-card>
-      <v-card-title>
-        {{ title }} - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
-      </v-card-title>
+      <div class="d-flex justify-space-between align-center">
+        <v-card-title>
+          {{ title }} - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
+        </v-card-title>
+        <v-btn icon @click="close">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </div>
       <v-card-text>
         <v-tabs v-model="tab" grow>
           <v-tab v-if="showPreCurationTab">Pre-Curation</v-tab>
@@ -41,7 +46,6 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="save">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -81,10 +85,10 @@ export default {
     },
     context: {
       type: String,
-      default: 'gene' // Default context
+      default: 'gene' // Default context, can be 'gene', 'precuration', or 'curation'
     },
   },
-  emits: ['close', 'save'],
+  emits: ['close'],
   setup(props, { emit }) {
     const isOpen = ref(props.open);
     const editedItem = ref({ ...props.item });
@@ -109,12 +113,17 @@ export default {
     });
 
     const handlePrecurationAccepted = () => {
-      showCurationTab.value = true; // Show the curation tab
-      tab.value = 1; // Switch to the curation tab
+      if (props.context === 'precuration') {
+        // If the context is 'precuration', just close the modal
+        close();
+      } else {
+        // Otherwise, switch to the curation tab
+        showCurationTab.value = true;
+        tab.value = 1;
+      }
     };
 
     const close = () => emit('close');
-    const save = () => emit('save', editedItem.value);
 
     const checkExistingCuration = async () => {
       try {
@@ -176,7 +185,6 @@ export default {
       isOpen,
       editedItem,
       close,
-      save,
       handlePrecurationAccepted,
       showGeneDetailCard,
       showPreCurationTab,
