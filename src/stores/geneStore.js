@@ -21,10 +21,14 @@ export const getGenes = async (uniqueColumns = ['hgnc_id', 'cur_id']) => {
 
   // Iterate through each document in the collection
   querySnapshot.forEach((doc) => {
-    const data = doc.data(); // Get document data
-    // Construct a unique identifier using the specified columns
-    const uniqueId = uniqueColumns.map(column => data[column]).join('-'); 
-    fetchedItems[uniqueId] = { ...data, docId: doc.id }; // Add document data and ID to fetched items
+    if (doc.exists()) {
+      const data = doc.data(); // Get document data
+      // Construct a unique identifier using the specified columns
+      const uniqueId = uniqueColumns.map(column => data[column]).join('-'); 
+      fetchedItems[uniqueId] = { ...data, docId: doc.id }; // Add document data and ID to fetched items
+    } else {
+      throw new Error("Gene document not found");
+    }
   });
 
   return fetchedItems; // Return the fetched items

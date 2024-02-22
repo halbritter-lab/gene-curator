@@ -12,7 +12,12 @@ export const getCurations = async () => {
   let curations = {};
 
   querySnapshot.forEach((docSnapshot) => {
-    curations[docSnapshot.id] = docSnapshot.data();
+    if (docSnapshot.exists()) {
+      // Include the document ID in the returned object
+      curations[docSnapshot.id] = { id: docSnapshot.id, ...docSnapshot.data() };
+    } else {
+      throw new Error("Curation document not found");
+    }
   });
 
   return curations;
