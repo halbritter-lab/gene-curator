@@ -3,18 +3,23 @@
   <v-dialog v-model="isOpen" persistent max-width="1200px">
     <v-card>
       <v-card-title>
-        Gene Curation - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
+        {{ title }} - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
       </v-card-title>
       <v-card-text>
         <v-tabs v-model="tab" grow>
-          <v-tab>Pre-Curation</v-tab>
+          <v-tab v-if="showPreCurationTab">Pre-Curation</v-tab>
           <v-tab v-if="showCurationTab">Curation</v-tab>
         </v-tabs>
 
-         <v-window v-model="tab" style="min-height: 500px;">
+         <v-window v-model="tab" style="min-height: 300px;">
           <v-window-item>
             <!-- Gene Detail Card Component -->
-            <GeneDetailCard :id="editedItem.hgnc_id" visibilityScope="curationView" :showTitle="false" />
+            <GeneDetailCard
+               v-if="showGeneDetailCard"
+              :id="editedItem.hgnc_id"
+              visibilityScope="curationView"
+              :showTitle="false"
+            />
 
             <!-- Precuration Form Component -->
             <PrecurationForm
@@ -53,7 +58,7 @@
 
 
 <script>
-import { ref, watchEffect, watch } from 'vue';
+import { ref, watchEffect, watch, computed } from 'vue';
 import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
 import CurationForm from './CurationForm.vue'; // Import the CurationForm component
@@ -74,11 +79,17 @@ export default {
       type: Boolean,
       required: true,
     },
+    context: {
+      type: String,
+      default: 'gene' // Default context
+    },
   },
   emits: ['close', 'save'],
   setup(props, { emit }) {
     const isOpen = ref(props.open);
     const editedItem = ref({ ...props.item });
+    const showGeneDetailCard = ref(true); // Controls the visibility of the gene detail card
+    const showPreCurationTab = ref(true); // Controls the visibility of the precuration tab
     const showCurationTab = ref(false); // Controls the visibility of the curation tab
     const tab = ref(0); // Controls the active tab
 
@@ -120,25 +131,62 @@ export default {
       }
     };
 
+    // Computed property to determine the title of the modal
+    const title = computed(() => {
+      return props.context === 'curation' ? 'Curation' 
+        : props.context === 'precuration' ? 'Precuration' 
+        : 'Gene Curation';
+    });
+
     // Watch for changes to the 'open' prop
     watch(() => props.open, async (newVal) => {
       if (newVal) { // If the modal is being opened
+        await initializeModal();
+      }
+    });
+
+    // Adjust the initial tab and content based on the context and existing curation
+    const initializeModal = async () => {
+      if (props.context === 'precuration') {
+        showGeneDetailCard.value = false;
+        showPreCurationTab.value = true;
+        showCurationTab.value = false;
+        tab.value = 0;
+      } else if (props.context === 'curation') {
+        showGeneDetailCard.value = false;
+        showPreCurationTab.value = false;
+        await checkExistingCuration(); // Check if there's an existing curation
+        // Set tab based on the existence of curation
+        tab.value = showCurationTab.value ? 1 : 0;
+      } else {
+        // For 'gene' context or other cases
         await checkExistingCuration();
+      }
+    };
+
+    // Call initializeModal when the modal is opened
+    watch(() => props.open, (newVal) => {
+      if (newVal) {
+        initializeModal();
       }
     });
 
     return {
+      initializeModal,
       isOpen,
       editedItem,
       close,
       save,
       handlePrecurationAccepted,
+      showGeneDetailCard,
+      showPreCurationTab,
       showCurationTab,
       tab,
       snackbarVisible,
       snackbarMessage,
       snackbarColor,
       showSnackbar,
+      title
     };
   },
 };
