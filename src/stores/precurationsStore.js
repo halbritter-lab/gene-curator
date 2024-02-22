@@ -12,7 +12,12 @@ export const getPrecurations = async () => {
   let precurations = {};
 
   querySnapshot.forEach((docSnapshot) => {
-    precurations[docSnapshot.id] = docSnapshot.data();
+    if (docSnapshot.exists()) {
+      // Include the document ID in the returned object
+      precurations[docSnapshot.id] = { id: docSnapshot.id, ...docSnapshot.data() };
+    } else {
+      throw new Error("Precuration document not found");
+    }
   });
 
   return precurations;
@@ -92,6 +97,9 @@ export const getPrecurationByHGNCIdOrSymbol = async (identifier) => {
  * @returns {Promise<void>}
  */
 export const updatePrecuration = async (docId, updatedData) => {
+  if (!docId) {
+    throw new Error("Document ID is undefined or invalid");
+  }
   const precurationRef = doc(db, 'precurations', docId);
   await updateDoc(precurationRef, {
     ...updatedData,
