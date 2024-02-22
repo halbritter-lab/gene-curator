@@ -25,7 +25,7 @@
       </template>
 
       <template v-slot:modal>
-        <CurationModal :item="selectedItem" :open="showModal" @close="closeModal" @save="saveData" />
+        <CurationModal :item="selectedItem" :open="showModal" @close="closeModal" />
       </template>
     </DataDisplayTable>
   </v-container>
@@ -127,12 +127,6 @@ export default {
       showModal.value = false;
     };
     
-    // Function to handle saving data from the modal
-    const saveData = (updatedItem) => {
-      // TODO: Implement the logic to save the updated item
-      console.log('Saving data:', updatedItem);
-    };
-    
     // Function to handle actions triggered from the table
     const handleAction = (item) => {
       // TODO: Implement additional actions if needed
@@ -177,7 +171,6 @@ export default {
       selectedItem,
       openModal,
       closeModal,
-      saveData,
       updatePage,
       updateItemsPerPage,
       handleAction,

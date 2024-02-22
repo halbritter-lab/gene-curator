@@ -24,7 +24,7 @@
       </template>
 
       <template v-slot:modal>
-        <CurationModal :item="selectedItem" :open="showModal" context="precuration" @close="closeModal" @save="saveData" />
+        <CurationModal :item="selectedItem" :open="showModal" context="precuration" @close="closeModal" />
       </template>
 
     </DataDisplayTable>
@@ -127,13 +127,6 @@ export default {
     const closeModal = () => {
       showModal.value = false;
     };
-    
-    // Function to handle saving data from the modal
-    const saveData = (updatedItem) => {
-      // TODO: Implement the logic to save the updated item
-      console.log('Saving data:', updatedItem);
-    };
-
 
     const updatePage = (newPage) => {
       page.value = newPage;
@@ -243,7 +236,6 @@ export default {
       selectedItem,
       openModal,
       closeModal,
-      saveData,
       updatePage,
       updateItemsPerPage,
       deleteItem,
