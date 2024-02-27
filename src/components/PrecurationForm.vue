@@ -4,55 +4,46 @@
     <v-card-title>Precuration</v-card-title>
     <v-card-text>
       <v-container>
+        <!-- Group the fields by the group attribute -->
+        <template v-for="(group, groupName) in groupedFields" :key="groupName">
+          <v-row>
+            <!-- Loop over fields within the same group and place them in columns -->
+            <v-col 
+              v-for="(field, index) in group" 
+              :key="index" 
+              :cols="12 / group.length"
+            >
+              <template v-if="field.format === 'boolean' && field.visibility.curationView">
+                <v-switch
+                  v-model="precurationData[field.key]"
+                  :label="field.label"
+                  :false-value="false"
+                  :true-value="true"
+                  :color="field.style.curationView === 'switch' ? field.style.color : ''"
+                  :class="{ 'inactive-switch': !precurationData[field.key] && field.style.curationView === 'switch' }"
+                ></v-switch>
+              </template>
+              <template v-else-if="field.style && field.style.curationView === 'text-field' && field.visibility.curationView">
+                <v-text-field
+                  v-model="precurationData[field.key]"
+                  :label="field.label"
+                  :class="field.style.curationView === 'text-field' ? 'custom-text-field' : ''"
+                ></v-text-field>
+              </template>
+              <template v-else-if="field.style && field.style.curationView === 'select' && field.visibility.curationView">
+                <v-select
+                  v-model="precurationData[field.key]"
+                  :items="field.options"
+                  :label="field.label"
+                ></v-select>
+              </template>
+              <!-- Add other field types as needed -->
+            </v-col>
+          </v-row>
+        </template>
         <v-row>
-          <v-col
-            v-for="(option, index) in precurationOptions"
-            :key="index"
-            cols="2"
-            class="text-center"
-          >
-            <v-switch
-              v-model="precurationData[option.key]"
-              :false-value="false"
-              :true-value="true"
-              hide-details
-              class="mt-0"
-              :color="precurationData[option.key] ? option.activeColor : 'grey'"
-            ></v-switch>
-            <div :style="{ color: option.color }">
-              {{ option.label }}: {{ displaySwitchValue(precurationData[option.key]) }}
-            </div>
-          </v-col>
-          <v-col cols="1" class="d-flex align-center justify-center">
-            <v-divider vertical class="mx-2"></v-divider>
-          </v-col>
-          <v-col cols="3">
-            <v-select
-              v-model="precurationData.decision"
-              :items="['Split', 'Lump']"
-              label="Decision"
-              hide-details
-            ></v-select>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="8">
-            <v-textarea
-              v-model="precurationData.comment"
-              label="Comment"
-              auto-grow
-              rows="1"
-              no-resize
-            ></v-textarea>
-          </v-col>
-          <v-col cols="1" class="d-flex align-center justify-center">
-            <v-divider vertical class="mx-2"></v-divider>
-          </v-col>
-          <v-col cols="3" class="pt-2 d-flex align-center">
-            <!-- Updated button with icon -->
-            <v-btn color="primary" @click="submitPrecuration">
-              Accept <v-icon>mdi-arrow-right</v-icon>
-            </v-btn>
+          <v-col cols="12" class="text-right">
+            <v-btn color="primary" @click="submitPrecuration">Accept</v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -60,7 +51,9 @@
   </v-card>
 </template>
 
+
 <script>
+import { precurationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/precurationDetailsConfig';
 import {
   getPrecurationByHGNCIdOrSymbol,
   createPrecuration,
@@ -75,29 +68,44 @@ export default {
   },
   data() {
     return {
-      precurationData: {
-        approved_symbol: this.approvedSymbol,
-        hgnc_id: this.hgncId,
-        entity_assertion: false,
-        inheritance_difference: false,
-        mechanism_difference: false,
-        phenotypic_variability: false,
-        decision: '',
-        comment: '',
-        createdAt: null, // Will be set when accept is clicked
-        updatedAt: null, // Will be set when accept is clicked
-        users: ['user1'], // Mock user values
-      },
-      precurationOptions: [
-        { key: 'entity_assertion', label: 'Assertion', color: 'purple', activeColor: 'indigo' },
-        { key: 'inheritance_difference', label: 'Inheritance', color: 'green', activeColor: 'lime' },
-        { key: 'mechanism_difference', label: 'Mechanism', color: 'red', activeColor: 'orange' },
-        { key: 'phenotypic_variability', label: 'Variability', color: 'blue', activeColor: 'cyan' },
-      ],
+      precurationData: this.initializePrecurationData(),
       existingPrecurationId: null,
     };
   },
+  computed: {
+    groupedFields() {
+      const fields = this.precurationFields;
+      const groups = {};
+
+      // Group fields by their 'group.name'
+      fields.forEach(field => {
+        if (!groups[field.group.name]) {
+          groups[field.group.name] = [];
+        }
+        groups[field.group.name].push(field);
+      });
+
+      // Sort groups by 'group.order'
+      Object.values(groups).forEach(group => {
+        group.sort((a, b) => a.group.order - b.group.order);
+      });
+
+      return groups;
+    },
+    precurationFields() {
+      let fields = Object.entries(precurationDetailsConfig)
+        .map(([key, config]) => ({ ...config, key }));
+      return fields;
+    },
+  },
   methods: {
+    initializePrecurationData() {
+      const data = {};
+      Object.keys(precurationDetailsConfig).forEach(key => {
+        data[key] = ''; // Initialize with default value
+      });
+      return data;
+    },
     async submitPrecuration() {
       const currentTime = new Date().toISOString();
       this.precurationData.updatedAt = currentTime;
@@ -138,6 +146,8 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-
+.inactive-switch {
+  --v-theme-switch-on-background: var(--v-theme-inactive-color);
+}
 /* Additional styles can be added here if needed */
 </style>
