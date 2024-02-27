@@ -111,6 +111,18 @@ export const curationDetailsConfig = {
       description: 'Curator’s comment about this curated entity.',
       visibility: { tableView: false, standardView: false, curationView: true }
     },
+    workflowConfigVersionUsed: {
+      label: 'Workflow Config Version Used',
+      format: 'text',
+      description: 'The version of the workflow configuration used to curate this entity.',
+      visibility: { tableView: false, standardView: false, curationView: true }
+    },
+    workflowConfigNameUsed: {
+      label: 'Workflow Config Name Used',
+      format: 'text',
+      description: 'The name of the workflow configuration used to curate this entity.',
+      visibility: { tableView: false, standardView: false, curationView: true }
+    },
     users: {
       label: 'Users',
       format: 'array',

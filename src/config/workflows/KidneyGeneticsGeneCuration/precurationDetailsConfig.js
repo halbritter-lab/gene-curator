@@ -65,6 +65,18 @@ export const precurationDetailsConfig = {
       description: 'The date and time when the precuration record was last updated.',
       visibility: { tableView: false, standardView: true, curationView: false }
     },
+    workflowConfigVersionUsed: {
+      label: 'Workflow Config Version Used',
+      format: 'text',
+      description: 'The version of the workflow configuration used to curate this entity.',
+      visibility: { tableView: false, standardView: false, curationView: true }
+    },
+    workflowConfigNameUsed: {
+      label: 'Workflow Config Name Used',
+      format: 'text',
+      description: 'The name of the workflow configuration used to curate this entity.',
+      visibility: { tableView: false, standardView: false, curationView: true }
+    },
     users: {
       label: 'Users',
       format: 'array',
