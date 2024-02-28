@@ -6,7 +6,7 @@
       <v-container>
         <!-- Dynamic Field Rendering Based on Configuration -->
         <template v-for="(group, groupName) in groupedFields" :key="groupName">
-          <v-row>
+          <v-row v-if="groupHasVisibleFields(group)">
             <v-col cols="12">
               <h2>{{ groupName }}</h2>
             </v-col>
@@ -128,6 +128,10 @@ export default {
     },
   },
   methods: {
+    groupHasVisibleFields(group) {
+      // This will check if there's at least one field in the group that should be visible
+      return group.some(field => field.visibility.curationView);
+    },
     initializeCurationData() {
       const data = {};
       Object.keys(curationDetailsConfig).forEach(key => {

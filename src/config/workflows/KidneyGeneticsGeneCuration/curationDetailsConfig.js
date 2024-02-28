@@ -133,49 +133,49 @@ export const curationDetailsConfig = {
     label: 'Created At',
     format: 'date',
     description: 'The date and time when the curation record was created.',
-    visibility: { tableView: false, standardView: true, curationView: true },
+    visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   updatedAt: {
     label: 'Updated At',
     format: 'date',
     description: 'The date and time when the curation record was last updated.',
-    visibility: { tableView: false, standardView: true, curationView: true },
+    visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   workflowConfigVersionUsed: {
     label: 'Workflow Config Version Used',
     format: 'text',
     description: 'The version of the workflow configuration used to curate this entity.',
-    visibility: { tableView: false, standardView: false, curationView: true },
+    visibility: { tableView: false, standardView: false, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   workflowConfigNameUsed: {
     label: 'Workflow Config Name Used',
     format: 'text',
     description: 'The name of the workflow configuration used to curate this entity.',
-    visibility: { tableView: false, standardView: false, curationView: true },
+    visibility: { tableView: false, standardView: false, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   users: {
     label: 'Users',
     format: 'array',
     description: 'A list of user identifiers who have worked on this curation record.',
-    visibility: { tableView: false, standardView: true, curationView: true },
+    visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   approvedBy: {
     label: 'Approved By',
     format: 'array',
     description: 'A list of user identifiers who have approved this curation.',
-    visibility: { tableView: false, standardView: true, curationView: true },
+    visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   approvedAt: {
     label: 'Approved At',
     format: 'date',
     description: 'The date and time when the curation record was approved.',
-    visibility: { tableView: false, standardView: true, curationView: true },
+    visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
   },
   // Additional fields can be added as per requirements.
