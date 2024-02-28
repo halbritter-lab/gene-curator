@@ -23,12 +23,24 @@
                   outlined
                   dense
                 ></v-text-field>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.format === 'boolean'">
                 <v-checkbox
                   v-model="curationData[field.key]"
                   :label="field.label"
                 ></v-checkbox>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.format === 'number'">
                 <v-text-field
@@ -40,6 +52,12 @@
                   outlined
                   dense
                 ></v-text-field>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.format === 'array' && field.style && field.style.curationView === 'select'">
                 <v-select
@@ -50,6 +68,12 @@
                   outlined
                   dense
                 ></v-select>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
                 <v-select
@@ -59,6 +83,12 @@
                   outlined
                   dense
                 ></v-select>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <!-- Add other field types as needed -->
             </v-col>

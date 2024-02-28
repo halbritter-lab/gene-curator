@@ -25,6 +25,12 @@
                   :color="field.style.curationView === 'switch' ? field.style.color : ''"
                   :class="{ 'inactive-switch': !precurationData[field.key] && field.style.curationView === 'switch' }"
                 ></v-switch>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.style && field.style.curationView === 'text-field' && field.visibility.curationView">
                 <v-text-field
@@ -32,6 +38,12 @@
                   :label="field.label"
                   :class="field.style.curationView === 'text-field' ? 'custom-text-field' : ''"
                 ></v-text-field>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <template v-else-if="field.style && field.style.curationView === 'select' && field.visibility.curationView">
                 <v-select
@@ -39,6 +51,12 @@
                   :items="field.options"
                   :label="field.label"
                 ></v-select>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  {{ field.description }}
+                </v-tooltip>
               </template>
               <!-- Add other field types as needed -->
             </v-col>
