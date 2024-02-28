@@ -4,148 +4,66 @@
     <v-card-title>Curation</v-card-title>
     <v-card-text>
       <v-container>
-
-        <!-- Entity Section -->
-        <v-row class="my-2">
-          <v-col cols="12">
-            <h2>Entity</h2>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.approved_symbol"
-              label="Approved Symbol"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.disease"
-              label="Disease"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.inheritance"
-              label="Inheritance"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-        </v-row>
-
-        <!-- Groups Section -->
-        <v-row class="my-2">
-          <v-col cols="12">
-            <h2>Groups</h2>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.groups.clinical"
-              label="Clinical Group"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <!-- Onset Group should be a select if it's an array -->
-            <v-select
-              v-model="curationData.groups.onset"
-              label="Onset Group"
-              :items="[]"
-              outlined
-              dense
-              multiple
-            ></v-select>
-          </v-col>
-          <v-col cols="4">
-            <v-checkbox
-              v-model="curationData.groups.syndromic"
-              label="Syndromic"
-            ></v-checkbox>
-          </v-col>
-        </v-row>
-
-        <!-- Points Section -->
-        <v-row class="my-2">
-          <v-col cols="12">
-            <h2>Points</h2>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.points.variants"
-              label="Variants"
-              type="number"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.points.models"
-              label="Models"
-              type="number"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.points.functional"
-              label="Functional"
-              type="number"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model="curationData.points.rescue"
-              label="Rescue"
-              type="number"
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <!-- Replication should be a select if it's an array -->
-            <v-select
-              v-model="curationData.points.replication"
-              label="Replication"
-              :items="[]"
-              outlined
-              dense
-              multiple
-            ></v-select>
-          </v-col>
-        </v-row>
-
-        <!-- Verdict Section -->
-        <v-row class="my-2">
-          <v-col cols="12">
-            <h2>Verdict</h2>
-          </v-col>
-          <v-col cols="4">
-            <v-select
-              v-model="curationData.verdict"
-              :items="['Definitive', 'Moderate', 'Limited', 'Refuted']"
-              label="Verdict"
-              outlined
-              dense
-            ></v-select>
-          </v-col>
-          <v-col cols="8">
-            <v-textarea
-              v-model="curationData.comment"
-              label="Comment"
-              auto-grow
-              rows="1"
-              no-resize
-            ></v-textarea>
-          </v-col>
-        </v-row>
+        <!-- Dynamic Field Rendering Based on Configuration -->
+        <template v-for="(group, groupName) in groupedFields" :key="groupName">
+          <v-row>
+            <v-col cols="12">
+              <h2>{{ groupName }}</h2>
+            </v-col>
+            <v-col 
+              v-for="(field, index) in group" 
+              :key="index" 
+              :cols="12 / group.length"
+            >
+              <!-- Handle Different Field Types -->
+              <template v-if="field.format === 'text' && field.style && field.style.curationView === 'text-field'">
+                <v-text-field
+                  v-model="curationData[field.key]"
+                  :label="field.label"
+                  outlined
+                  dense
+                ></v-text-field>
+              </template>
+              <template v-else-if="field.format === 'boolean'">
+                <v-checkbox
+                  v-model="curationData[field.key]"
+                  :label="field.label"
+                ></v-checkbox>
+              </template>
+              <template v-else-if="field.format === 'number'">
+                <v-text-field
+                  v-model="curationData[field.key]"
+                  :label="field.label"
+                  :min="field.min"
+                  :max="field.max"
+                  type="number"
+                  outlined
+                  dense
+                ></v-text-field>
+              </template>
+              <template v-else-if="field.format === 'array' && field.style && field.style.curationView === 'select'">
+                <v-select
+                  v-model="curationData[field.key]"
+                  :items="field.options"
+                  :label="field.label"
+                  multiple
+                  outlined
+                  dense
+                ></v-select>
+              </template>
+              <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
+                <v-select
+                  v-model="curationData[field.key]"
+                  :items="field.options"
+                  :label="field.label"
+                  outlined
+                  dense
+                ></v-select>
+              </template>
+              <!-- Add other field types as needed -->
+            </v-col>
+          </v-row>
+        </template>
       </v-container>
     </v-card-text>
     <v-card-actions>
@@ -157,6 +75,7 @@
 
 
 <script>
+import { curationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/curationDetailsConfig';
 import {
   createCuration,
   updateCuration,
@@ -171,27 +90,8 @@ export default {
   },
   data() {
     return {
-      curationData: {
-        approved_symbol: this.approvedSymbol,
-        hgnc_id: this.hgncId,
-        disease: '',
-        inheritance: '',
-        groups: {
-          clinical: '',
-          onset: [],
-          syndromic: false,
-        },
-        points: {
-          variants: 0,
-          models: 0,
-          functional: 0,
-          rescue: 0,
-          replication: [],
-        },
-        verdict: '',
-        comment: '',
-      },
-      existingCurationId: null, // Used to track if we're updating an existing curation
+      curationData: this.initializeCurationData(),
+      existingCurationId: null,
     };
   },
   async created() {
@@ -207,7 +107,45 @@ export default {
       }
     }
   },
+  computed: {
+    groupedFields() {
+      const fields = Object.entries(curationDetailsConfig)
+        .map(([key, config]) => ({ ...config, key }));
+      
+      const groups = {};
+      fields.forEach(field => {
+        if (!groups[field.group.name]) {
+          groups[field.group.name] = [];
+        }
+        groups[field.group.name].push(field);
+      });
+
+      Object.values(groups).forEach(group => {
+        group.sort((a, b) => a.group.order - b.group.order);
+      });
+
+      return groups;
+    },
+  },
   methods: {
+    initializeCurationData() {
+      const data = {};
+      Object.keys(curationDetailsConfig).forEach(key => {
+        const field = curationDetailsConfig[key];
+        if (field.format === 'boolean') {
+          data[key] = false;
+        } else if (field.format === 'number') {
+          data[key] = field.min || 0; // Use min value if defined, otherwise default to 0
+        } else if (field.format === 'array' && field.style && field.style.curationView === 'select') {
+          data[key] = [];
+        } else if (field.format === 'text' && field.style && field.style.curationView === 'select') {
+          data[key] = null;
+        } else {
+          data[key] = '';
+        }
+      });
+      return data;
+    },
     async saveCuration() {
       try {
         if (this.existingCurationId) {
@@ -226,7 +164,6 @@ export default {
   },
 };
 </script>
-
 
 
 <style scoped>

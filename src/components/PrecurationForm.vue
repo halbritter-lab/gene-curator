@@ -7,6 +7,9 @@
         <!-- Group the fields by the group attribute -->
         <template v-for="(group, groupName) in groupedFields" :key="groupName">
           <v-row>
+            <v-col cols="12">
+              <h2>{{ groupName }}</h2>
+            </v-col>
             <!-- Loop over fields within the same group and place them in columns -->
             <v-col 
               v-for="(field, index) in group" 
