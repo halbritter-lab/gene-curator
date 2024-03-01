@@ -1,104 +1,115 @@
 <!-- components/CurationForm.vue -->
 <template>
   <v-card class="elevation-2">
-    <v-card-title>Curation</v-card-title>
-    <v-card-text>
-      <v-container>
-        <!-- Dynamic Field Rendering Based on Configuration -->
-        <template v-for="(group, groupName) in groupedFields" :key="groupName">
-          <v-row v-if="groupHasVisibleFields(group)">
-            <v-col cols="12">
-              <h2>{{ groupName }}</h2>
-            </v-col>
-            <v-col 
-              v-for="(field, index) in group" 
-              :key="index" 
-              :cols="12 / group.length"
-            >
-              <!-- Handle Different Field Types -->
-              <template v-if="field.format === 'text' && field.style && field.style.curationView === 'text-field'">
-                <v-text-field
-                  v-model="curationData[field.key]"
-                  :label="field.label"
-                  outlined
-                  dense
-                ></v-text-field>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
+    <v-card-title>
+      Curation
+      <v-btn icon class="add-curation-btn" @click="addCurationEntity">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+    </v-card-title>
+
+    <!-- Expansion Panels for multiple curation entities -->
+    <v-expansion-panels multiple>
+      <v-expansion-panel v-for="(curationData, index) in curationDataArray" :key="`curation-${index}`" :title="`Curation Entity ${ index + 1 }`">
+          <v-expansion-panel-text>
+            <!-- Dynamic Field Rendering Based on Configuration -->
+            <template v-for="(group, groupName) in groupedFields" :key="groupName">
+              <v-row v-if="groupHasVisibleFields(group)">
+                <v-col cols="12">
+                  <h2>{{ groupName }}</h2>
+                </v-col>
+                <v-col
+                  v-for="(field, fieldIndex) in group"
+                  :key="`field-${index}-${fieldIndex}`"
+                  :cols="12 / group.length"
                 >
-                  {{ field.description }}
-                </v-tooltip>
-              </template>
-              <template v-else-if="field.format === 'boolean'">
-                <v-checkbox
-                  v-model="curationData[field.key]"
-                  :label="field.label"
-                ></v-checkbox>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                >
-                  {{ field.description }}
-                </v-tooltip>
-              </template>
-              <template v-else-if="field.format === 'number'">
-                <v-text-field
-                  v-model="curationData[field.key]"
-                  :label="field.label"
-                  :min="field.min"
-                  :max="field.max"
-                  type="number"
-                  outlined
-                  dense
-                ></v-text-field>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                >
-                  {{ field.description }}
-                </v-tooltip>
-              </template>
-              <template v-else-if="field.format === 'array' && field.style && field.style.curationView === 'select'">
-                <v-select
-                  v-model="curationData[field.key]"
-                  :items="field.options"
-                  :label="field.label"
-                  multiple
-                  outlined
-                  dense
-                ></v-select>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                >
-                  {{ field.description }}
-                </v-tooltip>
-              </template>
-              <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
-                <v-select
-                  v-model="curationData[field.key]"
-                  :items="field.options"
-                  :label="field.label"
-                  outlined
-                  dense
-                ></v-select>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                >
-                  {{ field.description }}
-                </v-tooltip>
-              </template>
-              <!-- Add other field types as needed -->
-            </v-col>
-          </v-row>
-        </template>
-      </v-container>
-    </v-card-text>
+
+                  <!-- Handle Different Field Types -->
+                  <template v-if="field.format === 'text' && field.style && field.style.curationView === 'text-field'">
+                    <v-text-field
+                      v-model="curationData[field.key]"
+                      :label="field.label"
+                      outlined
+                      dense
+                    ></v-text-field>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ field.description }}
+                    </v-tooltip>
+                  </template>
+                  <template v-else-if="field.format === 'boolean'">
+                    <v-checkbox
+                      v-model="curationData[field.key]"
+                      :label="field.label"
+                    ></v-checkbox>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ field.description }}
+                    </v-tooltip>
+                  </template>
+                  <template v-else-if="field.format === 'number'">
+                    <v-text-field
+                      v-model="curationData[field.key]"
+                      :label="field.label"
+                      :min="field.min"
+                      :max="field.max"
+                      type="number"
+                      outlined
+                      dense
+                    ></v-text-field>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ field.description }}
+                    </v-tooltip>
+                  </template>
+                  <template v-else-if="field.format === 'array' && field.style && field.style.curationView === 'select'">
+                    <v-select
+                      v-model="curationData[field.key]"
+                      :items="field.options"
+                      :label="field.label"
+                      multiple
+                      outlined
+                      dense
+                    ></v-select>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ field.description }}
+                    </v-tooltip>
+                  </template>
+                  <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
+                    <v-select
+                      v-model="curationData[field.key]"
+                      :items="field.options"
+                      :label="field.label"
+                      outlined
+                      dense
+                    ></v-select>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ field.description }}
+                    </v-tooltip>
+                  </template>
+                  <!-- Add other field types as needed -->
+                </v-col>
+              </v-row>
+            </template>
+          </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="saveCuration">Save</v-btn>
+      <v-btn color="primary" @click="saveCuration">Save All</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -120,7 +131,7 @@ export default {
   },
   data() {
     return {
-      curationData: this.initializeCurationData(),
+      curationDataArray: [this.initializeCurationData()],
       existingCurationId: null,
     };
   },
@@ -162,6 +173,9 @@ export default {
       // This will check if there's at least one field in the group that should be visible
       return group.some(field => field.visibility.curationView);
     },
+    addCurationEntity() {
+      this.curationDataArray.push(this.initializeCurationData());
+    },
     initializeCurationData() {
       const data = {};
       Object.keys(curationDetailsConfig).forEach(key => {
@@ -182,14 +196,16 @@ export default {
     },
     async saveCuration() {
       try {
-        if (this.existingCurationId) {
-          // Update the existing curation
-          await updateCuration(this.existingCurationId, this.curationData);
-          console.log('Curation updated:', this.existingCurationId);
-        } else {
-          // Create a new curation
-          const newId = await createCuration(this.curationData);
-          console.log('New curation created with ID:', newId);
+        for (const curationData of this.curationDataArray) {
+          if (curationData.id) { // Assuming each curationData object has an 'id' field
+            await updateCuration(curationData.id, curationData);
+            console.log('Curation updated:', curationData.id);
+          } else {
+            const newId = await createCuration(curationData);
+            console.log('New curation created with ID:', newId);
+            // Assign the new ID to the curationData object
+            curationData.id = newId;
+          }
         }
       } catch (error) {
         console.error('Error saving curation:', error.message);
@@ -204,5 +220,8 @@ export default {
 h2 {
   font-size: 1.5em;
   margin-bottom: 0.5em;
+}
+.add-curation-btn {
+  margin-left: auto; /* pushes the button to the right */
 }
 </style>
