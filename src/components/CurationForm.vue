@@ -194,17 +194,27 @@ export default {
       });
       return data;
     },
+    validateCurationData(curationData) {
+      const errors = [];
+      for (const [key, field] of Object.entries(curationDetailsConfig)) {
+        if (field.required && !curationData[key]) {
+          errors.push(`The field "${field.label}" is required.`);
+        }
+      }
+      return errors;
+    },
     async saveCuration() {
       try {
         for (const curationData of this.curationDataArray) {
-          if (curationData.id) { // Assuming each curationData object has an 'id' field
-            await updateCuration(curationData.id, curationData);
+          if (curationData.id) {
+            // Update existing curation
+            await updateCuration(curationData.id, curationData, curationDetailsConfig);
             console.log('Curation updated:', curationData.id);
           } else {
-            const newId = await createCuration(curationData);
+            // Create new curation
+            const newId = await createCuration(curationData, curationDetailsConfig);
             console.log('New curation created with ID:', newId);
-            // Assign the new ID to the curationData object
-            curationData.id = newId;
+            curationData.id = newId; // Update the ID in the curation data array
           }
         }
       } catch (error) {

@@ -11,7 +11,8 @@ export const curationDetailsConfig = {
       description: 'The official symbol for the gene as provided by HGNC.',
       visibility: { tableView: true, standardView: true, curationView: true },
       style: { curationView: 'text-field'},
-      group: {name: 'Entity Information', order: 1}
+      group: {name: 'Entity Information', order: 1},
+      required: true
     },
     hgnc_id: {
       label: 'HGNC ID',
@@ -19,7 +20,8 @@ export const curationDetailsConfig = {
       description: 'Unique identifier for the gene provided by the HGNC.',
       visibility: { tableView: false, standardView: false, curationView: false },
       style: { curationView: 'text-field'},
-      group: {name: 'Entity Information', order: 1}
+      group: {name: 'Entity Information', order: 1},
+      required: true
     },
     disease: {
       label: 'Disease',
@@ -27,7 +29,8 @@ export const curationDetailsConfig = {
       description: 'MONDO identifier for the disease associated with the gene.',
       visibility: { tableView: true, standardView: true, curationView: true },
       style: { curationView: 'text-field'},
-      group: {name: 'Entity Information', order: 1}
+      group: {name: 'Entity Information', order: 1},
+      required: true
     },
     inheritance: {
       label: 'Inheritance',
@@ -35,7 +38,8 @@ export const curationDetailsConfig = {
       description: 'Type of inheritance pattern observed for the gene-related conditions.',
       visibility: { tableView: true, standardView: true, curationView: true },
       style: { curationView: 'text-field'},
-      group: {name: 'Entity Information', order: 1}
+      group: {name: 'Entity Information', order: 1},
+      required: true
     },
     variants: {
       label: 'Variants',
@@ -127,7 +131,8 @@ export const curationDetailsConfig = {
     description: 'The decision made during curation, such as "Definitive" or "Refuted".',
     visibility: { tableView: true, standardView: true, curationView: true },
     style: { curationView: 'select'},
-    group: {name: 'Verdict', order: 3}
+    group: {name: 'Verdict', order: 3},
+    required: true
   },
   createdAt: {
     label: 'Created At',

@@ -25,11 +25,34 @@ export const getCurations = async () => {
 
 
 /**
+ * Checks if the provided curation data is valid according to the provided configuration.
+ * @param {Object} curationData - The data to validate.
+ * @param {Object} config - The configuration object against which to validate.
+ * @returns {Array} An array of error messages, empty if no errors.
+ */
+const validateCurationData = (curationData, config) => {
+  const errors = [];
+  for (const [key, field] of Object.entries(config)) {
+    if (field.required && !curationData[key]) {
+      errors.push(`The field "${field.label}" is required.`);
+    }
+  }
+  return errors;
+};
+
+
+/**
  * Creates a new curation document in the Firestore 'curations' collection with the provided data.
  * @param {Object} curationData - The data to create a new curation document.
+ * @param {Object} config - The configuration object against which to validate.
  * @returns {Promise<string>} A promise that resolves to the new document's ID.
  */
-export const createCuration = async (curationData) => {
+export const createCuration = async (curationData, config) => {
+  const errors = validateCurationData(curationData, config);
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(' ')}`);
+  }
+
   const docRef = await addDoc(collection(db, 'curations'), {
     ...curationData,
     createdAt: Timestamp.fromDate(new Date()),
@@ -62,9 +85,15 @@ export const getCuration = async (docId) => {
  * Updates a specific curation document in Firestore with the provided data.
  * @param {string} docId - The document ID of the curation to update.
  * @param {Object} updatedData - An object containing the updated data for the curation.
+ * @param {Object} config - The configuration object against which to validate.
  * @returns {Promise<void>} A promise that resolves once the update is complete.
  */
-export const updateCuration = async (docId, updatedData) => {
+export const updateCuration = async (docId, updatedData, config) => {
+  const errors = validateCurationData(updatedData, config);
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(' ')}`);
+  }
+
   const curationRef = doc(db, 'curations', docId);
   await updateDoc(curationRef, {
     ...updatedData,
