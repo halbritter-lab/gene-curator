@@ -10,14 +10,16 @@ export const precurationDetailsConfig = {
       format: 'text',
       description: 'The official gene symbol approved by the HGNC.',
       visibility: { tableView: true, standardView: true, curationView: false },
-      group: {name: 'Gene Information', order: 1}
+      group: {name: 'Gene Information', order: 1},
+      required: true
     },
     hgnc_id: {
       label: 'HGNC ID',
       format: 'text',
       description: 'The unique identifier for the gene provided by the HGNC.',
       visibility: { tableView: false, standardView: true, curationView: false },
-      group: {name: 'Gene Information', order: 1}
+      group: {name: 'Gene Information', order: 1},
+      required: true
     },
     entity_assertion: {
       label: 'Entity Assertion',
@@ -25,7 +27,8 @@ export const precurationDetailsConfig = {
       description: 'A boolean value indicating whether an assertion about the entity was made.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'purple', inactiveColor: 'indigo'},
-      group: {name: 'Assertion', order: 2}
+      group: {name: 'Assertion', order: 2},
+      required: true
     },
     inheritance_difference: {
       label: 'Inheritance Difference',
@@ -33,7 +36,8 @@ export const precurationDetailsConfig = {
       description: 'Indicates if there is a difference in inheritance patterns noted.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'green', inactiveColor: 'lime'},
-      group: {name: 'Assertion', order: 2}
+      group: {name: 'Assertion', order: 2},
+      required: true
     },
     mechanism_difference: {
       label: 'Mechanism Difference',
@@ -66,7 +70,8 @@ export const precurationDetailsConfig = {
       description: 'The decision made during precuration, such as "lump" or "split".',
       visibility: { tableView: true, standardView: true, curationView: true },
       style: { curationView: 'select'},
-      group: {name: 'Decision', order: 3}
+      group: {name: 'Decision', order: 3},
+      required: true
     },
     createdAt: {
       label: 'Created At',
