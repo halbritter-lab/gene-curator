@@ -70,6 +70,13 @@
       </v-container>
     </v-card-text>
   </v-card>
+
+  <!-- Error Dialog Component -->
+  <error-dialog
+    v-model="error"
+    :error="errorVal"
+    @value="error = $event"
+  ></error-dialog>
 </template>
 
 
@@ -80,6 +87,7 @@ import {
   createPrecuration,
   updatePrecuration
 } from "@/stores/precurationsStore";
+import ErrorDialog from "@/components/ErrorDialog";
 
 export default {
   name: 'PrecurationForm',
@@ -87,10 +95,15 @@ export default {
     approvedSymbol: String,
     hgncId: String,
   },
+  components: {
+    ErrorDialog,
+  },
   data() {
     return {
       precurationData: this.initializePrecurationData(),
       existingPrecurationId: null,
+      error: false,
+      errorVal: {},
     };
   },
   computed: {
@@ -131,21 +144,52 @@ export default {
       });
       return data;
     },
-    async submitPrecuration() {
-      const currentTime = new Date().toISOString();
-      this.precurationData.updatedAt = currentTime;
-
-      if (!this.existingPrecurationId) {
-        this.precurationData.createdAt = currentTime;
-        const newId = await createPrecuration(this.precurationData);
-        // TODO: remove this log and handle the newId
-        console.log('New precuration created with ID:', newId);
-      } else {
-        await updatePrecuration(this.existingPrecurationId, this.precurationData);
-        console.log('Precuration updated:', this.existingPrecurationId);
+    validatePrecurationData(precurationData) {
+      const errors = [];
+      for (const [key, field] of Object.entries(precurationDetailsConfig)) {
+        if (field.required && (precurationData[key] === undefined || precurationData[key] === '')) {
+          errors.push(`The field "${field.label}" is required.`);
+        }
       }
+      return errors;
+    },
+    async submitPrecuration() {
+      // Reset error state
+      this.error = false;
+      this.errorVal = {};
 
-      this.$emit('precuration-accepted', this.precurationData);
+      try {
+        // Validate the precuration data
+        const validationErrors = this.validatePrecurationData(this.precurationData, precurationDetailsConfig);
+        if (validationErrors.length > 0) {
+          throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
+        }
+
+        // Add timestamps for creation or update
+        const currentTime = new Date().toISOString();
+        if (!this.existingPrecurationId) {
+          // If creating a new precuration
+          this.precurationData.createdAt = currentTime;
+          const newId = await createPrecuration(this.precurationData, precurationDetailsConfig);
+          console.log('New precuration created with ID:', newId);
+        } else {
+          // If updating an existing precuration
+          this.precurationData.updatedAt = currentTime;
+          await updatePrecuration(this.existingPrecurationId, this.precurationData, precurationDetailsConfig);
+          console.log('Precuration updated:', this.existingPrecurationId);
+        }
+
+        // Emit an event to indicate successful submission
+        this.$emit('precuration-accepted', this.precurationData);
+      } catch (error) {
+        // Set error state and display error dialog
+        this.error = true;
+        this.errorVal = {
+          title: "Submission Error",
+          message: error.message || "There was an error submitting the precuration. Please check the required fields."
+        };
+        console.error('Error during precuration submission:', error.message);
+      }
     },
     displaySwitchValue(value) {
       return value ? 'Yes' : 'No';

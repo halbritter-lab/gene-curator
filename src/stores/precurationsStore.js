@@ -4,6 +4,22 @@ import { db } from '@/firebase';
 
 
 /**
+ * Validates the given precuration data against the precuration details configuration.
+ * @param {Object} precurationData - The data to validate.
+ * @returns {Array} An array of error messages, empty if no errors.
+ */
+const validatePrecurationData = (precurationData, config) => {
+  const errors = [];
+  for (const [key, field] of Object.entries(config)) {
+    if (field.required && (precurationData[key] === undefined || precurationData[key] === '')) {
+      errors.push(`The field "${field.label}" is required.`);
+    }
+  }
+  return errors;
+};
+
+
+/**
  * Fetches all precuration documents from the Firestore collection.
  * @returns {Promise<Object>} An object mapping document IDs to precuration data.
  */
@@ -29,7 +45,12 @@ export const getPrecurations = async () => {
  * @param {Object} precurationData - The data for the new precuration.
  * @returns {Promise<string>} The ID of the newly created document.
  */
-export const createPrecuration = async (precurationData) => {
+export const createPrecuration = async (precurationData, config) => {
+  const validationErrors = validatePrecurationData(precurationData, config);
+  if (validationErrors.length > 0) {
+    throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
+  }
+
   const docRef = await addDoc(collection(db, 'precurations'), {
     ...precurationData,
     createdAt: Timestamp.fromDate(new Date()),
@@ -96,10 +117,12 @@ export const getPrecurationByHGNCIdOrSymbol = async (identifier) => {
  * @param {Object} updatedData - An object containing the updated data.
  * @returns {Promise<void>}
  */
-export const updatePrecuration = async (docId, updatedData) => {
-  if (!docId) {
-    throw new Error("Document ID is undefined or invalid");
+export const updatePrecuration = async (docId, updatedData, config) => {
+  const validationErrors = validatePrecurationData(updatedData, config);
+  if (validationErrors.length > 0) {
+    throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
   }
+
   const precurationRef = doc(db, 'precurations', docId);
   await updateDoc(precurationRef, {
     ...updatedData,
