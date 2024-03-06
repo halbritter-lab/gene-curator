@@ -49,14 +49,18 @@ export default {
       default: true,
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const gene = ref(null);
 
     onMounted(async () => {
       if (props.id) {
-        gene.value = await getGeneByHGNCIdOrSymbol(props.id).catch(error => {
-          console.error(error.message);
-        });
+        try {
+          const fetchedGene = await getGeneByHGNCIdOrSymbol(props.id);
+          gene.value = fetchedGene;
+          emit('gene-data-loaded', fetchedGene); // Emit an event with the gene data
+        } catch (error) {
+          console.error('Error fetching gene:', error.message);
+        }
       }
     });
 
