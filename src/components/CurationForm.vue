@@ -191,6 +191,14 @@ export default {
         } else {
           data[key] = '';
         }
+
+        // Prefill approved_symbol and hgnc_id if provided as props
+        if (key === 'approved_symbol' && this.approvedSymbol) {
+          data[key] = this.approvedSymbol;
+        }
+        if (key === 'hgnc_id' && this.hgncId) {
+          data[key] = this.hgncId;
+        }
       });
       return data;
     },
