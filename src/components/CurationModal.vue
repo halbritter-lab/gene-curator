@@ -24,6 +24,7 @@
               :id="editedItem.hgnc_id"
               visibilityScope="curationView"
               :showTitle="false"
+              @gene-data-loaded="handleGeneDataLoaded"
             />
 
             <!-- Precuration Form Component -->
@@ -140,6 +141,15 @@ export default {
       }
     };
 
+    // State to store fetched gene data
+    const geneData = ref(null); // State to store fetched gene data
+
+    const handleGeneDataLoaded = (data) => {
+      geneData.value = data; // Store the fetched gene data
+      // Pass the gene data to other components as needed
+      // For example, you can now pass this data to PrecurationForm and CurationForm
+    };
+
     // Computed property to determine the title of the modal
     const title = computed(() => {
       return props.context === 'curation' ? 'Curation' 
@@ -194,7 +204,9 @@ export default {
       snackbarMessage,
       snackbarColor,
       showSnackbar,
-      title
+      title,
+      handleGeneDataLoaded,
+      geneData,
     };
   },
 };
