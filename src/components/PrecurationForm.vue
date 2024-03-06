@@ -174,6 +174,8 @@ export default {
       this.error = false;
       this.errorVal = {};
 
+      const currentUserId = JSON.parse(localStorage.getItem('user')).uid;
+
       try {
         // Validate the precuration data
         const validationErrors = this.validatePrecurationData(this.precurationData, precurationDetailsConfig);
@@ -190,12 +192,12 @@ export default {
           this.precurationData.workflowConfigVersionUsed = workflowConfigVersion;
           this.precurationData.workflowConfigNameUsed = workflowConfigName;
           // Create the new precuration
-          const newId = await createPrecuration(this.precurationData, precurationDetailsConfig);
+          const newId = await createPrecuration(this.precurationData, currentUserId, precurationDetailsConfig);
           console.log('New precuration created with ID:', newId);
         } else {
           // If updating an existing precuration
           this.precurationData.updatedAt = currentTime;
-          await updatePrecuration(this.existingPrecurationId, this.precurationData, precurationDetailsConfig);
+          await updatePrecuration(this.existingPrecurationId, this.precurationData, currentUserId, precurationDetailsConfig);
           console.log('Precuration updated:', this.existingPrecurationId);
         }
 

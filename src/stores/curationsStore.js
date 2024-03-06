@@ -45,9 +45,11 @@ const validateCurationData = (curationData, config) => {
  * Creates a new curation document in the Firestore 'curations' collection with the provided data.
  * @param {Object} curationData - The data to create a new curation document.
  * @param {Object} config - The configuration object against which to validate.
+ * @param {string} userId - The user ID of the user creating the curation.
+ * @param {Object} config - The configuration object against which to validate.
  * @returns {Promise<string>} A promise that resolves to the new document's ID.
  */
-export const createCuration = async (curationData, config) => {
+export const createCuration = async (curationData, userId, config) => {
   const errors = validateCurationData(curationData, config);
   if (errors.length > 0) {
     throw new Error(`Validation failed: ${errors.join(' ')}`);
@@ -55,6 +57,7 @@ export const createCuration = async (curationData, config) => {
 
   const docRef = await addDoc(collection(db, 'curations'), {
     ...curationData,
+    userId, // include the userId
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
@@ -85,10 +88,11 @@ export const getCuration = async (docId) => {
  * Updates a specific curation document in Firestore with the provided data.
  * @param {string} docId - The document ID of the curation to update.
  * @param {Object} updatedData - An object containing the updated data for the curation.
+ * @param {string} userId - The user ID of the user performing the update.
  * @param {Object} config - The configuration object against which to validate.
  * @returns {Promise<void>} A promise that resolves once the update is complete.
  */
-export const updateCuration = async (docId, updatedData, config) => {
+export const updateCuration = async (docId, updatedData, userId, config) => {
   const errors = validateCurationData(updatedData, config);
   if (errors.length > 0) {
     throw new Error(`Validation failed: ${errors.join(' ')}`);
@@ -97,6 +101,7 @@ export const updateCuration = async (docId, updatedData, config) => {
   const curationRef = doc(db, 'curations', docId);
   await updateDoc(curationRef, {
     ...updatedData,
+    userId, // include the userId
     updatedAt: Timestamp.fromDate(new Date()),
   });
 };

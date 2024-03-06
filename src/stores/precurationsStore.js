@@ -43,9 +43,11 @@ export const getPrecurations = async () => {
 /**
  * Creates a new precuration document in Firestore with the given data.
  * @param {Object} precurationData - The data for the new precuration.
+ * @param {string} userId - The ID of the user creating the precuration.
+ * @param {Object} config - The precuration details configuration.
  * @returns {Promise<string>} The ID of the newly created document.
  */
-export const createPrecuration = async (precurationData, config) => {
+export const createPrecuration = async (precurationData, userId, config) => {
   const validationErrors = validatePrecurationData(precurationData, config);
   if (validationErrors.length > 0) {
     throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
@@ -53,6 +55,7 @@ export const createPrecuration = async (precurationData, config) => {
 
   const docRef = await addDoc(collection(db, 'precurations'), {
     ...precurationData,
+    userId, // include the userId
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
@@ -115,9 +118,11 @@ export const getPrecurationByHGNCIdOrSymbol = async (identifier) => {
  * Updates a precuration document in Firestore with the given data.
  * @param {string} docId - The document ID of the precuration to update.
  * @param {Object} updatedData - An object containing the updated data.
+ * @param {string} userId - The ID of the user updating the precuration.
+ * @param {Object} config - The precuration details configuration.
  * @returns {Promise<void>}
  */
-export const updatePrecuration = async (docId, updatedData, config) => {
+export const updatePrecuration = async (docId, updatedData, userId, config) => {
   const validationErrors = validatePrecurationData(updatedData, config);
   if (validationErrors.length > 0) {
     throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
@@ -126,6 +131,7 @@ export const updatePrecuration = async (docId, updatedData, config) => {
   const precurationRef = doc(db, 'precurations', docId);
   await updateDoc(precurationRef, {
     ...updatedData,
+    userId, // include the userId
     updatedAt: Timestamp.fromDate(new Date()),
   });
 };

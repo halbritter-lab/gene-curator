@@ -216,6 +216,8 @@ export default {
       return errors;
     },
     async saveCuration() {
+    const currentUserId = JSON.parse(localStorage.getItem('user')).uid; // Retrieve the current user's ID
+
       try {
         for (const curationData of this.curationDataArray) {
           // Include the workflow configuration version and name in the curation record
@@ -224,11 +226,11 @@ export default {
 
           if (curationData.id) {
             // Update existing curation
-            await updateCuration(curationData.id, curationData, curationDetailsConfig);
+            await updateCuration(curationData.id, curationData, currentUserId, curationDetailsConfig);
             console.log('Curation updated:', curationData.id);
           } else {
             // Create new curation
-            const newId = await createCuration(curationData, curationDetailsConfig);
+            const newId = await createCuration(curationData, currentUserId, curationDetailsConfig);
             console.log('New curation created with ID:', newId);
             curationData.id = newId; // Update the ID in the curation data array
           }
