@@ -82,6 +82,7 @@
 
 <script>
 import { precurationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/precurationDetailsConfig';
+import { workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 import {
   getPrecurationByHGNCIdOrSymbol,
   createPrecuration,
@@ -185,6 +186,10 @@ export default {
         if (!this.existingPrecurationId) {
           // If creating a new precuration
           this.precurationData.createdAt = currentTime;
+          // Include the workflow configuration version and name used to create the precuration
+          this.precurationData.workflowConfigVersionUsed = workflowConfigVersion;
+          this.precurationData.workflowConfigNameUsed = workflowConfigName;
+          // Create the new precuration
           const newId = await createPrecuration(this.precurationData, precurationDetailsConfig);
           console.log('New precuration created with ID:', newId);
         } else {

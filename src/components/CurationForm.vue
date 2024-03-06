@@ -117,6 +117,7 @@
 
 <script>
 import { curationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/curationDetailsConfig';
+import { workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 import {
   createCuration,
   updateCuration,
@@ -217,6 +218,10 @@ export default {
     async saveCuration() {
       try {
         for (const curationData of this.curationDataArray) {
+          // Include the workflow configuration version and name in the curation record
+          curationData.workflowConfigVersionUsed = workflowConfigVersion;
+          curationData.workflowConfigNameUsed = workflowConfigName;
+
           if (curationData.id) {
             // Update existing curation
             await updateCuration(curationData.id, curationData, curationDetailsConfig);
