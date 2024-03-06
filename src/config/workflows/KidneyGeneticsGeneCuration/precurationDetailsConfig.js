@@ -45,7 +45,8 @@ export const precurationDetailsConfig = {
       description: 'Indicates if there is a difference in the mechanism of action noted.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'red', inactiveColor: 'orange'},
-      group: {name: 'Assertion', order: 2}
+      group: {name: 'Assertion', order: 2},
+      required: true
     },
     phenotypic_variability: {
       label: 'Phenotypic Variability',
@@ -53,7 +54,8 @@ export const precurationDetailsConfig = {
       description: 'Indicates if there is phenotypic variability associated with the gene.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'blue', inactiveColor: 'cyan'},
-      group: {name: 'Assertion', order: 2}
+      group: {name: 'Assertion', order: 2},
+      required: true
     },
     comment: {
       label: 'Comment',

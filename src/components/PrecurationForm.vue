@@ -95,6 +95,7 @@ export default {
     approvedSymbol: String,
     hgncId: String,
   },
+  emits: ['precuration-accepted'],
   components: {
     ErrorDialog,
   },
@@ -140,7 +141,21 @@ export default {
     initializePrecurationData() {
       const data = {};
       Object.keys(precurationDetailsConfig).forEach(key => {
-        data[key] = ''; // Initialize with default value
+        // Set the default value for each field
+        if (precurationDetailsConfig[key].format === 'boolean') {
+            data[key] = false;
+        } else {
+            // For other types, initialize with an empty string or respective default
+            data[key] = '';
+        }
+
+        // If the props for approvedSymbol or hgncId are passed, use them to prefill the respective fields
+        if (key === 'approved_symbol' && this.approvedSymbol) {
+          data[key] = this.approvedSymbol;
+        }
+        if (key === 'hgnc_id' && this.hgncId) {
+          data[key] = this.hgncId;
+        }
       });
       return data;
     },
