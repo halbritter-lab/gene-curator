@@ -194,16 +194,16 @@ export default {
         'Approve Precuration',
         'Are you sure you want to approve this precuration?',
         async () => {
-          if (item && item.id) {
+          if (item && item.id && user.value) {
             const updatedData = {
               ...item,
-              approvedBy: user.value.uid,
-              approvedAt: new Date()
+              approvedBy: user.value.uid, // Assuming you have the user's UID here
+              approvedAt: new Date().toISOString()
             };
-            await updatePrecuration(item.id, updatedData);
+            await updatePrecuration(item.id, updatedData, user.value.uid, precurationDetailsConfig);
             updateLocalState(item.id, updatedData);
           } else {
-            console.error('Item ID is undefined or invalid');
+            console.error('Item ID or User ID is undefined or invalid');
           }
         }
       );

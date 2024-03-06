@@ -195,16 +195,16 @@ export default {
         'Approve Curation',
         'Are you sure you want to approve this curation?',
         async () => {
-          if (item && item.id) {
+          if (item && item.id && user.value) {
             const updatedData = {
               ...item,
-              approvedBy: user.value.uid,
-              approvedAt: new Date()
+              approvedBy: user.value.uid, // Assuming you have the user's UID here
+              approvedAt: new Date().toISOString()
             };
-            await updateCuration(item.id, updatedData);
+            await updateCuration(item.id, updatedData, user.value.uid, curationDetailsConfig);
             updateLocalState(item.id, updatedData);
           } else {
-            console.error('Item ID is undefined or invalid');
+            console.error('Item ID or User ID is undefined or invalid');
           }
         }
       );
