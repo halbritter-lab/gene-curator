@@ -120,7 +120,7 @@ import { curationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCura
 import {
   createCuration,
   updateCuration,
-  getCurationByHGNCIdOrSymbol
+  getCurationsByHGNCIdOrSymbol
 } from "@/stores/curationsStore";
 
 export default {
@@ -138,14 +138,17 @@ export default {
   async created() {
     if (this.hgncId || this.approvedSymbol) {
       try {
-        const curation = await getCurationByHGNCIdOrSymbol(this.hgncId || this.approvedSymbol);
-        if (curation) {
-          this.existingCurationId = curation.id;
-          Object.assign(this.curationData, curation);
+        const curations = await getCurationsByHGNCIdOrSymbol(this.hgncId || this.approvedSymbol);
+        if (curations.length > 0) {
+          this.curationDataArray = curations.map(curation => Object.assign(this.initializeCurationData(), curation));
+        } else {
+          this.curationDataArray = [this.initializeCurationData()];
         }
       } catch (error) {
-        console.error('Error fetching curation:', error.message);
+        console.error('Error fetching curations:', error.message);
       }
+    } else {
+      this.curationDataArray = [this.initializeCurationData()];
     }
   },
   computed: {

@@ -144,3 +144,33 @@ export const getCurationByHGNCIdOrSymbol = async (identifier) => {
   
     return curationData;
   };
+
+  
+  /**
+ * Retrieves all curation documents from Firestore by either the approved symbol or HGNC ID.
+ * @param {string} identifier - The approved symbol or HGNC ID to search for.
+ * @returns {Promise<Array>} A promise that resolves to an array of objects containing the curation data if found, otherwise an empty array.
+ */
+export const getCurationsByHGNCIdOrSymbol = async (identifier) => {
+  const curationsRef = collection(db, 'curations');
+  const symbolQuery = query(curationsRef, where("approved_symbol", "==", identifier));
+  const hgncQuery = query(curationsRef, where("hgnc_id", "==", identifier));
+
+  let curationDataArray = [];
+
+  const addToCurationDataArray = (docSnapshot) => {
+    if (docSnapshot.exists()) {
+      curationDataArray.push({ id: docSnapshot.id, ...docSnapshot.data() });
+    }
+  };
+
+  const symbolSnapshot = await getDocs(symbolQuery);
+  symbolSnapshot.forEach(addToCurationDataArray);
+
+  if (curationDataArray.length === 0) {
+    const hgncSnapshot = await getDocs(hgncQuery);
+    hgncSnapshot.forEach(addToCurationDataArray);
+  }
+
+  return curationDataArray;
+};
