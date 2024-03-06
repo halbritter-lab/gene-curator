@@ -24,7 +24,16 @@ export const workflowConfig = {
         checksum: 'md5-checksum-of-precuration-config',
         nextStage: 'curation',
         prefillRules: [
-          // Define rules to prefill data from gene to pre-curation
+          {
+            source: 'geneDetailsConfig',
+            target: 'precurationDetailsConfig',
+            fields: [
+              { sourceField: 'approved_symbol', targetField: 'approved_symbol' },
+              { sourceField: 'hgnc_id', targetField: 'hgnc_id' },
+              // Add more field mappings as needed
+            ],
+          },
+          // Other rules can be added here
         ],
         decisionRules: [
           // Rules for decisions
@@ -36,7 +45,16 @@ export const workflowConfig = {
         checksum: 'md5-checksum-of-curation-config',
         nextStage: null,
         prefillRules: [
-          // Define rules to prefill data from gene and pre-curation to curation
+          {
+            source: 'geneDetailsConfig',
+            target: 'curationDetailsConfig',
+            fields: [
+              { sourceField: 'approved_symbol', targetField: 'approved_symbol' },
+              { sourceField: 'hgnc_id', targetField: 'hgnc_id' },
+              // Add more field mappings as needed
+            ],
+          },
+          // Other rules can be added here
         ],
         multipleCurationRules: [
           // Rules for multiple curation scenarios
