@@ -42,19 +42,19 @@ export const curationDetailsConfig = {
       required: true
     },
     variants: {
-      label: 'Variants',
+      label: 'Genetic evidence',
       format: 'number',
-      description: 'Points for variants identified.',
+      description: 'Points for genetic data. Give 0.5 points per LP/P variant in ClinVar.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'number-field'},
       min: 0,
-      max: 2,
+      max: 12,
       group: {name: 'Points', order: 2}
   },
   models: {
       label: 'Models',
       format: 'number',
-      description: 'Points for animal or cellular models studied.',
+      description: 'Points for animal or cellular models studied. Two points if MGI Phenotype and MOI fit, if only phenotype fits, give 1 point.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'number-field'},
       min: 0,
@@ -64,7 +64,7 @@ export const curationDetailsConfig = {
   functional: {
       label: 'Functional',
       format: 'number',
-      description: 'Points for functional studies performed.',
+      description: 'Points for functional categories: Just add interaction_score and expression_score if available.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'number-field'},
       min: 0,
@@ -74,7 +74,7 @@ export const curationDetailsConfig = {
   rescue: {
       label: 'Rescue',
       format: 'number',
-      description: 'Points for rescue experiments performed.',
+      description: 'Points for rescue experiments performed. Research in literature if necessary.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'number-field'},
       min: 0,
@@ -84,7 +84,7 @@ export const curationDetailsConfig = {
   replication: {
       label: 'Replication',
       format: 'text',
-      description: 'References to replication studies.',
+      description: 'References to replication studies after the initial clinical report.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'text-field'},
       group: {name: 'Points', order: 2}
@@ -92,7 +92,7 @@ export const curationDetailsConfig = {
   clinical: {
       label: 'Clinical Group',
       format: 'array',
-      options: ['complement_mediated_kidney_diseases', 'congenital_anomalies_of_the_kidney_and_urinary_tract', 'glomerulopathy', 'kidney_cystic_and_ciliopathy_disorders', 'tubulopathy', 'hereditary_cancer', 'nephrocalcinosis_or_nephrolithiasis'],
+      options: ['complement_mediated_kidney_diseases', 'congenital_anomalies_of_the_kidney_and_urinary_tract', 'glomerulopathy', 'kidney_cystic_and_ciliopathy_disorders', 'tubulopathy', 'tubulointerstitial_disease', 'hereditary_cancer', 'nephrocalcinosis_or_nephrolithiasis'],
       description: 'Clinical categorization of the entity.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'select'},
@@ -127,7 +127,7 @@ export const curationDetailsConfig = {
   decision: {
     label: 'Verdict',
     format: 'text',
-    options: ['Definitive', 'Moderate', 'Limited', 'Refuted'],
+    options: ['Definitive', 'Strong', 'Moderate', 'Limited', 'Refuted'],
     description: 'The decision made during curation, such as "Definitive" or "Refuted".',
     visibility: { tableView: true, standardView: true, curationView: true },
     style: { curationView: 'select'},

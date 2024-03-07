@@ -78,7 +78,7 @@ export const geneDetailsConfig = {
     separator: ';',
     keyValueSeparator: ':',
     description: 'Data from ClinVar including pathogenicity classifications.',
-    visibility: { tableView: false, standardView: true, curationView: false }
+    visibility: { tableView: false, standardView: true, curationView: true }
   },
   descartes_kidney_tpm: {
     label: 'Descartes Kidney TPM',
@@ -102,13 +102,13 @@ export const geneDetailsConfig = {
     label: 'Expression Score',
     format: 'number',
     description: 'Score based on gene expression levels.',
-    visibility: { tableView: false, standardView: false, curationView: false }
+    visibility: { tableView: false, standardView: false, curationView: true }
   },
   interaction_score: {
     label: 'Interaction Score',
     format: 'number',
     description: 'Quantitative score representing gene interactions.',
-    visibility: { tableView: false, standardView: false, curationView: false }
+    visibility: { tableView: false, standardView: false, curationView: true }
   },
   lof_z: {
     label: 'LOF Z',
@@ -139,13 +139,13 @@ export const geneDetailsConfig = {
     format: 'array',
     separator: ';',
     description: 'Phenotypic information from the Mouse Genome Informatics database.',
-    visibility: { tableView: false, standardView: true, curationView: false }
+    visibility: { tableView: false, standardView: true, curationView: true }
   },
   stringdb_interaction_normalized_score: {
     label: 'StringDB Interaction Normalized Score',
     format: 'number',
     description: 'Normalized score of gene interactions from StringDB.',
-    visibility: { tableView: false, standardView: false, curationView: false }
+    visibility: { tableView: false, standardView: false, curationView: true }
   },
   stringdb_interaction_string: {
     label: 'StringDB Interactions',
@@ -170,7 +170,7 @@ export const geneDetailsConfig = {
     label: 'Updated At',
     format: 'date',
     description: 'The date and time when the gene record was last updated.',
-    visibility: { tableView: false, standardView: true, curationView: true }
+    visibility: { tableView: false, standardView: true, curationView: false }
   },
   hasPrecuration: {
     label: 'Has Precuration',

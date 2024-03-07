@@ -22,9 +22,9 @@ export const precurationDetailsConfig = {
       required: true
     },
     entity_assertion: {
-      label: 'Entity Assertion',
+      label: 'Multiple Assertions',
       format: 'boolean',
-      description: 'A boolean value indicating whether an assertion about the entity was made.',
+      description: 'A value indicating whether one or more assertions about the gene were made in literature or databases.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'purple', inactiveColor: 'indigo'},
       group: {name: 'Assertion', order: 2},
@@ -42,7 +42,7 @@ export const precurationDetailsConfig = {
     mechanism_difference: {
       label: 'Mechanism Difference',
       format: 'boolean',
-      description: 'Indicates if there is a difference in the mechanism of action noted.',
+      description: 'Indicates if there is a difference in the molecular mechanism of pathogenicity (e.g. LOF vs. missense or haploinsufficiency vs. gain-of-function).',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'red', inactiveColor: 'orange'},
       group: {name: 'Assertion', order: 2},
@@ -51,7 +51,7 @@ export const precurationDetailsConfig = {
     phenotypic_variability: {
       label: 'Phenotypic Variability',
       format: 'boolean',
-      description: 'Indicates if there is phenotypic variability associated with the gene.',
+      description: 'Indicates if there is phenotypic variability associated with the gene (e.g. lump if intra familial variability is larger then inter familial variability and vice versa).',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'switch', color: 'blue', inactiveColor: 'cyan'},
       group: {name: 'Assertion', order: 2},
