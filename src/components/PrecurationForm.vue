@@ -50,6 +50,10 @@
                   v-model="precurationData[field.key]"
                   :items="field.options"
                   :label="field.label"
+                  :class="{
+                    'prefilled-field': decisionPrefilled && field.key === 'decision',
+                    'manually-changed-field': decisionManuallyChanged && field.key === 'decision'
+                  }"
                 ></v-select>
                 <v-tooltip
                   activator="parent"
@@ -81,8 +85,7 @@
 
 
 <script>
-import { precurationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/precurationDetailsConfig';
-import { workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import { precurationDetailsConfig, workflowConfig, workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 import {
   getPrecurationByHGNCIdOrSymbol,
   createPrecuration,
@@ -106,6 +109,8 @@ export default {
       existingPrecurationId: null,
       error: false,
       errorVal: {},
+      decisionPrefilled: false,
+      decisionManuallyChanged: false,
     };
   },
   computed: {
@@ -134,7 +139,61 @@ export default {
       return fields;
     },
   },
+  watch: {
+    precurationData: {
+      deep: true,
+      handler() {
+        this.applyDecisionRules();
+      }
+    },
+    'precurationData.decision': 'onDecisionChange',
+  },
   methods: {
+    applyDecisionRules() {
+      const decisionRule = workflowConfig.stages.precuration.decisionRules[0];
+      let trueCount = decisionRule.conditions.reduce((count, condition) => 
+        this.precurationData[condition] ? count + 1 : count, 0);
+
+      if (trueCount >= decisionRule.threshold) {
+        // Apply prefilled decision only if the current decision matches the computed decision or is empty
+        if (this.precurationData.decision === decisionRule.decision || !this.precurationData.decision) {
+          this.precurationData.decision = decisionRule.decision;
+          this.decisionPrefilled = true;
+          this.decisionManuallyChanged = false;
+        }
+      } else {
+        // If conditions are not met and the decision was prefilled, reset the decision prefilled status
+        if (this.decisionPrefilled) {
+          this.decisionPrefilled = false;
+        }
+      }
+    },
+    onDecisionChange(newValue) {
+      const decisionRule = workflowConfig.stages.precuration.decisionRules[0];
+      let trueCount = decisionRule.conditions.reduce((count, condition) => 
+        this.precurationData[condition] ? count + 1 : count, 0);
+
+      const computedDecision = trueCount >= decisionRule.threshold ? decisionRule.decision : '';
+
+      this.decisionManuallyChanged = newValue !== computedDecision;
+
+      if (this.decisionManuallyChanged) {
+        this.updateCommentField("Decision manually overridden.");
+      } else {
+        this.removeCommentOverride();
+      }
+    },
+    updateCommentField(overrideMessage) {
+      if (!this.precurationData.comment.includes(overrideMessage)) {
+        this.precurationData.comment += (this.precurationData.comment ? " " : "") + overrideMessage;
+      }
+    },
+    removeCommentOverride() {
+      const overrideMessage = "Decision manually overridden.";
+      if (this.precurationData.comment.includes(overrideMessage)) {
+        this.precurationData.comment = this.precurationData.comment.replace(overrideMessage, "").trim();
+      }
+    },
     groupHasVisibleFields(group) {
       // This will check if there's at least one field in the group that should be visible
       return group.some(field => field.visibility.curationView);
@@ -232,13 +291,28 @@ export default {
 </script>
 
 <style scoped>
+/* Custom styles for text fields */
 .text-center {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+/* Custom styles for text fields */
 .inactive-switch {
   --v-theme-switch-on-background: var(--v-theme-inactive-color);
+}
+
+/* Style for prefilled fields */
+.prefilled-field {
+  border: 2px solid orange; /* Orange border for prefilled fields */
+  /* Other styles as needed */
+}
+
+/* Style for manually changed fields */
+.manually-changed-field {
+  border: 2px solid purple; /* Purple border for manually changed fields */
+  /* Other styles as needed */
 }
 /* Additional styles can be added here if needed */
 </style>

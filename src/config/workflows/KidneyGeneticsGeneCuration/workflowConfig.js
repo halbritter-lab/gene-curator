@@ -36,7 +36,16 @@ export const workflowConfig = {
           // Other rules can be added here
         ],
         decisionRules: [
-          // Rules for decisions
+          {
+            conditions: [
+              'entity_assertion', 
+              'inheritance_difference', 
+              'mechanism_difference', 
+              'phenotypic_variability'
+            ],
+            decision: 'Split', // Or any other default decision
+            threshold: 2 // Minimum number of true conditions to trigger this decision
+          }
         ]
       },
       curation: {
