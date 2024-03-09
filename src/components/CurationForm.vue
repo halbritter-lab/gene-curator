@@ -57,6 +57,7 @@
                       :label="field.label"
                       :min="field.min"
                       :max="field.max"
+                      :step="field.step || 1"
                       type="number"
                       outlined
                       dense

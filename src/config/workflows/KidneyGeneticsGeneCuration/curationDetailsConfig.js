@@ -49,6 +49,7 @@ export const curationDetailsConfig = {
       style: { curationView: 'number-field'},
       min: 0,
       max: 12,
+      step: 0.5,
       group: {name: 'Points', order: 2}
   },
   models: {
@@ -59,6 +60,7 @@ export const curationDetailsConfig = {
       style: { curationView: 'number-field'},
       min: 0,
       max: 2,
+      step: 0.5,
       group: {name: 'Points', order: 2}
   },
   functional: {
@@ -69,6 +71,7 @@ export const curationDetailsConfig = {
       style: { curationView: 'number-field'},
       min: 0,
       max: 2,
+      step: 0.5,
       group: {name: 'Points', order: 2}
   },
   rescue: {
@@ -79,6 +82,7 @@ export const curationDetailsConfig = {
       style: { curationView: 'number-field'},
       min: 0,
       max: 2,
+      step: 0.5,
       group: {name: 'Points', order: 2}
   },
   replication: {
