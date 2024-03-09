@@ -185,4 +185,3 @@ export const curationDetailsConfig = {
   },
   // Additional fields can be added as per requirements.
 };
-  

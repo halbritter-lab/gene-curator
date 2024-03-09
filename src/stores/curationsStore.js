@@ -32,11 +32,26 @@ export const getCurations = async () => {
  */
 const validateCurationData = (curationData, config) => {
   const errors = [];
+
   for (const [key, field] of Object.entries(config)) {
-    if (field.required && !curationData[key]) {
+    const value = curationData[key];
+    
+    // Check for required fields
+    if (field.required && !value) {
       errors.push(`The field "${field.label}" is required.`);
     }
+
+    // Check for number fields with min and max values
+    if (field.format === 'number') {
+      if (field.min !== undefined && value < field.min) {
+        errors.push(`The value for "${field.label}" should not be less than ${field.min}.`);
+      }
+      if (field.max !== undefined && value > field.max) {
+        errors.push(`The value for "${field.label}" should not exceed ${field.max}.`);
+      }
+    }
   }
+
   return errors;
 };
 
