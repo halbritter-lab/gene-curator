@@ -35,34 +35,27 @@
       </v-card-text>
     </v-card>
 
-    <error-dialog
-      v-model="error"
-      :error="errorVal"
-      @value="error = $event"
-    ></error-dialog>
+    <!-- loading dialog component -->
     <loading-dialog v-model="loading" message="Please wait..." />
   </v-container>
 
-  <!-- Snackbar for registration feedback -->
-  <v-snackbar
+  <!-- Message Snackbar for feedback -->
+  <MessageSnackbar
     v-model="snackbarVisible"
+    :title="snackbarTitle"
+    :message="snackbarMessage"
     :color="snackbarColor"
-    :timeout="6000"
-  >
-    {{ snackbarMessage }}
-  </v-snackbar>
+  />
 
 </template>
 
 <script>
 import AuthService from "@/stores/AuthService";
-import ErrorDialog from "@/components/ErrorDialog";
 import LoadingDialog from "@/components/LoadingDialog";
 
 export default {
   name: "RegisterUser",
   components: {
-    ErrorDialog,
     LoadingDialog,
   },
   data() {
@@ -74,11 +67,13 @@ export default {
       password: "",
       snackbarVisible: false,
       snackbarMessage: '',
+      snackbarTitle: '',
       snackbarColor: '',
     };
   },
   methods: {
-    displaySnackbar(message, color) {
+    showSnackbar(title, message, color) {
+      this.snackbarTitle = title;
       this.snackbarMessage = message;
       this.snackbarColor = color;
       this.snackbarVisible = true;
@@ -99,7 +94,7 @@ export default {
         console.log(user);
         this.loading = false;
         // Handle successful registration
-        this.displaySnackbar('Registration successful! Redirecting...', 'success');
+        this.showSnackbar('Success', 'Registration successful! Redirecting...', 'success');
 
         // Redirect after 3 seconds
         setTimeout(() => {
@@ -107,11 +102,8 @@ export default {
         }, 3000);
 
       } catch (error) {
-       this.error = true;
-        this.errorVal = {
-          title: "Error",
-          description: "There was an error registering your account",
-        };
+        this.loading = false;
+        this.showSnackbar('Error', error.message || 'There was an error registering your account', 'error');
       }
     },
   },

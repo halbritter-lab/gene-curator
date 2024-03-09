@@ -50,35 +50,39 @@
       </v-card-text>
     </v-card>
 
-    <error-dialog
-      v-model="error"
-      :error="errorVal"
-      @value="error = $event"
-    ></error-dialog>
+    <!-- loading dialog component -->
     <loading-dialog v-model="loading" message="Please wait..." />
+
+    <!-- Message Snackbar for feedback -->
+    <MessageSnackbar
+      v-model="snackbarVisible"
+      :title="snackbarTitle"
+      :message="snackbarMessage"
+      :color="snackbarColor"
+    />
   </v-container>
 </template>
 
 <script>
 import AuthService from "@/stores/AuthService";
 import { useRouter } from "vue-router"; // Import useRouter
-import ErrorDialog from "@/components/ErrorDialog";
 import LoadingDialog from "@/components/LoadingDialog";
 
 export default {
   name: "LoginUser",
   components: {
-    ErrorDialog,
     LoadingDialog,
   },
   data() {
     return {
-      error: false,
-      errorVal: {},
       loading: false,
 
       email: "",
       password: "",
+      snackbarVisible: false,
+      snackbarMessage: '',
+      snackbarTitle: '',
+      snackbarColor: '',
     };
   },
   setup() {
@@ -87,6 +91,13 @@ export default {
     return { router }; // Return router to use it inside methods
   },
   methods: {
+    showSnackbar(title, message, color) {
+      this.snackbarTitle = title;
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbarVisible = true;
+    },
+
     async loginWithEmail() {
       const { valid } = await this.$refs.loginForm.validate();
       if (!valid) return;
@@ -100,16 +111,11 @@ export default {
         // Handle successful login
         this.saveUserToLocalStorage(user);
         this.router.push("/"); // Redirect to home page after successful login
+        this.showSnackbar('Success', 'Logged in successfully', 'success');
         this.loading = false;
       } catch (error) {
         this.loading = false;
-        console.error(error);
-
-        this.error = true;
-        this.errorVal = {
-          title: "Login Error",
-          message: "There was an error logging you in. Please try again.",
-        };
+        this.showSnackbar('Error', 'There was an error logging you in. Please try again.', 'error');
       }
     },
     async signInWithGoogle() {
@@ -118,15 +124,9 @@ export default {
         // Handle successful login
         this.saveUserToLocalStorage(user);
         this.router.push("/"); // Redirect to home page after successful login
+        this.showSnackbar('Success', 'Logged in with Google successfully', 'success');
       } catch (error) {
-        console.error(error);
-
-        this.error = true;
-        this.errorVal = {
-          title: "Login Error",
-          message:
-            "There was an error logging you in with Google. Please try again.",
-        };
+        this.showSnackbar('Error', 'There was an error logging you in with Google. Please try again.', 'error');
       }
     },
     navigateToRegister() {

@@ -56,13 +56,12 @@
     </v-card>
   </v-dialog>
 
-<v-snackbar
-  v-model="snackbarVisible"
-  :color="snackbarColor"
-  :timeout="6000"
->
-  {{ snackbarMessage }}
-</v-snackbar>
+  <MessageSnackbar
+    v-model="snackbarVisible"
+    :title="snackbarTitle"
+    :message="snackbarMessage"
+    :color="snackbarColor"
+  />
 
 </template>
 
@@ -107,9 +106,11 @@ export default {
 
     const snackbarVisible = ref(false);
     const snackbarMessage = ref('');
-    const snackbarColor = ref('success'); // Default color
+    const snackbarTitle = ref(''); // Add title state
+    const snackbarColor = ref('success');
 
-    const showSnackbar = (message, color = 'success') => {
+    const showSnackbar = (title, message, color = 'success') => {
+      snackbarTitle.value = title; // Set title
       snackbarMessage.value = message;
       snackbarColor.value = color;
       snackbarVisible.value = true;
@@ -207,10 +208,11 @@ export default {
       showPreCurationTab,
       showCurationTab,
       tab,
+      showSnackbar,
       snackbarVisible,
       snackbarMessage,
+      snackbarTitle,
       snackbarColor,
-      showSnackbar,
       title,
       handleGeneDataLoaded,
       geneData

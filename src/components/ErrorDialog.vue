@@ -1,3 +1,4 @@
+<!-- components/ErrorDialog.vue -->
 <template>
   <v-dialog width="470">
     <v-card style="padding: 10px 0">

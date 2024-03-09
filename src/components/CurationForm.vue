@@ -113,6 +113,14 @@
       <v-btn color="primary" @click="saveCuration">Save All</v-btn>
     </v-card-actions>
   </v-card>
+
+  <!-- message snackbar component -->
+  <MessageSnackbar
+    v-model="snackbarVisible"
+    :title="snackbarTitle"
+    :message="snackbarMessage"
+    :color="snackbarColor"
+  />
 </template>
 
 
@@ -135,6 +143,10 @@ export default {
     return {
       curationDataArray: [this.initializeCurationData()],
       existingCurationId: null,
+      snackbarVisible: false,
+      snackbarMessage: '',
+      snackbarTitle: '',
+      snackbarColor: 'success',
     };
   },
   async created() {
@@ -147,7 +159,7 @@ export default {
           this.curationDataArray = [this.initializeCurationData()];
         }
       } catch (error) {
-        console.error('Error fetching curations:', error.message);
+        this.showSnackbar('Error', `Error fetching curations: ${error.message}`, 'error');
       }
     } else {
       this.curationDataArray = [this.initializeCurationData()];
@@ -174,6 +186,12 @@ export default {
     },
   },
   methods: {
+    showSnackbar(title, message, color = 'success') {
+      this.snackbarTitle = title;
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbarVisible = true;
+    },
     groupHasVisibleFields(group) {
       // This will check if there's at least one field in the group that should be visible
       return group.some(field => field.visibility.curationView);
@@ -228,16 +246,16 @@ export default {
           if (curationData.id) {
             // Update existing curation
             await updateCuration(curationData.id, curationData, currentUserId, curationDetailsConfig);
-            console.log('Curation updated:', curationData.id);
+            this.showSnackbar('Success', `Curation updated: ${curationData.id}`, 'success');
           } else {
             // Create new curation
             const newId = await createCuration(curationData, currentUserId, curationDetailsConfig);
-            console.log('New curation created with ID:', newId);
+            this.showSnackbar('Success', `New curation created with ID: ${newId}`, 'success');
             curationData.id = newId; // Update the ID in the curation data array
           }
         }
       } catch (error) {
-        console.error('Error saving curation:', error.message);
+        this.showSnackbar('Error', `Error saving curation: ${error.message}`, 'error');
       }
     },
   },

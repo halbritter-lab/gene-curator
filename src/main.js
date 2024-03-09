@@ -3,6 +3,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'; // Import the router
+import MessageSnackbar from './components/MessageSnackbar.vue'; // Import the MessageSnackbar component
 
 // Vuetify
 import 'vuetify/styles'
@@ -24,4 +25,5 @@ const vuetify = createVuetify({
 createApp(App)
   .use(vuetify)
   .use(router) // Use the router
-  .mount('#app')
+  .component('MessageSnackbar', MessageSnackbar) // Register MessageSnackbar globally
+  .mount('#app');

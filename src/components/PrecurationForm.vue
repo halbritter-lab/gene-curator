@@ -75,12 +75,13 @@
     </v-card-text>
   </v-card>
 
-  <!-- Error Dialog Component -->
-  <error-dialog
-    v-model="error"
-    :error="errorVal"
-    @value="error = $event"
-  ></error-dialog>
+  <!-- message snackbar component -->
+  <MessageSnackbar
+    v-model="snackbarVisible"
+    :title="snackbarTitle"
+    :message="snackbarMessage"
+    :color="snackbarColor"
+  />
 </template>
 
 
@@ -91,7 +92,6 @@ import {
   createPrecuration,
   updatePrecuration
 } from "@/stores/precurationsStore";
-import ErrorDialog from "@/components/ErrorDialog";
 
 export default {
   name: 'PrecurationForm',
@@ -101,16 +101,17 @@ export default {
   },
   emits: ['precuration-accepted'],
   components: {
-    ErrorDialog,
   },
   data() {
     return {
       precurationData: this.initializePrecurationData(),
       existingPrecurationId: null,
-      error: false,
-      errorVal: {},
       decisionPrefilled: false,
       decisionManuallyChanged: false,
+      snackbarVisible: false,
+      snackbarMessage: '',
+      snackbarTitle: '',
+      snackbarColor: 'success',
     };
   },
   computed: {
@@ -149,6 +150,12 @@ export default {
     'precurationData.decision': 'onDecisionChange',
   },
   methods: {
+    showSnackbar(title, message, color = 'success') {
+      this.snackbarTitle = title;
+      this.snackbarMessage = message;
+      this.snackbarColor = color;
+      this.snackbarVisible = true;
+    },
     applyDecisionRules() {
       const decisionRule = workflowConfig.stages.precuration.decisionRules[0];
       let trueCount = decisionRule.conditions.reduce((count, condition) => 
@@ -229,10 +236,6 @@ export default {
       return errors;
     },
     async submitPrecuration() {
-      // Reset error state
-      this.error = false;
-      this.errorVal = {};
-
       const currentUserId = JSON.parse(localStorage.getItem('user')).uid;
 
       try {
@@ -252,24 +255,18 @@ export default {
           this.precurationData.workflowConfigNameUsed = workflowConfigName;
           // Create the new precuration
           const newId = await createPrecuration(this.precurationData, currentUserId, precurationDetailsConfig);
-          console.log('New precuration created with ID:', newId);
+          this.showSnackbar('Success', 'New precuration created with ID:' + newId, 'success');
         } else {
           // If updating an existing precuration
           this.precurationData.updatedAt = currentTime;
           await updatePrecuration(this.existingPrecurationId, this.precurationData, currentUserId, precurationDetailsConfig);
-          console.log('Precuration updated:', this.existingPrecurationId);
+          this.showSnackbar('Success', 'Precuration updated' + this.existingPrecurationId, 'success');
         }
 
         // Emit an event to indicate successful submission
         this.$emit('precuration-accepted', this.precurationData);
       } catch (error) {
-        // Set error state and display error dialog
-        this.error = true;
-        this.errorVal = {
-          title: "Submission Error",
-          message: error.message || "There was an error submitting the precuration. Please check the required fields."
-        };
-        console.error('Error during precuration submission:', error.message);
+        this.showSnackbar('Error', error.message || "There was an error submitting the precuration", 'error');
       }
     },
     displaySwitchValue(value) {
@@ -284,7 +281,7 @@ export default {
         Object.assign(this.precurationData, precuration);
       }
     } catch (error) {
-      console.error('Error fetching precuration:', error.message);
+      this.showSnackbar('Error', 'Error fetching precuration: ' + error.message, 'error');
     }
   }
 };
