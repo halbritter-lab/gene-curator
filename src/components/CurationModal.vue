@@ -5,6 +5,11 @@
       <div class="d-flex justify-space-between align-center">
         <v-card-title>
           {{ title }} - {{ editedItem.approved_symbol }} - HGNC:{{ editedItem.hgnc_id }}
+          <GeneLinkChips
+            :hgnc-id="editedItem.hgnc_id"
+            :gene-symbol="editedItem.approved_symbol"
+            :links-to-show="['clingen', 'gencc', 'search_omim']"
+          />
         </v-card-title>
         <v-btn icon @click="close">
           <v-icon>mdi-close</v-icon>
@@ -68,12 +73,14 @@ import GeneDetailCard from './GeneDetailCard.vue';
 import PrecurationForm from './PrecurationForm.vue';
 import CurationForm from './CurationForm.vue'; // Import the CurationForm component
 import { getPrecurationByHGNCIdOrSymbol } from '@/stores/precurationsStore';
+import GeneLinkChips from './GeneLinkChips.vue'; // Import the GeneLinkChips component
 
 export default {
   components: {
     GeneDetailCard,
     PrecurationForm,
-    CurationForm
+    CurationForm,
+    GeneLinkChips
   },
   props: {
     item: {
@@ -206,7 +213,7 @@ export default {
       showSnackbar,
       title,
       handleGeneDataLoaded,
-      geneData,
+      geneData
     };
   },
 };
