@@ -70,9 +70,20 @@ export const createCuration = async (curationData, userId, config) => {
     throw new Error(`Validation failed: ${errors.join(' ')}`);
   }
 
+  // Check for existing curation
+  const exists = await checkForExistingCuration({
+    approvedSymbol: curationData.approved_symbol,
+    disease: curationData.disease,
+    inheritance: curationData.inheritance
+  });
+  
+  if (exists) {
+    throw new Error("A curation with the same symbol, disease, and inheritance already exists.");
+  }
+
   const docRef = await addDoc(collection(db, 'curations'), {
     ...curationData,
-    users: [userId], // Initialize with the creating user
+    users: [userId],
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
@@ -215,4 +226,18 @@ const updateUsersArray = (usersArray, userId) => {
   const newUsersArray = usersArray.filter(id => id !== userId);
   newUsersArray.push(userId); // Add the userId at the end
   return newUsersArray;
+};
+
+
+/**
+ * Checks if a curation with the given parameters already exists.
+ * @param {Object} params - Parameters to check for existing curation.
+ * @returns {Promise<boolean>} - Returns true if curation exists, false otherwise.
+ */
+const checkForExistingCuration = async ({ approvedSymbol, disease, inheritance }) => {
+  const curationsRef = collection(db, 'curations');
+  const q = query(curationsRef, where("approved_symbol", "==", approvedSymbol), where("disease", "==", disease), where("inheritance", "==", inheritance));
+
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
 };
