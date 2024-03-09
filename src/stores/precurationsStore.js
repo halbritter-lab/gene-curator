@@ -55,7 +55,7 @@ export const createPrecuration = async (precurationData, userId, config) => {
 
   const docRef = await addDoc(collection(db, 'precurations'), {
     ...precurationData,
-    userId, // include the userId
+    users: [userId], // Initialize with the creating user
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
@@ -129,9 +129,18 @@ export const updatePrecuration = async (docId, updatedData, userId, config) => {
   }
 
   const precurationRef = doc(db, 'precurations', docId);
+  const docSnap = await getDoc(precurationRef);
+
+  if (!docSnap.exists()) {
+    throw new Error("Precuration document not found");
+  }
+
+  const existingData = docSnap.data();
+  const updatedUsers = updateUsersArray(existingData.users || [], userId);
+
   await updateDoc(precurationRef, {
     ...updatedData,
-    userId, // include the userId
+    users: updatedUsers,
     updatedAt: Timestamp.fromDate(new Date()),
   });
 };
@@ -146,4 +155,17 @@ export const updatePrecuration = async (docId, updatedData, userId, config) => {
 export const deletePrecuration = async (docId) => {
   const precurationRef = doc(db, 'precurations', docId);
   await deleteDoc(precurationRef);
+};
+
+
+/**
+ * Updates the users array with the given userId, maintaining order and uniqueness.
+ * @param {Array} usersArray - The current array of user IDs.
+ * @param {string} userId - The ID of the user to add or move in the array.
+ * @returns {Array} The updated array of user IDs.
+ */
+const updateUsersArray = (usersArray, userId) => {
+  const newUsersArray = usersArray.filter(id => id !== userId);
+  newUsersArray.push(userId); // Add the userId at the end
+  return newUsersArray;
 };

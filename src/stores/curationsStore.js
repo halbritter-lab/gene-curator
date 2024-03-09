@@ -57,7 +57,7 @@ export const createCuration = async (curationData, userId, config) => {
 
   const docRef = await addDoc(collection(db, 'curations'), {
     ...curationData,
-    userId, // include the userId
+    users: [userId], // Initialize with the creating user
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
@@ -99,9 +99,18 @@ export const updateCuration = async (docId, updatedData, userId, config) => {
   }
 
   const curationRef = doc(db, 'curations', docId);
+  const docSnap = await getDoc(curationRef);
+
+  if (!docSnap.exists()) {
+    throw new Error("Curation document not found");
+  }
+
+  const existingData = docSnap.data();
+  const updatedUsers = updateUsersArray(existingData.users || [], userId);
+
   await updateDoc(curationRef, {
     ...updatedData,
-    userId, // include the userId
+    users: updatedUsers,
     updatedAt: Timestamp.fromDate(new Date()),
   });
 };
@@ -178,4 +187,17 @@ export const getCurationsByHGNCIdOrSymbol = async (identifier) => {
   }
 
   return curationDataArray;
+};
+
+
+/**
+ * Updates the users array with the given userId, maintaining order and uniqueness.
+ * @param {Array} usersArray - The current array of user IDs.
+ * @param {string} userId - The ID of the user to add or move in the array.
+ * @returns {Array} The updated array of user IDs.
+ */
+const updateUsersArray = (usersArray, userId) => {
+  const newUsersArray = usersArray.filter(id => id !== userId);
+  newUsersArray.push(userId); // Add the userId at the end
+  return newUsersArray;
 };
