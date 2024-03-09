@@ -35,9 +35,10 @@ export const curationDetailsConfig = {
     inheritance: {
       label: 'Inheritance',
       format: 'text',
+      options: ['Autosomal dominant', 'Autosomal recessive', 'X-linked other', 'X-linked recessive', 'X-linked dominant', 'Mitochondrial', 'Somatic mutation'],
       description: 'Type of inheritance pattern observed for the gene-related conditions.',
       visibility: { tableView: true, standardView: true, curationView: true },
-      style: { curationView: 'text-field'},
+      style: { curationView: 'select'},
       group: {name: 'Entity Information', order: 1},
       required: true
     },
