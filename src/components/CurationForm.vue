@@ -28,6 +28,7 @@
                   <template v-if="field.format === 'text' && field.style && field.style.curationView === 'text-field'">
                     <v-text-field
                       v-model="curationData[field.key]"
+                      :rules="getFieldRules(field)"
                       :label="field.label"
                       outlined
                       dense
@@ -42,6 +43,7 @@
                   <template v-else-if="field.format === 'boolean'">
                     <v-checkbox
                       v-model="curationData[field.key]"
+                      :rules="getFieldRules(field)"
                       :label="field.label"
                     ></v-checkbox>
                     <v-tooltip
@@ -54,6 +56,7 @@
                   <template v-else-if="field.format === 'number'">
                     <v-text-field
                       v-model="curationData[field.key]"
+                      :rules="getFieldRules(field)"
                       :label="field.label"
                       :min="field.min"
                       :max="field.max"
@@ -72,6 +75,7 @@
                   <template v-else-if="field.format === 'array' && field.style && field.style.curationView === 'select'">
                     <v-select
                       v-model="curationData[field.key]"
+                      :rules="getFieldRules(field)"
                       :items="field.options"
                       :label="field.label"
                       multiple
@@ -88,6 +92,7 @@
                   <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
                     <v-select
                       v-model="curationData[field.key]"
+                      :rules="getFieldRules(field)"
                       :items="field.options"
                       :label="field.label"
                       outlined
@@ -132,6 +137,7 @@ import {
   updateCuration,
   getCurationsByHGNCIdOrSymbol
 } from "@/stores/curationsStore";
+import { required, number, min, max } from '@/utils/validators';
 
 export default {
   name: 'CurationForm',
@@ -186,6 +192,23 @@ export default {
     },
   },
   methods: {
+    getFieldRules(field) {
+      const rules = [];
+      if (field.required) {
+        rules.push(required);
+      }
+      if (field.format === 'number') {
+        rules.push(number);
+        if (field.min !== undefined) {
+          rules.push(min(field.min));
+        }
+        if (field.max !== undefined) {
+          rules.push(max(field.max));
+        }
+      }
+      return rules;
+    }
+    ,
     showSnackbar(title, message, color = 'success') {
       this.snackbarTitle = title;
       this.snackbarMessage = message;
