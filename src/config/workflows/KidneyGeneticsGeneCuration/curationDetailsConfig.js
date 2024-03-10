@@ -35,7 +35,36 @@ export const curationDetailsConfig = {
     inheritance: {
       label: 'Inheritance',
       format: 'text',
-      options: ['Autosomal dominant', 'Autosomal recessive', 'X-linked other', 'X-linked recessive', 'X-linked dominant', 'Mitochondrial', 'Somatic mutation'],
+      options: [
+        {
+          value: 'HP:0000006',
+          title: 'Autosomal dominant',
+        },
+        {
+          value: 'HP:0000007',
+          title: 'Autosomal recessive',
+        },
+        {
+          value: 'HP:0001417',
+          title: 'X-linked other',
+        },
+        {
+          value: 'HP:0001419',
+          title: 'X-linked recessive',
+        },
+        {
+          value: 'HP:0001423',
+          title: 'X-linked dominant',
+        },
+        {
+          value: 'HP:0001427',
+          title: 'Mitochondrial',
+        },
+        {
+          value: 'HP:0001428',
+          title: 'Somatic mutation',
+        }
+      ],
       description: 'Type of inheritance pattern observed for the gene-related conditions.',
       visibility: { tableView: true, standardView: true, curationView: true },
       style: { curationView: 'select'},

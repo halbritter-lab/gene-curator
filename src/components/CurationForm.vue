@@ -92,8 +92,9 @@
                   <template v-else-if="field.format === 'text' && field.style && field.style.curationView === 'select'">
                     <v-select
                       v-model="curationData[field.key]"
-                      :rules="getFieldRules(field)"
                       :items="field.options"
+                      item-value="value"
+                      item-text="title"
                       :label="field.label"
                       outlined
                       dense

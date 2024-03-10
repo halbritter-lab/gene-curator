@@ -7,44 +7,51 @@
 export const inheritanceTermEqualityConfig = {
     "HP:0000006": {
       hpoName: "Autosomal dominant inheritance",
+      shortText: "Autosomal dominant",
       definition: "A mode of inheritance that is observed for traits related to a gene encoded on one of the autosomes...",
-      shortText: "AD",
+      abbreviation: "AD",
       equivalents: ["Autosomal dominant", "dominant", "AD", "Autosomal dominant inheritance"]
     },
     "HP:0000007": {
       hpoName: "Autosomal recessive inheritance",
+      shortText: "Autosomal recessive",
       definition: "A mode of inheritance that is observed for traits related to a gene encoded on one of the autosomes...",
-      shortText: "AR",
+      abbreviation: "AR",
       equivalents: ["Autosomal recessive", "recessive", "AR", "Autosomal recessive inheritance"]
     },
     "HP:0001417": {
       hpoName: "X-linked other inheritance",
+      shortText: "X-linked",
       definition: "A mode of inheritance that is observed for traits related to a gene encoded on the X chromosome.",
-      shortText: "Xo",
+      abbreviation: "Xo",
       equivalents: ["X-linked", "Xo", "X-linked other inheritance"]
     },
     "HP:0001419": {
       hpoName: "X-linked recessive inheritance",
+      shortText: "X-linked recessive",
       definition: "A mode of inheritance that is observed for recessive traits related to a gene encoded on the X chromosome...",
-      shortText: "XR",
+      abbreviation: "XR",
       equivalents: ["X-linked recessive", "recessive X-linked", "XR", "X-linked recessive inheritance"]
     },
     "HP:0001423": {
       hpoName: "X-linked dominant inheritance",
+      shortText: "X-linked dominant",
       definition: "A mode of inheritance that is observed for dominant traits related to a gene encoded on the X chromosome...",
-      shortText: "XD",
+      abbreviation: "XD",
       equivalents: ["X-linked dominant", "dominant X-linked", "XD", "X-linked dominant inheritance"]
     },
     "HP:0001427": {
       hpoName: "Mitochondrial inheritance",
+      shortText: "Mitochondrial",
       definition: "A mode of inheritance that is observed for traits related to a gene encoded on the mitochondrial genome...",
-      shortText: "Mit",
+      abbreviation: "Mit",
       equivalents: ["Mitochondrial", "Mit", "Mitochondrial inheritance"]
     },
     "HP:0001428": {
       hpoName: "Somatic mutation",
+      shortText: "Somatic",
       definition: "A mode of inheritance in which a trait or disorder results from a de novo mutation occurring after conception...",
-      shortText: "Som",
+      abbreviation: "Som",
       equivalents: ["Somatic", "Som", "Somatic mutation"]
     }
     // Additional mappings can be added here
