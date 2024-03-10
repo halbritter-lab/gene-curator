@@ -145,6 +145,7 @@ export default {
   props: {
     approvedSymbol: String,
     hgncId: String,
+    precurationDetails: Object,
   },
   data() {
     return {
@@ -247,6 +248,14 @@ export default {
           data[key] = this.hgncId;
         }
       });
+
+      // Add precuration data as nested object using docId as key
+      if (this.precurationDetails && this.precurationDetails.docId) {
+        const precurationDocId = this.precurationDetails.docId;
+        // Creating a nested object with docId as key
+        data['precurationDetails'] = { [precurationDocId]: this.precurationDetails };
+      }
+
       return data;
     },
     validateCurationData(curationData) {

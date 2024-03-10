@@ -92,12 +92,12 @@ import {
   createPrecuration,
   updatePrecuration
 } from "@/stores/precurationsStore";
+import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 export default {
   name: 'PrecurationForm',
   props: {
-    approvedSymbol: String,
-    hgncId: String,
+    geneObject: Object,
   },
   emits: ['precuration-accepted'],
   components: {
@@ -208,22 +208,29 @@ export default {
     initializePrecurationData() {
       const data = {};
       Object.keys(precurationDetailsConfig).forEach(key => {
-        // Set the default value for each field
-        if (precurationDetailsConfig[key].format === 'boolean') {
-            data[key] = false;
+        if (this.geneObject && key in this.geneObject) {
+          data[key] = this.geneObject[key];
         } else {
-            // For other types, initialize with an empty string or respective default
-            data[key] = '';
-        }
-
-        // If the props for approvedSymbol or hgncId are passed, use them to prefill the respective fields
-        if (key === 'approved_symbol' && this.approvedSymbol) {
-          data[key] = this.approvedSymbol;
-        }
-        if (key === 'hgnc_id' && this.hgncId) {
-          data[key] = this.hgncId;
+          data[key] = precurationDetailsConfig[key].format === 'boolean' ? false : '';
         }
       });
+
+      // Handling geneDetails as a nested object with the gene document ID as key
+      if (this.geneObject && this.geneObject.docId) {
+        const geneDocId = this.geneObject.docId;
+        const geneDetails = {};
+
+        // Populate geneDetails with relevant information from geneObject
+        Object.keys(geneDetailsConfig).forEach(detailKey => {
+          if (detailKey in this.geneObject) {
+            geneDetails[detailKey] = this.geneObject[detailKey];
+          }
+        });
+
+        // Set geneDetails with geneDocId as key
+        data['geneDetails'] = { [geneDocId]: geneDetails };
+      }
+
       return data;
     },
     validatePrecurationData(precurationData) {
@@ -247,24 +254,25 @@ export default {
 
         // Add timestamps for creation or update
         const currentTime = new Date().toISOString();
+        let docId;
         if (!this.existingPrecurationId) {
           // If creating a new precuration
           this.precurationData.createdAt = currentTime;
-          // Include the workflow configuration version and name used to create the precuration
           this.precurationData.workflowConfigVersionUsed = workflowConfigVersion;
           this.precurationData.workflowConfigNameUsed = workflowConfigName;
-          // Create the new precuration
-          const newId = await createPrecuration(this.precurationData, currentUserId, precurationDetailsConfig);
-          this.showSnackbar('Success', 'New precuration created with ID:' + newId, 'success');
+          docId = await createPrecuration(this.precurationData, currentUserId, precurationDetailsConfig);
+          this.precurationData.docId = docId; // Add docId to precurationData
+          this.showSnackbar('Success', 'New precuration created with ID:' + docId, 'success');
         } else {
           // If updating an existing precuration
           this.precurationData.updatedAt = currentTime;
           await updatePrecuration(this.existingPrecurationId, this.precurationData, currentUserId, precurationDetailsConfig);
+          docId = this.existingPrecurationId;
           this.showSnackbar('Success', 'Precuration updated' + this.existingPrecurationId, 'success');
         }
 
-        // Emit an event to indicate successful submission
-        this.$emit('precuration-accepted', this.precurationData);
+        // Emit an event to indicate successful submission, including the docId
+        this.$emit('precuration-accepted', { docId, ...this.precurationData });
       } catch (error) {
         this.showSnackbar('Error', error.message || "There was an error submitting the precuration", 'error');
       }
@@ -274,14 +282,20 @@ export default {
     },
   },
   async created() {
-    try {
-      const precuration = await getPrecurationByHGNCIdOrSymbol(this.approvedSymbol || this.hgncId);
-      if (precuration) {
-        this.existingPrecurationId = precuration.id;
-        Object.assign(this.precurationData, precuration);
+    // Ensure geneObject is available and has the necessary properties
+    if (this.geneObject && (this.geneObject.approved_symbol || this.geneObject.hgnc_id)) {
+      try {
+        // Use geneObject's approved_symbol or hgnc_id for the query
+        const identifier = this.geneObject.approved_symbol || this.geneObject.hgnc_id;
+        const precuration = await getPrecurationByHGNCIdOrSymbol(identifier);
+
+        if (precuration) {
+          this.existingPrecurationId = precuration.id;
+          Object.assign(this.precurationData, precuration);
+        }
+      } catch (error) {
+        this.showSnackbar('Error', 'Error fetching precuration: ' + error.message, 'error');
       }
-    } catch (error) {
-      this.showSnackbar('Error', 'Error fetching precuration: ' + error.message, 'error');
     }
   }
 };

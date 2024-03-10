@@ -34,8 +34,8 @@
 
             <!-- Precuration Form Component -->
             <PrecurationForm
-              :approvedSymbol="editedItem.approved_symbol"
-              :hgncId="editedItem.hgnc_id"
+              v-if="geneData"
+              :gene-object="geneData"
               @precuration-accepted="handlePrecurationAccepted"
             />
           </v-window-item>
@@ -43,8 +43,10 @@
           <v-window-item v-if="showCurationTab">
             <!-- CurationForm Component -->
             <CurationForm
+              v-if="precurationDetails"
               :approvedSymbol="editedItem.approved_symbol"
               :hgncId="editedItem.hgnc_id"
+              :precurationDetails="precurationDetails"
             />
           </v-window-item>
         </v-window>
@@ -121,12 +123,14 @@ export default {
       editedItem.value = { ...props.item };
     });
 
-    const handlePrecurationAccepted = () => {
+    const precurationDetails = ref(null);
+
+    const handlePrecurationAccepted = (precurationData) => {
       if (props.context === 'precuration') {
-        // If the context is 'precuration', just close the modal
         close();
       } else {
-        // Otherwise, switch to the curation tab
+        // Capture the precuration data
+        precurationDetails.value = precurationData;
         showCurationTab.value = true;
         tab.value = 1;
       }
@@ -154,8 +158,6 @@ export default {
 
     const handleGeneDataLoaded = (data) => {
       geneData.value = data; // Store the fetched gene data
-      // Pass the gene data to other components as needed
-      // For example, you can now pass this data to PrecurationForm and CurationForm
     };
 
     // Computed property to determine the title of the modal
@@ -215,7 +217,8 @@ export default {
       snackbarColor,
       title,
       handleGeneDataLoaded,
-      geneData
+      geneData,
+      precurationDetails
     };
   },
 };

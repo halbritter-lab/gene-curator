@@ -6,7 +6,7 @@ import { precurationDetailsConfig, precurationDetailsConfigVersion } from './pre
 import { curationDetailsConfig, curationDetailsConfigVersion } from './curationDetailsConfig';
 
 // Defining the workflow configuration version and name
-export const workflowConfigVersion = '0.1.0';
+export const workflowConfigVersion = '0.2.0';
 export const workflowConfigName = 'Kidney Genetics Gene Curation';
 
 // Defining the workflow configuration
@@ -20,7 +20,7 @@ export const workflowConfig = {
       },
       precuration: {
         configFile: 'precurationDetailsConfig.js',
-        version: '0.1.0',
+        version: '0.2.0',
         checksum: 'md5-checksum-of-precuration-config',
         nextStage: 'curation',
         prefillRules: [
@@ -50,7 +50,7 @@ export const workflowConfig = {
       },
       curation: {
         configFile: 'curationDetailsConfig.js',
-        version: '0.1.0',
+        version: '0.2.0',
         checksum: 'md5-checksum-of-curation-config',
         nextStage: null,
         prefillRules: [

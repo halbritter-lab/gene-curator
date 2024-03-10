@@ -1,7 +1,10 @@
 // config/workflow/KidneyGeneticsGeneCuration/curationDetailsConfig.js
 
+// Import the precuration details config
+import { precurationDetailsConfig } from './precurationDetailsConfig';
+
 // Define the version of the curation details configuration
-export const curationDetailsConfigVersion = '0.1.0';
+export const curationDetailsConfigVersion = '0.2.0';
 
 // Define the curation details configuration
 export const curationDetailsConfig = {
@@ -216,6 +219,15 @@ export const curationDetailsConfig = {
     description: 'The date and time when the curation record was approved.',
     visibility: { tableView: false, standardView: true, curationView: false },
     group: {name: 'Metadata', order: 4}
+  },
+  precurationDetails: {
+    label: 'Precuration Details',
+    format: 'object',
+    description: 'The details of the precuration associated with this curation.',
+    visibility: { tableView: false, standardView: false, curationView: false },
+    group: { name: 'Precuration Information', order: 5 },
+    required: true,
+    nestedConfig: precurationDetailsConfig // Reference to the precurationDetailsConfig as the nested configuration
   },
   // Additional fields can be added as per requirements.
 };
