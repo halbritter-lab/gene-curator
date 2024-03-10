@@ -61,7 +61,6 @@ const validateCurationData = (curationData, config) => {
  * @param {Object} curationData - The data to create a new curation document.
  * @param {Object} config - The configuration object against which to validate.
  * @param {string} userId - The user ID of the user creating the curation.
- * @param {Object} config - The configuration object against which to validate.
  * @returns {Promise<string>} A promise that resolves to the new document's ID.
  */
 export const createCuration = async (curationData, userId, config) => {
