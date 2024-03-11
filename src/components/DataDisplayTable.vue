@@ -33,7 +33,7 @@
         <div v-else-if="column.type === 'date'">
           {{ formatTimestamp(item[column.name]) }}
         </div>
-        <!-- Handle boolean formatting -->
+        <!-- Handle link formatting -->
         <router-link v-else-if="column.type === 'link'" :to="column.to(item)">
           {{ item[column.name] }}
         </router-link>

@@ -173,15 +173,27 @@ export const geneDetailsConfig = {
     visibility: { tableView: false, standardView: true, curationView: false }
   },
   hasPrecuration: {
-    label: 'Has Precuration',
-    format: 'boolean',
-    description: 'Indicates if the gene has been precurationed.',
+    label: 'Precuration Documents',
+    format: 'array', // Changed from 'boolean' to 'array' to store multiple docIds
+    description: 'Array of document IDs for precurations associated with the gene.',
     visibility: { tableView: false, standardView: false, curationView: false }
   },
   hasCuration: {
-    label: 'Has Curation',
-    format: 'boolean',
-    description: 'Indicates if the gene has been curated.',
+    label: 'Curation Documents',
+    format: 'array', // Changed from 'boolean' to 'array' to store multiple docIds
+    description: 'Array of document IDs for curations associated with the gene.',
+    visibility: { tableView: false, standardView: false, curationView: false }
+  },
+  precuratedBy: {
+    label: 'Precurated By',
+    format: 'array', // Changed from 'text' to 'array' to store multiple user IDs
+    description: 'Array of user IDs who have precurated the gene.',
+    visibility: { tableView: false, standardView: false, curationView: false }
+  },
+  curatedBy: {
+    label: 'Curated By',
+    format: 'array', // Changed from 'text' to 'array' to store multiple user IDs
+    description: 'Array of user IDs who have curated the gene.',
     visibility: { tableView: false, standardView: false, curationView: false }
   },
   // Add additional fields as needed

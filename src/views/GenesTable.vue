@@ -24,6 +24,10 @@
         <v-btn @click="openModal(item)">Curate</v-btn>
       </template>
 
+      <template v-slot:curation-status="{ item }" v-if="isCuratorOrAdmin">
+        <GeneCurationStatusChips :gene="item" />
+      </template>
+
       <template v-slot:modal>
         <CurationModal :item="selectedItem" :open="showModal" @close="closeModal" />
       </template>
@@ -39,6 +43,7 @@ import { getGenes } from '@/stores/geneStore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import CurationModal from '@/components/CurationModal.vue';
 import DataExport from '@/components/DataExport.vue';
+import GeneCurationStatusChips from '@/components/GeneCurationStatusChips.vue';
 import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 /**
@@ -50,7 +55,8 @@ export default {
   components: {
     DataDisplayTable,
     CurationModal,
-    DataExport
+    DataExport,
+    GeneCurationStatusChips
   },
   setup() {
     // State for raw gene data and UI states
@@ -92,6 +98,7 @@ export default {
       // Add 'Actions' header if user is curator or admin
       if (isCuratorOrAdmin.value) {
         dynamicHeaders.push({ title: 'Actions', value: 'actions', sortable: false });
+        dynamicHeaders.push({ title: 'Curation Status', value: 'curation', type: 'slot', slotName: 'curation-status', sortable: false });
       }
 
       return dynamicHeaders;
@@ -112,6 +119,11 @@ export default {
           name: 'actions',
           type: 'slot',
           slotName: 'action-slot'
+        },
+        {
+          name: 'curation',
+          type: 'slot',
+          slotName: 'curation-status'
         }
       ]
     };

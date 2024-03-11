@@ -139,6 +139,7 @@ import {
   getCurationsByHGNCIdOrSymbol
 } from "@/stores/curationsStore";
 import { required, number, min, max } from '@/utils/validators';
+import { updateGeneCurationStatus, getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
 
 export default {
   name: 'CurationForm',
@@ -268,7 +269,7 @@ export default {
       return errors;
     },
     async saveCuration() {
-    const currentUserId = JSON.parse(localStorage.getItem('user')).uid; // Retrieve the current user's ID
+      const currentUserId = JSON.parse(localStorage.getItem('user')).uid; // Retrieve the current user's ID
 
       try {
         for (const curationData of this.curationDataArray) {
@@ -276,20 +277,52 @@ export default {
           curationData.workflowConfigVersionUsed = workflowConfigVersion;
           curationData.workflowConfigNameUsed = workflowConfigName;
 
-          if (curationData.id) {
+          let curationDocId = curationData.id; // Get the curation doc ID if it already exists
+          let geneDocId; // Declare a variable to store gene document ID
+
+          // If precurationDetails exist, retrieve the geneDocId from the nested geneDetails object
+          if (this.precurationDetails && this.precurationDetails.geneDetails) {
+            const geneDetailsKeys = Object.keys(this.precurationDetails.geneDetails);
+            if (geneDetailsKeys.length > 0) {
+              // Assuming geneDetails is an object with a single key that is the geneDocId
+              geneDocId = geneDetailsKeys[0];
+            }
+          }
+
+          // If geneDocId is still not determined, fetch it from the store
+          if (!geneDocId) {
+            // This function should be created to get the gene document ID based on the gene identifier (approvedSymbol or hgncId)
+            geneDocId = await this.getGeneDocIdByGeneIdentifier(this.approvedSymbol || this.hgncId);
+          }
+
+          // Update or create the curation document
+          if (curationDocId) {
             // Update existing curation
-            await updateCuration(curationData.id, curationData, currentUserId, curationDetailsConfig);
-            this.showSnackbar('Success', `Curation updated: ${curationData.id}`, 'success');
+            await updateCuration(curationDocId, curationData, currentUserId, curationDetailsConfig);
+            this.showSnackbar('Success', `Curation updated: ${curationDocId}`, 'success');
           } else {
             // Create new curation
-            const newId = await createCuration(curationData, currentUserId, curationDetailsConfig);
-            this.showSnackbar('Success', `New curation created with ID: ${newId}`, 'success');
-            curationData.id = newId; // Update the ID in the curation data array
+            curationDocId = await createCuration(curationData, currentUserId, curationDetailsConfig);
+            this.showSnackbar('Success', `New curation created with ID: ${curationDocId}`, 'success');
+            curationData.id = curationDocId; // Update the ID in the curation data array
+          }
+
+          // Update the gene curation status
+          if (geneDocId) {
+            await updateGeneCurationStatus(geneDocId, {
+              hasCuration: curationDocId,
+              curatedBy: currentUserId
+            });
           }
         }
       } catch (error) {
         this.showSnackbar('Error', `Error saving curation: ${error.message}`, 'error');
       }
+    },
+    // Helper function to fetch the gene document ID from the store
+    async getGeneDocIdByGeneIdentifier(identifier) {
+      const geneData = await getGeneByHGNCIdOrSymbol(identifier);
+      return geneData ? geneData.docId : null;
     },
   },
 };

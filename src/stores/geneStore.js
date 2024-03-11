@@ -327,3 +327,41 @@ export const parseValue = (value, config) => {
       return value;
   }
 };
+
+
+/**
+ * Updates the gene record with precuration and curation status and curator details.
+ *
+ * @param {string} docId - The document ID of the gene to update.
+ * @param {Object} curationDetails - An object containing the curation details such as precuration status, curation status, and curator identifiers.
+ * @returns {Promise<void>}
+ */
+export const updateGeneCurationStatus = async (docId, curationDetails) => {
+  const geneRef = doc(db, 'genes', docId);
+
+  // Retrieve the current gene document to update arrays
+  const geneDoc = await getDoc(geneRef);
+  if (!geneDoc.exists()) {
+    throw new Error("Gene document not found");
+  }
+  const geneData = geneDoc.data();
+
+  // Initialize the update object with the last modified timestamp
+  const updateData = { updatedAt: Timestamp.fromDate(new Date()) };
+
+  // Conditionally add fields to the update object if they are defined
+  if (curationDetails.hasPrecuration !== undefined) {
+    updateData.hasPrecuration = [...new Set([...(geneData.hasPrecuration || []), curationDetails.hasPrecuration])];
+  }
+  if (curationDetails.hasCuration !== undefined) {
+    updateData.hasCuration = [...new Set([...(geneData.hasCuration || []), curationDetails.hasCuration])];
+  }
+  if (curationDetails.precuratedBy !== undefined) {
+    updateData.precuratedBy = [...new Set([...(geneData.precuratedBy || []), curationDetails.precuratedBy])];
+  }
+  if (curationDetails.curatedBy !== undefined) {
+    updateData.curatedBy = [...new Set([...(geneData.curatedBy || []), curationDetails.curatedBy])];
+  }
+
+  await updateDoc(geneRef, updateData);
+};

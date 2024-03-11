@@ -92,6 +92,7 @@ import {
   createPrecuration,
   updatePrecuration
 } from "@/stores/precurationsStore";
+import { updateGeneCurationStatus } from '@/stores/geneStore';
 import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 
 export default {
@@ -215,6 +216,8 @@ export default {
         }
       });
 
+
+      console.log('Gene object:', this.geneObject.docId);
       // Handling geneDetails as a nested object with the gene document ID as key
       if (this.geneObject && this.geneObject.docId) {
         const geneDocId = this.geneObject.docId;
@@ -261,7 +264,6 @@ export default {
           this.precurationData.workflowConfigVersionUsed = workflowConfigVersion;
           this.precurationData.workflowConfigNameUsed = workflowConfigName;
           docId = await createPrecuration(this.precurationData, currentUserId, precurationDetailsConfig);
-          this.precurationData.docId = docId; // Add docId to precurationData
           this.showSnackbar('Success', 'New precuration created with ID:' + docId, 'success');
         } else {
           // If updating an existing precuration
@@ -269,6 +271,16 @@ export default {
           await updatePrecuration(this.existingPrecurationId, this.precurationData, currentUserId, precurationDetailsConfig);
           docId = this.existingPrecurationId;
           this.showSnackbar('Success', 'Precuration updated' + this.existingPrecurationId, 'success');
+        }
+
+        console.log('Gene object:', this.geneObject.docId);
+        console.log('Precuration docId:', docId);
+        // Update gene curation status in the gene record
+        if (this.geneObject && this.geneObject.docId) {
+          await updateGeneCurationStatus(this.geneObject.docId, {
+            hasPrecuration: docId, // Provide the docId of the new or updated precuration
+            precuratedBy: currentUserId // Provide the userId as an array
+          });
         }
 
         // Emit an event to indicate successful submission, including the docId
