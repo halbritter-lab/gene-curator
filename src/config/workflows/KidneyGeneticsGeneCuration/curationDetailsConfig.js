@@ -153,13 +153,39 @@ export const curationDetailsConfig = {
       style: { curationView: 'select'},
       group: {name: 'Groups', order: 3}
   },
+  kidneyDisease: {
+    label: 'Kidney Disease Association',
+    format: 'text',
+    options: ['yes', 'no', 'unclear'],
+    description: 'Indicates if this entity is associated with kidney disease.',
+    visibility: { tableView: false, standardView: true, curationView: true },
+    style: { curationView: 'select'},
+    group: {name: 'Other', order: 4},
+    required: true
+  },
+  diseaseEquality: {
+    label: 'Disease Equality',
+    format: 'text',
+    description: 'Identifiers for diseases that are equivalent to the curated disease (e.g. from OMIM).',
+    visibility: { tableView: false, standardView: true, curationView: true },
+    style: { curationView: 'text-field'},
+    group: {name: 'Other', order: 4}
+  },
+  geneReviews: {
+    label: 'GeneReviews Article',
+    format: 'text',
+    description: 'References to GeneReviews articles related to the gene.',
+    visibility: { tableView: false, standardView: true, curationView: true },
+    style: { curationView: 'text-field'},
+    group: {name: 'Other', order: 4}
+  },
   comment: {
     label: 'Comment',
     format: 'text',
     description: 'Curator’s comment about this curated entity.',
     visibility: { tableView: false, standardView: false, curationView: true },
     style: { curationView: 'text-field'},
-    group: {name: 'Verdict', order: 3}
+    group: {name: 'Verdict', order: 5}
   },
   decision: {
     label: 'Verdict',
@@ -168,7 +194,7 @@ export const curationDetailsConfig = {
     description: 'The decision made during curation, such as "Definitive" or "Refuted".',
     visibility: { tableView: true, standardView: true, curationView: true },
     style: { curationView: 'select'},
-    group: {name: 'Verdict', order: 3},
+    group: {name: 'Verdict', order: 5},
     required: true
   },
   createdAt: {
@@ -176,56 +202,56 @@ export const curationDetailsConfig = {
     format: 'date',
     description: 'The date and time when the curation record was created.',
     visibility: { tableView: false, standardView: true, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   updatedAt: {
     label: 'Updated At',
     format: 'date',
     description: 'The date and time when the curation record was last updated.',
     visibility: { tableView: false, standardView: true, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   workflowConfigVersionUsed: {
     label: 'Workflow Config Version Used',
     format: 'text',
     description: 'The version of the workflow configuration used to curate this entity.',
     visibility: { tableView: false, standardView: false, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   workflowConfigNameUsed: {
     label: 'Workflow Config Name Used',
     format: 'text',
     description: 'The name of the workflow configuration used to curate this entity.',
     visibility: { tableView: false, standardView: false, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   users: {
     label: 'Users',
     format: 'array',
     description: 'A list of user identifiers who have worked on this curation record.',
     visibility: { tableView: false, standardView: true, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   approvedBy: {
     label: 'Approved By',
     format: 'array',
     description: 'A list of user identifiers who have approved this curation.',
     visibility: { tableView: false, standardView: true, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   approvedAt: {
     label: 'Approved At',
     format: 'date',
     description: 'The date and time when the curation record was approved.',
     visibility: { tableView: false, standardView: true, curationView: false },
-    group: {name: 'Metadata', order: 4}
+    group: {name: 'Metadata', order: 6}
   },
   precurationDetails: {
     label: 'Precuration Details',
     format: 'object',
     description: 'The details of the precuration associated with this curation.',
     visibility: { tableView: false, standardView: false, curationView: false },
-    group: { name: 'Precuration Information', order: 5 },
+    group: { name: 'Precuration Information', order: 7 },
     required: true,
     nestedConfig: precurationDetailsConfig // Reference to the precurationDetailsConfig as the nested configuration
   },
