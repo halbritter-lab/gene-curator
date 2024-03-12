@@ -4,7 +4,7 @@
     <v-card v-if="gene" class="mx-auto my-4" max-width="800">
       <v-card-title v-if="showTitle" class="headline">{{ gene.approved_symbol }}</v-card-title>
       <v-card-text>
-        <v-table dense>
+        <v-table density="compact">
           <tbody>
             <template v-for="(value, key) in filteredGeneDetails" :key="key">
               <tr>
