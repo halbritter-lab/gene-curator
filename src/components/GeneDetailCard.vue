@@ -2,7 +2,10 @@
 <template>
   <v-container>
     <v-card v-if="gene" class="mx-auto my-4" max-width="800">
-      <v-card-title v-if="showTitle" class="headline">{{ gene.approved_symbol }}</v-card-title>
+      <v-card-title v-if="showTitle" class="headline">
+        {{ gene.approved_symbol }}
+        <HelpIcon :helpContent="helpContent" />
+      </v-card-title>
       <v-card-text>
         <v-table density="compact">
           <tbody>
@@ -35,7 +38,8 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
-import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import { geneDetailsConfig, workflowConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import HelpIcon from './HelpIcon.vue';
 
 export default {
   props: {
@@ -49,7 +53,14 @@ export default {
       default: true,
     },
   },
+  components: {
+    HelpIcon, // Add HelpIcon to the components
+  },
   setup(props, { emit }) {
+    // Get the help content from the workflow config
+    const helpContent =  workflowConfig.stages.gene.helpConfig;
+
+    // Define a reactive variable to store the gene data
     const gene = ref(null);
 
     onMounted(async () => {
@@ -100,7 +111,7 @@ export default {
       }
     }
 
-    return { gene, filteredGeneDetails };
+    return { gene, filteredGeneDetails, helpContent };
   },
 };
 </script>

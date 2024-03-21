@@ -6,7 +6,9 @@ import { precurationDetailsConfig, precurationDetailsConfigVersion } from './pre
 import { curationDetailsConfig, curationDetailsConfigVersion } from './curationDetailsConfig';
 
 // Importing static help configurations
+import geneHelpConfig from './static/geneHelp.json';
 import precurationHelpConfig from './static/precurationHelp.json';
+import curationHelpConfig from './static/curationHelp.json';
 
 // Defining the workflow configuration version and name
 export const workflowConfigVersion = '0.2.0';
@@ -18,6 +20,7 @@ export const workflowConfig = {
       gene: {
         configFile: 'geneDetailsConfig.js',
         version: '0.2.0',
+        helpConfig: geneHelpConfig,
         checksum: 'md5-checksum-of-gene-config',
         nextStage: 'precuration'
       },
@@ -55,6 +58,7 @@ export const workflowConfig = {
       curation: {
         configFile: 'curationDetailsConfig.js',
         version: '0.2.0',
+        helpConfig: curationHelpConfig,
         checksum: 'md5-checksum-of-curation-config',
         nextStage: null,
         prefillRules: [

@@ -3,6 +3,7 @@
   <v-card class="elevation-2">
     <v-card-title>
       Curation
+      <HelpIcon :helpContent="helpContent" />
       <v-btn icon class="add-curation-btn" @click="addCurationEntity">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
@@ -131,8 +132,7 @@
 
 
 <script>
-import { curationDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/curationDetailsConfig';
-import { workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import { curationDetailsConfig, workflowConfig, workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 import {
   createCuration,
   updateCuration,
@@ -140,6 +140,7 @@ import {
 } from "@/stores/curationsStore";
 import { required, number, min, max } from '@/utils/validators';
 import { updateGeneCurationStatus, getGeneByHGNCIdOrSymbol } from '@/stores/geneStore';
+import HelpIcon from './HelpIcon.vue';
 
 export default {
   name: 'CurationForm',
@@ -147,6 +148,9 @@ export default {
     approvedSymbol: String,
     hgncId: String,
     precurationDetails: Object,
+  },
+  components: {
+    HelpIcon,
   },
   data() {
     return {
@@ -156,6 +160,7 @@ export default {
       snackbarMessage: '',
       snackbarTitle: '',
       snackbarColor: 'success',
+      helpContent: workflowConfig.stages.curation.helpConfig,
     };
   },
   async created() {
