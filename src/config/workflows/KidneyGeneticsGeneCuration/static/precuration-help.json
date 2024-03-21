@@ -1,0 +1,37 @@
+{
+"HelpDialog": {
+    "title": "Pre-Curation Help",
+    "content": "To begin pre-curation, follow the workflow to determine if the gene/entity is listed in ClinGen. Use sources such as GenCC and OMIM for additional information. Refer to the lumping and splitting criteria to guide your decisions.",
+    "cardStyle": {
+    "padding": "20px"
+    },
+    "titleStyle": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": "20px"
+    }
+},
+"workflow": {
+    "checkListedInClinGen": "Apply this group and points after reviewing the entry.",
+    "reviewExternalSources": {
+    "description": "Review GenCC and OMIM for unlisted genes/entities.",
+    "dataCollection": [
+        "Disease entities associated with the gene",
+        "Variability of phenotypic presentations",
+        "Inheritance pattern for each disease entity asserted"
+    ]
+    }
+},
+"lumpingAndSplittingCriteria": {
+    "lumpCriteria": [
+    "Only one disease entity asserted in literature",
+    "No molecular mechanism difference observed",
+    "Intrafamilial variability pronounced",
+    "Disease entities are part of a variable phenotype in a single organ system"
+    ],
+    "splitCriteria": [
+    "More than one distinct disease entity asserted in literature",
+    "Distinguishable molecular mechanisms",
+    "Different inheritance patterns with varying phenotypes"
+    ]
+}
+}
