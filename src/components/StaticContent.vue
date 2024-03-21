@@ -1,3 +1,4 @@
+<!-- components/StaticContent.vue -->
 <template>
   <v-container>
     <h1>{{ config.title }}</h1>

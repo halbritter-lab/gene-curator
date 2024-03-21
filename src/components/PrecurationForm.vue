@@ -1,7 +1,10 @@
 <!-- components/PrecurationForm.vue -->
 <template>
   <v-card class="elevation-2">
-    <v-card-title>Precuration</v-card-title>
+    <v-card-title>
+      Precuration
+      <HelpIcon :helpContent="helpContent" />
+    </v-card-title>
     <v-card-text>
       <v-container>
         <!-- Group the fields by the group attribute -->
@@ -86,14 +89,14 @@
 
 
 <script>
-import { precurationDetailsConfig, workflowConfig, workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import { geneDetailsConfig, precurationDetailsConfig, workflowConfig, workflowConfigVersion, workflowConfigName } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
 import {
   getPrecurationByHGNCIdOrSymbol,
   createPrecuration,
   updatePrecuration
 } from "@/stores/precurationsStore";
 import { updateGeneCurationStatus } from '@/stores/geneStore';
-import { geneDetailsConfig } from '@/config/workflows/KidneyGeneticsGeneCuration/workflowConfig';
+import HelpIcon from './HelpIcon.vue';
 
 export default {
   name: 'PrecurationForm',
@@ -102,6 +105,7 @@ export default {
   },
   emits: ['precuration-accepted'],
   components: {
+    HelpIcon,
   },
   data() {
     return {
@@ -113,6 +117,7 @@ export default {
       snackbarMessage: '',
       snackbarTitle: '',
       snackbarColor: 'success',
+      helpContent: workflowConfig.stages.precuration.helpConfig,
     };
   },
   computed: {
@@ -216,8 +221,6 @@ export default {
         }
       });
 
-
-      console.log('Gene object:', this.geneObject.docId);
       // Handling geneDetails as a nested object with the gene document ID as key
       if (this.geneObject && this.geneObject.docId) {
         const geneDocId = this.geneObject.docId;
@@ -273,8 +276,6 @@ export default {
           this.showSnackbar('Success', 'Precuration updated' + this.existingPrecurationId, 'success');
         }
 
-        console.log('Gene object:', this.geneObject.docId);
-        console.log('Precuration docId:', docId);
         // Update gene curation status in the gene record
         if (this.geneObject && this.geneObject.docId) {
           await updateGeneCurationStatus(this.geneObject.docId, {

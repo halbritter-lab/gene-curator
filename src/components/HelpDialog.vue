@@ -1,19 +1,26 @@
 <!-- components/HelpDialog.vue -->
 <template>
-  <v-dialog
-    width="auto"
-    v-model="dialog"
-  >
-    <v-card :style="cardStyle">
-      <v-card-title :style="titleStyle">
-        {{ title }}
-      </v-card-title>
-      <!-- Use a div instead of v-card-text to avoid the warning and still render HTML -->
-      <div v-html="content" class="v-card-text" :style="contentStyle">
-      </div>
+  <v-dialog v-model="dialog" max-width="600px">
+    <v-card>
+      <v-card-title>{{ helpContent.HelpDialog.title }}</v-card-title>
+      <v-container>
+        <v-row>
+          <v-col v-for="section in helpContent.sections" :key="section.header" cols="12">
+            <v-card outlined>
+              <v-card-title>{{ section.header }}</v-card-title>
+              <v-card-text v-html="section.content"></v-card-text>
+              <v-card-actions v-if="section.links">
+                <v-btn v-for="link in section.links" :key="link.title" :href="link.url" text>
+                  {{ link.title }}
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="primary" elevation="0" @click="dialog = false">Ok</v-btn>
+        <v-btn color="primary" @click="close">Close</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -21,40 +28,23 @@
 
 <script>
 export default {
-  name: "HelpDialog",
-
+  name: 'HelpDialog',
   props: {
-    title: {
-      type: String,
-      default: '',
-    },
-    content: {
-      type: String,
-      default: '',
-    },
-    config: {
+    helpContent: {
       type: Object,
-      default: () => ({}),
+      required: true,
     },
   },
-  data () {
+  data() {
     return {
       dialog: false,
-    }
+    };
   },
-  computed: {
-    cardStyle() {
-      return this.config.cardStyle || { padding: '10px 0' };
-    },
-    titleStyle() {
-      return this.config.titleStyle || { fontFamily: 'google-sans, sans-serif', fontSize: '24px' };
-    },
-    contentStyle() {
-      // You can define default styles or pull them from config
-      return this.config.contentStyle || {};
-    },
-  },
+  emits: ['update:modelValue'],
   methods: {
+    close() {
+      this.$emit('update:modelValue', false);
+    },
   },
 };
 </script>
