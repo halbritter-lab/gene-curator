@@ -14,7 +14,7 @@ export const workflowConfig = {
     stages: {
       gene: {
         configFile: 'geneDetailsConfig.js',
-        version: '0.1.0',
+        version: '0.2.0',
         checksum: 'md5-checksum-of-gene-config',
         nextStage: 'precuration'
       },

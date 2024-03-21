@@ -1,7 +1,7 @@
 // config/workflow/KidneyGeneticsGeneCuration/geneDetailsConfig.js
 
 // Define the version of the gene details configuration
-export const geneDetailsConfigVersion = '0.1.0';
+export const geneDetailsConfigVersion = '0.2.0';
 
 // Define the gene details configuration
 export const geneDetailsConfig = {
