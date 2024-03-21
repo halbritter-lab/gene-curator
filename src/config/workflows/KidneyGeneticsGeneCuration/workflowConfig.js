@@ -5,6 +5,9 @@ import { geneDetailsConfig, geneDetailsConfigVersion } from './geneDetailsConfig
 import { precurationDetailsConfig, precurationDetailsConfigVersion } from './precurationDetailsConfig';
 import { curationDetailsConfig, curationDetailsConfigVersion } from './curationDetailsConfig';
 
+// Importing static help configurations
+import precurationHelpConfig from './static/precurationHelp.json';
+
 // Defining the workflow configuration version and name
 export const workflowConfigVersion = '0.2.0';
 export const workflowConfigName = 'Kidney Genetics Gene Curation';
@@ -21,6 +24,7 @@ export const workflowConfig = {
       precuration: {
         configFile: 'precurationDetailsConfig.js',
         version: '0.2.0',
+        helpConfig: precurationHelpConfig,
         checksum: 'md5-checksum-of-precuration-config',
         nextStage: 'curation',
         prefillRules: [
