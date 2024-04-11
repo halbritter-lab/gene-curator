@@ -136,6 +136,7 @@ export default {
 
     // Function to handle modal closure
     const closeModal = () => {
+      selectedItem.value = ref({});
       showModal.value = false;
     };
     

@@ -135,7 +135,14 @@ export default {
       }
     };
 
-    const close = () => emit('close');
+    // Emit the 'close' event when the close method is called
+    // also reset the geneData
+    // and set the precurationDetails to null
+    const close = () => {
+      emit('close');
+      geneData.value = null;
+      precurationDetails.value = null;
+    };
 
     const checkExistingCuration = async () => {
       try {
