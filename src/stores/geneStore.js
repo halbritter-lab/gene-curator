@@ -155,6 +155,32 @@ export const getGeneByHGNCIdOrSymbol = async (identifier) => {
 
 
 /**
+ * Retrieves a specific gene document from the Firestore 'genes' collection by document ID.
+ *
+ * @async
+ * @function getGeneByDocId
+ * @param {string} docId - The document ID of the gene to retrieve.
+ * @returns {Promise<Object>} - A promise that resolves to an object containing the gene data.
+ * @throws {Error} - Throws an error if the document doesn't exist or the retrieval fails.
+ * @description This function retrieves a specific gene document from the Firestore 'genes' collection using the provided document ID.
+ */
+export const getGeneByDocId = async (docId) => {
+  try {
+    const geneRef = doc(db, 'genes', docId);
+    const docSnap = await getDoc(geneRef);
+
+    if (docSnap.exists()) {
+      return { docId: docSnap.id, ...docSnap.data() };
+    } else {
+      throw new Error("Gene document not found");
+    }
+  } catch (error) {
+    throw new Error(`Error retrieving gene by document ID: ${error.message}`);
+  }
+};
+
+
+/**
  * Parses a CSV string, checks against existing entries based on unique columns, 
  * and writes or updates each row as a document in the 'genes' collection with timestamps.
  * 

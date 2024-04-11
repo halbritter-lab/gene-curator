@@ -39,7 +39,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import DataDisplayTable from '@/components/DataDisplayTable.vue';
-import { getGenes } from '@/stores/geneStore';
+import { getGenes, getGeneByDocId } from '@/stores/geneStore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import CurationModal from '@/components/CurationModal.vue';
 import DataExport from '@/components/DataExport.vue';
@@ -135,8 +135,26 @@ export default {
     };
 
     // Function to handle modal closure
-    const closeModal = () => {
-      selectedItem.value = ref({});
+    const closeModal = async () => {
+      if (selectedItem.value.docId) {
+        try {
+          // Fetch the latest data for the selected gene by its document ID
+          const updatedGeneData = await getGeneByDocId(selectedItem.value.docId);
+
+          // Create a new object for rawItems with the updated data
+          // This ensures reactivity by replacing the object rather than mutating it
+          rawItems.value = {
+            ...rawItems.value,
+            [[selectedItem.value.hgnc_id, selectedItem.value.cur_id].join('-')]: updatedGeneData
+          };
+        } catch (error) {
+          console.error(`Failed to fetch updated gene data: ${error.message}`);
+          // Handle the error appropriately, possibly with a user notification
+        }
+      }
+      
+      // Reset selectedItem and close the modal
+      selectedItem.value = {};
       showModal.value = false;
     };
     
