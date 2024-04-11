@@ -2,7 +2,7 @@
 <template>
   <v-card class="elevation-2">
     <v-card-title>
-      Curation
+      Curation ({{ curationEntityCount }} Entities)
       <HelpIcon :helpContent="helpContent" />
       <v-btn icon class="add-curation-btn" @click="addCurationEntity">
         <v-icon>mdi-plus</v-icon>
@@ -10,7 +10,11 @@
     </v-card-title>
 
     <!-- Expansion Panels for multiple curation entities -->
-    <v-expansion-panels multiple>
+    <v-expansion-panels
+      multiple
+      open
+      v-model="openedPanels"
+    >
       <v-expansion-panel v-for="(curationData, index) in curationDataArray" :key="`curation-${index}`" :title="`Curation Entity ${ index + 1 }`">
           <v-expansion-panel-text>
             <!-- Dynamic Field Rendering Based on Configuration -->
@@ -161,6 +165,7 @@ export default {
       snackbarTitle: '',
       snackbarColor: 'success',
       helpContent: workflowConfig.stages.curation.helpConfig,
+      openedPanels: [0],
     };
   },
   async created() {
@@ -197,6 +202,9 @@ export default {
       });
 
       return groups;
+    },
+    curationEntityCount() {
+      return this.curationDataArray.length;
     },
   },
   methods: {
