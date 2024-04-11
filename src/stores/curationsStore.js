@@ -1,5 +1,5 @@
 // stores/curationsStore.js
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
+import { collection, getDocs, getDoc, setDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 
 
@@ -32,6 +32,7 @@ export const getCurations = async () => {
  */
 const validateCurationData = (curationData, config) => {
   const errors = [];
+  console.log(curationData);
 
   for (const [key, field] of Object.entries(config)) {
     const value = curationData[key];
@@ -80,14 +81,17 @@ export const createCuration = async (curationData, userId, config) => {
     throw new Error("A curation with the same symbol, disease, and inheritance already exists.");
   }
 
-  const docRef = await addDoc(collection(db, 'curations'), {
+  const docId = doc(collection(db, 'curations'));
+
+  await setDoc(docId, {
     ...curationData,
     users: [userId],
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
+    id: docId.id,
   });
 
-  return docRef.id;
+  return docId.id;
 };
 
 

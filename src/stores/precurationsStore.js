@@ -1,5 +1,5 @@
 // stores/precurationsStore.js
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
+import { collection, getDocs, getDoc, setDoc, doc, updateDoc, deleteDoc, Timestamp, query, where } from 'firebase/firestore';
 import { db } from '@/firebase';
 
 
@@ -67,14 +67,17 @@ export const createPrecuration = async (precurationData, userId, config) => {
     throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
   }
 
-  const docRef = await addDoc(collection(db, 'precurations'), {
+  const docId = doc(collection(db, 'precurations'));
+
+  await setDoc(docId, {
     ...precurationData,
     users: [userId], // Initialize with the creating user
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
+    id: docId.id,
   });
 
-  return docRef.id;
+  return docId.id;
 };
 
 
