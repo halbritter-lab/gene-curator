@@ -265,9 +265,8 @@ export default {
 
       // Add precuration data as nested object using document id as key
       if (this.precurationDetails && this.precurationDetails.id) {
-        const precurationDocId = this.precurationDetails.id;
         // Creating a nested object with docId as key
-        data['precurationDetails'] = { [precurationDocId]: this.precurationDetails };
+        data['precurationDetails'] = { [this.precurationDetails.id]: this.precurationDetails };
       }
 
       return data;

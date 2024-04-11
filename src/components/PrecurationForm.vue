@@ -285,7 +285,7 @@ export default {
         }
 
         // Emit an event to indicate successful submission, including the docId
-        this.$emit('precuration-accepted', { docId, ...this.precurationData });
+        this.$emit('precuration-accepted', { id: docId, ...this.precurationData });
       } catch (error) {
         this.showSnackbar('Error', error.message || "There was an error submitting the precuration", 'error');
       }
