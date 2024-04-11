@@ -133,7 +133,8 @@ export const curationDetailsConfig = {
       description: 'Clinical categorization of the entity.',
       visibility: { tableView: false, standardView: true, curationView: true },
       style: { curationView: 'select'},
-      group: {name: 'Groups', order: 3}
+      group: {name: 'Groups', order: 3},
+      required: true
   },
   onset: {
       label: 'Onset Group',
