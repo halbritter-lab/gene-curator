@@ -141,6 +141,7 @@ export default {
       try {
         const existingCuration = await getPrecurationByHGNCIdOrSymbol(editedItem.value.hgnc_id || editedItem.value.approved_symbol);
         if (existingCuration) {
+          precurationDetails.value = existingCuration;
           showCurationTab.value = true;
           tab.value = 1; // Open Curation tab if curation exists
         } else {

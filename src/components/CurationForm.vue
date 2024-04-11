@@ -255,9 +255,9 @@ export default {
         }
       });
 
-      // Add precuration data as nested object using docId as key
-      if (this.precurationDetails && this.precurationDetails.docId) {
-        const precurationDocId = this.precurationDetails.docId;
+      // Add precuration data as nested object using document id as key
+      if (this.precurationDetails && this.precurationDetails.id) {
+        const precurationDocId = this.precurationDetails.id;
         // Creating a nested object with docId as key
         data['precurationDetails'] = { [precurationDocId]: this.precurationDetails };
       }

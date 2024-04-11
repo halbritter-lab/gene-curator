@@ -32,7 +32,6 @@ export const getCurations = async () => {
  */
 const validateCurationData = (curationData, config) => {
   const errors = [];
-  console.log(curationData);
 
   for (const [key, field] of Object.entries(config)) {
     const value = curationData[key];
