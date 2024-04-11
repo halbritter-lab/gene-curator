@@ -43,7 +43,6 @@
           <v-window-item v-if="showCurationTab">
             <!-- CurationForm Component -->
             <CurationForm
-              v-if="precurationDetails"
               :approvedSymbol="editedItem.approved_symbol"
               :hgncId="editedItem.hgnc_id"
               :precurationDetails="precurationDetails"
