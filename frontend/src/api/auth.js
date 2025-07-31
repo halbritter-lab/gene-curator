@@ -29,5 +29,14 @@ export const authAPI = {
   async me() {
     const response = await apiClient.get('/auth/me')
     return response.data
+  },
+
+  async changePassword(passwordData) {
+    const response = await apiClient.post('/auth/change-password', passwordData)
+    return response.data
   }
 }
+
+// Export as both named export and default for compatibility
+export const authApi = authAPI
+export default authAPI

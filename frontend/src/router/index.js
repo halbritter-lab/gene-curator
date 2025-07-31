@@ -9,6 +9,7 @@ const GenesTable = () => import('@/views/GenesTable.vue')
 const GeneDetail = () => import('@/views/GeneDetail.vue')
 const GeneAdmin = () => import('@/views/GeneAdmin.vue')
 const UserProfile = () => import('@/views/UserProfile.vue')
+const UserManagement = () => import('@/views/UserManagement.vue')
 const About = () => import('@/views/About.vue')
 const FAQ = () => import('@/views/FAQ.vue')
 const NotAuthorized = () => import('@/views/NotAuthorized.vue')
@@ -75,6 +76,16 @@ const routes = [
     meta: { 
       title: 'User Profile',
       requiresAuth: true
+    }
+  },
+  {
+    path: '/admin/users',
+    name: 'UserManagement',
+    component: UserManagement,
+    meta: { 
+      title: 'User Management',
+      requiresAuth: true,
+      requiredRoles: ['admin']
     }
   },
   {

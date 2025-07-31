@@ -143,6 +143,13 @@ const menuItems = [
         title: 'Gene Management',
         to: { name: 'GeneAdmin' },
         icon: 'mdi-database-edit'
+      },
+      {
+        name: 'user-management',
+        title: 'User Management',
+        to: { name: 'UserManagement' },
+        icon: 'mdi-account-group',
+        requiredRoles: ['admin']
       }
     ]
   },
@@ -180,13 +187,29 @@ const visibleMenuItems = computed(() => {
       return false
     }
     
+    // Filter children based on role requirements
+    if (item.children) {
+      item.children = item.children.filter(child => {
+        if (child.requiredRoles && !authStore.hasAnyRole(child.requiredRoles)) {
+          return false
+        }
+        return true
+      })
+      
+      // Hide parent if no children are visible
+      if (item.children.length === 0) {
+        return false
+      }
+    }
+    
     return true
   })
 })
 
 const toggleTheme = () => {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-  localStorage.setItem('theme', theme.global.name.value)
+  const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
+  theme.global.name.value = newTheme
+  localStorage.setItem('theme', newTheme)
 }
 
 const handleLogout = async () => {

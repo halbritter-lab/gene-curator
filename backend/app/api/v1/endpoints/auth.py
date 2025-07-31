@@ -142,6 +142,27 @@ async def change_password(
     
     return {"message": "Password updated successfully"}
 
+@router.post("/change-password")
+async def change_password_alt(
+    password_data: PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+) -> Any:
+    """
+    Change current user's password (alternative endpoint).
+    """
+    # Verify current password
+    if not user_crud.authenticate(db, current_user.email, password_data.current_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password"
+        )
+    
+    # Update password
+    user_crud.update_password(db, str(current_user.id), password_data.new_password)
+    
+    return {"message": "Password updated successfully"}
+
 @router.post("/register", response_model=UserResponse)
 async def register_user(
     user_data: UserCreate,
