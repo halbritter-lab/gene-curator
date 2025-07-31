@@ -1,0 +1,35 @@
+# Development-specific overrides
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: gene_curator_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - ./database/sql:/docker-entrypoint-initdb.d  # Use main SQL files
+      - dev_postgres_data:/var/lib/postgresql/data
+
+  backend:
+    environment:
+      DATABASE_URL: postgresql://dev_user:dev_password@postgres:5432/gene_curator_dev
+      ENVIRONMENT: development
+      DEBUG: "true"
+      LOG_LEVEL: debug
+    volumes:
+      - ./backend:/app
+      - ./plan/archived/current_codebase/src/config:/app/legacy_config  # For migration reference
+
+  # Frontend will be uncommented when implemented
+  # frontend:
+  #   environment:
+  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
+  #     VITE_ENVIRONMENT: development
+  #   volumes:
+  #     - ./frontend:/app
+  #     - ./plan/archived/current_codebase/src/config:/app/legacy_config
+
+volumes:
+  dev_postgres_data:
+    driver: local
