@@ -212,8 +212,8 @@ const visibleMenuItems = computed(() => {
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
   
-  // Use modern Vuetify theme switching without deprecated warnings
-  theme.global.name.value = newTheme
+  // Use the new Vuetify theme API
+  theme.change(newTheme)
   localStorage.setItem('theme', newTheme)
 }
 
@@ -227,11 +227,10 @@ const handleLogout = async () => {
 }
 
 onMounted(() => {
-  // Apply saved theme on mount
+  // Apply saved theme on mount using new API
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
-    // Initialize theme without triggering deprecation
-    theme.global.name.value = savedTheme
+    theme.change(savedTheme)
   }
 })
 </script>
