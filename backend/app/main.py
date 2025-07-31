@@ -2,21 +2,20 @@
 FastAPI main application entry point.
 """
 
+import logging
+import time
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import time
-import logging
 
-from app.core.config import settings
-from app.core.database import engine
-from app.models import database_models  # Import to ensure tables are created
 from app.api.v1.api import api_router
+from app.core.config import settings
 
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL.upper()),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add request timing middleware
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -48,8 +48,10 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
+
 
 # Root endpoint
 @app.get("/")
@@ -64,6 +66,7 @@ async def root():
         "docs_url": "/docs" if settings.ENVIRONMENT == "development" else None,
     }
 
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
@@ -71,22 +74,24 @@ async def health_check():
     try:
         # Test database connection
         from sqlalchemy import text
+
         from app.core.database import get_db
-        
+
         db = next(get_db())
         db.execute(text("SELECT 1"))
         db_status = "healthy"
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
         db_status = "unhealthy"
-    
+
     return {
         "status": "healthy" if db_status == "healthy" else "unhealthy",
         "timestamp": time.time(),
         "database": db_status,
         "environment": settings.ENVIRONMENT,
-        "version": "2.0.0"
+        "version": "2.0.0",
     }
+
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -97,9 +102,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "detail": "Internal server error",
             "type": "internal_error",
-            "request_id": id(request)
-        }
+            "request_id": id(request),
+        },
     )
+
 
 # Startup event
 @app.on_event("startup")
@@ -109,16 +115,19 @@ async def startup_event():
     logger.info(f"Database URL: {settings.DATABASE_URL}")
     logger.info(f"ClinGen SOP Version: {settings.CLINGEN_SOP_VERSION}")
 
+
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Shutting down Gene Curator API...")
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=settings.ENVIRONMENT == "development"
+        reload=settings.ENVIRONMENT == "development",
     )

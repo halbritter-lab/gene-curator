@@ -132,17 +132,51 @@ const menuItems = [
     requiresAuth: false
   },
   {
+    name: 'curation',
+    title: 'Curation',
+    icon: 'mdi-clipboard-check',
+    requiresAuth: true,
+    requiredRoles: ['admin', 'curator'],
+    children: [
+      {
+        name: 'precurations',
+        title: 'Pre-curations',
+        to: { name: 'Precurations' },
+        icon: 'mdi-clipboard-text'
+      },
+      {
+        name: 'curations',
+        title: 'Curations',
+        to: { name: 'Curations' },
+        icon: 'mdi-clipboard-check-multiple'
+      },
+      {
+        name: 'create-precuration',
+        title: 'Create Pre-curation',
+        to: { name: 'CreatePrecuration' },
+        icon: 'mdi-plus-circle'
+      },
+      {
+        name: 'create-curation',
+        title: 'Create Curation',
+        to: { name: 'CreateCuration' },
+        icon: 'mdi-plus-circle-multiple'
+      }
+    ]
+  },
+  {
     name: 'admin',
     title: 'Admin',
     icon: 'mdi-cog',
     requiresAuth: true,
-    requiredRoles: ['admin', 'curator'],
+    requiredRoles: ['admin'],
     children: [
       {
         name: 'gene-admin',
         title: 'Gene Management',
         to: { name: 'GeneAdmin' },
-        icon: 'mdi-database-edit'
+        icon: 'mdi-database-edit',
+        requiredRoles: ['admin']
       },
       {
         name: 'user-management',

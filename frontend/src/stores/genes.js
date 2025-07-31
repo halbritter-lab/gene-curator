@@ -19,8 +19,6 @@ export const useGenesStore = defineStore('genes', {
     },
     searchParams: {
       query: '',
-      gene_family: '',
-      chromosome: '',
       sort_by: 'approved_symbol',
       sort_order: 'asc'
     }
@@ -309,8 +307,6 @@ export const useGenesStore = defineStore('genes', {
       this.searchResults = null
       this.searchParams = {
         query: '',
-        gene_family: '',
-        chromosome: '',
         sort_by: 'approved_symbol',
         sort_order: 'asc'
       }

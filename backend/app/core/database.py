@@ -2,10 +2,11 @@
 Database configuration and session management.
 """
 
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import logging
 
 from app.core.config import settings
 
@@ -17,7 +18,7 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
-    echo=settings.DEBUG and settings.LOG_LEVEL.lower() == "debug"
+    echo=settings.DEBUG and settings.LOG_LEVEL.lower() == "debug",
 )
 
 # Create session factory
@@ -25,6 +26,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create declarative base
 Base = declarative_base()
+
 
 def get_db():
     """
@@ -41,11 +43,13 @@ def get_db():
     finally:
         db.close()
 
+
 def init_db():
     """Initialize database by creating all tables."""
     logger.info("Initializing database...")
     Base.metadata.create_all(bind=engine)
     logger.info("Database initialization complete.")
+
 
 def check_db_connection():
     """Check database connection health."""

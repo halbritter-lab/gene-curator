@@ -1,3 +1,5 @@
 export { authAPI } from './auth.js'
 export { genesAPI } from './genes.js'
+export { precurationsAPI } from './precurations.js'
+export { curationsAPI } from './curations.js'
 export { default as apiClient } from './client.js'

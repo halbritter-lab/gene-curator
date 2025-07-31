@@ -14,6 +14,7 @@ Gene Curator is a Vue.js-based platform for genetic information curation and man
 
 ## Essential Commands
 
+### Frontend Commands
 ```bash
 # Development
 npm run serve       # Start development server (http://localhost:8080)
@@ -22,6 +23,27 @@ npm run lint        # Run ESLint to check code quality
 
 # Installation
 npm install         # Install dependencies (requires Node.js 16.20.0)
+```
+
+### Backend Commands
+```bash
+# Setup and Development
+make dev           # Set up development environment with pre-commit hooks
+poetry install     # Install Python dependencies
+
+# Code Quality
+make lint          # Run all linting checks (ruff, mypy, bandit, poetry)
+make format        # Auto-format code with ruff
+make type-check    # Run mypy type checking only
+make security-check # Run bandit security analysis only
+
+# Testing
+make test          # Run pytest tests
+make test-cov      # Run tests with coverage report
+
+# Maintenance
+make clean         # Clean build artifacts and cache
+make update-deps   # Update dependencies and pre-commit hooks
 ```
 
 ## Architecture Overview

@@ -157,7 +157,7 @@ const features = [
   },
   {
     title: 'Advanced Search',
-    description: 'Powerful search capabilities across gene symbols, families, chromosomes, and functional annotations',
+    description: 'Powerful search capabilities across gene symbols, HGNC IDs, and dyadic names for efficient curation',
     icon: 'mdi-magnify',
     color: 'info'
   },
@@ -198,21 +198,21 @@ const statisticsCards = computed(() => {
       color: 'primary'
     },
     {
-      title: 'Gene Families',
-      value: statistics.value.gene_families || 0,
-      icon: 'mdi-family-tree',
+      title: 'Curation Ready',
+      value: statistics.value.genes_ready_for_curation || 0,
+      icon: 'mdi-clipboard-check',
       color: 'success'
     },
     {
-      title: 'Chromosomes',
-      value: statistics.value.chromosomes || 0,
-      icon: 'mdi-chromosome',
+      title: 'Recent Additions',
+      value: statistics.value.recent_additions || 0,
+      icon: 'mdi-plus-circle',
       color: 'info'
     },
     {
-      title: 'Last Updated',
-      value: formatDate(statistics.value.last_updated),
-      icon: 'mdi-clock',
+      title: 'Recently Updated',
+      value: statistics.value.updated_last_week || 0,
+      icon: 'mdi-update',
       color: 'warning'
     }
   ]

@@ -12,6 +12,12 @@ const UserProfile = () => import('@/views/UserProfile.vue')
 const UserManagement = () => import('@/views/UserManagement.vue')
 const About = () => import('@/views/About.vue')
 const FAQ = () => import('@/views/FAQ.vue')
+const PrecurationsTable = () => import('@/views/PrecurationsTable.vue')
+const PrecurationDetail = () => import('@/views/PrecurationDetail.vue')
+const CreatePrecuration = () => import('@/views/CreatePrecuration.vue')
+const CurationsTable = () => import('@/views/CurationsTable.vue')
+const CurationDetail = () => import('@/views/CurationDetail.vue')
+const CreateCuration = () => import('@/views/CreateCuration.vue')
 const NotAuthorized = () => import('@/views/NotAuthorized.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
@@ -66,7 +72,69 @@ const routes = [
     meta: { 
       title: 'Gene Administration',
       requiresAuth: true,
-      requiredRoles: ['admin', 'curator']
+      requiredRoles: ['admin'] // Only admins can manage genes (bulk upload/delete)
+    }
+  },
+  {
+    path: '/precurations',
+    name: 'Precurations',
+    component: PrecurationsTable,
+    meta: { 
+      title: 'Pre-curations',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
+    path: '/precurations/create',
+    name: 'CreatePrecuration',
+    component: CreatePrecuration,
+    meta: { 
+      title: 'Create Pre-curation',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
+    path: '/precurations/:id',
+    name: 'PrecurationDetail',
+    component: PrecurationDetail,
+    props: true,
+    meta: { 
+      title: 'Pre-curation Details',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
+    path: '/curations',
+    name: 'Curations',
+    component: CurationsTable,
+    meta: { 
+      title: 'Curations',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
+    path: '/curations/create',
+    name: 'CreateCuration',
+    component: CreateCuration,
+    meta: { 
+      title: 'Create Curation',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
+    path: '/curations/:id',
+    name: 'CurationDetail',
+    component: CurationDetail,
+    props: true,
+    meta: { 
+      title: 'Curation Details',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
     }
   },
   {
