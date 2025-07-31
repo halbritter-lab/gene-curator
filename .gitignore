@@ -24,3 +24,4 @@ pnpm-debug.log*
 
 # claude files and folders
 .claude/
+CLAUDE.md
