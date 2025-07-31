@@ -29,7 +29,7 @@
             <div class="d-flex align-center">
               <v-icon color="primary" size="32" class="me-3">mdi-account-group</v-icon>
               <div>
-                <div class="text-h5 font-weight-bold">{{ statistics.total_users || 0 }}</div>
+                <div class="text-h5 font-weight-bold">{{ usersStore.statistics.total_users || 0 }}</div>
                 <div class="text-caption text-medium-emphasis">Total Users</div>
               </div>
             </div>
@@ -42,7 +42,7 @@
             <div class="d-flex align-center">
               <v-icon color="success" size="32" class="me-3">mdi-account-check</v-icon>
               <div>
-                <div class="text-h5 font-weight-bold">{{ statistics.active_users || 0 }}</div>
+                <div class="text-h5 font-weight-bold">{{ usersStore.statistics.active_users || 0 }}</div>
                 <div class="text-caption text-medium-emphasis">Active Users</div>
               </div>
             </div>
@@ -55,7 +55,7 @@
             <div class="d-flex align-center">
               <v-icon color="warning" size="32" class="me-3">mdi-account-off</v-icon>
               <div>
-                <div class="text-h5 font-weight-bold">{{ statistics.inactive_users || 0 }}</div>
+                <div class="text-h5 font-weight-bold">{{ usersStore.statistics.inactive_users || 0 }}</div>
                 <div class="text-caption text-medium-emphasis">Inactive Users</div>
               </div>
             </div>
@@ -68,7 +68,7 @@
             <div class="d-flex align-center">
               <v-icon color="info" size="32" class="me-3">mdi-account-clock</v-icon>
               <div>
-                <div class="text-h5 font-weight-bold">{{ statistics.recent_registrations || 0 }}</div>
+                <div class="text-h5 font-weight-bold">{{ usersStore.statistics.recent_registrations || 0 }}</div>
                 <div class="text-caption text-medium-emphasis">Recent (30d)</div>
               </div>
             </div>
@@ -94,7 +94,7 @@
       <v-col cols="12" md="6" class="d-flex align-center justify-end">
         <v-btn
           @click="refreshUsers"
-          :loading="loading"
+          :loading="usersStore.loading"
           variant="outlined"
           prepend-icon="mdi-refresh"
         >
@@ -107,14 +107,14 @@
     <v-card>
       <v-data-table
         :headers="headers"
-        :items="paginatedUsers"
-        :loading="loading"
+        :items="usersStore.paginatedUsers"
+        :loading="usersStore.loading"
         loading-text="Loading users..."
         no-data-text="No users found"
-        :items-per-page="itemsPerPage"
-        :page="currentPage"
-        @update:page="currentPage = $event"
-        @update:items-per-page="itemsPerPage = $event"
+        :items-per-page="usersStore.itemsPerPage"
+        :page="usersStore.currentPage"
+        @update:page="usersStore.currentPage = $event"
+        @update:items-per-page="usersStore.itemsPerPage = $event"
       >
         <!-- User info -->
         <template #item.name="{ item }">
@@ -302,7 +302,7 @@
           </v-btn>
           <v-btn 
             @click="saveUser" 
-            :loading="loading"
+            :loading="usersStore.loading"
             :disabled="!formValid"
             color="primary"
           >
@@ -403,7 +403,7 @@
           </v-btn>
           <v-btn 
             @click="performDeleteUser" 
-            :loading="loading"
+            :loading="usersStore.loading"
             color="error"
           >
             Delete
@@ -426,7 +426,6 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useUsersStore } from '@/stores/users'
 
 // Simple debounce function
@@ -473,16 +472,8 @@ const userFormData = ref({
   is_active: true
 })
 
-// Computed
-const { 
-  users, 
-  paginatedUsers, 
-  statistics, 
-  loading, 
-  error, 
-  currentPage, 
-  itemsPerPage 
-} = storeToRefs(usersStore)
+// Store reactive properties (accessed directly without destructuring)
+// const { users, paginatedUsers, statistics, loading, error, currentPage, itemsPerPage } are accessed via usersStore.*
 
 // Table headers
 const headers = [

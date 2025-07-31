@@ -212,11 +212,8 @@ const visibleMenuItems = computed(() => {
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
   
-  // Use the new Vuetify theme API
-  if (theme.global && typeof theme.global.name === 'object' && 'value' in theme.global.name) {
-    theme.global.name.value = newTheme
-  }
-  
+  // Use modern Vuetify theme switching without deprecated warnings
+  theme.global.name.value = newTheme
   localStorage.setItem('theme', newTheme)
 }
 
@@ -229,12 +226,11 @@ const handleLogout = async () => {
   }
 }
 
-onMounted(async () => {
-  // Apply saved theme after Vue is fully mounted
+onMounted(() => {
+  // Apply saved theme on mount
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
-    await nextTick()
-    // Set the theme name
+    // Initialize theme without triggering deprecation
     theme.global.name.value = savedTheme
   }
 })
