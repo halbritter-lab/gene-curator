@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '@/stores/auth.js'
@@ -208,7 +208,12 @@ const visibleMenuItems = computed(() => {
 
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
-  theme.global.name.value = newTheme
+  
+  // Use the new Vuetify theme API
+  if (theme.global && typeof theme.global.name === 'object' && 'value' in theme.global.name) {
+    theme.global.name.value = newTheme
+  }
+  
   localStorage.setItem('theme', newTheme)
 }
 
@@ -221,10 +226,12 @@ const handleLogout = async () => {
   }
 }
 
-onMounted(() => {
-  // Apply saved theme
+onMounted(async () => {
+  // Apply saved theme after Vue is fully mounted
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
+    await nextTick()
+    // Set the theme name
     theme.global.name.value = savedTheme
   }
 })
