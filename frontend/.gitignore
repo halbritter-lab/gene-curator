@@ -133,6 +133,7 @@ dist/
 # Vue.js
 *.vue.js
 *.vue.d.ts
+.vue-tsc-cache/
 
 # TypeScript
 *.tsbuildinfo
@@ -141,8 +142,8 @@ tsconfig.tsbuildinfo
 # ESLint
 .eslintcache
 
-# Prettier
-.prettierignore
+# Prettier cache
+.prettier-cache
 
 # Stylelint
 .stylelintcache

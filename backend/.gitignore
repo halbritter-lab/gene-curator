@@ -194,9 +194,12 @@ Thumbs.db
 celerybeat-schedule.*
 dump.rdb
 
-# Alembic
-alembic/versions/*.py
-!alembic/versions/README
+# Alembic - keep migration files but ignore temp files
+# Uncomment the following lines if you want to ignore migration files:
+# alembic/versions/*.py
+# !alembic/versions/README
+alembic.ini.bak
+alembic/*.pyc
 
 # Local development
 .env.local
