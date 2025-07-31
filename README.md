@@ -1,68 +1,115 @@
-# Gene Curator
+# Gene Curator - ClinGen Compliant Genetic Curation Platform
 
-![Gene Curator Logo](public/img/logo.png)
+> **🚧 ARCHITECTURE REFACTOR IN PROGRESS**
+> 
+> This project is currently undergoing a major architectural transformation to implement native ClinGen Standard Operating Procedure (SOP v11) compliance and migrate to a modern three-tier architecture.
 
-Gene Curator is an open-source platform designed for the curation and management of genetic information. This project provides tools for gene data analysis, visualization, and export, assisting researchers and clinicians in the field of genomics.
+## Project Status
 
-## Table of Contents
+- **Current State**: Refactoring in progress on `refactor` branch
+- **Target Architecture**: PostgreSQL + FastAPI + Vue 3/Vite with automated ClinGen compliance
+- **Original Implementation**: Archived in `plan/archived/current_codebase/`
 
-- [Installation](#installation)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [Architecture](#architecture)
-- [Contact](#contact)
-- [License](#license)
+## Refactor Overview
 
-## Installation
+Gene Curator is being transformed from a Firebase-based monolithic architecture to a modern, containerized three-tier system that natively enforces ClinGen scientific standards:
 
-Clone the repository and install the dependencies:
+### Key Innovations
+- **Automated ClinGen Compliance**: Native SOP v11 evidence scoring and summary generation
+- **Scientific Rigor**: Immutable data primitives with verifiable provenance
+- **Enhanced Performance**: PostgreSQL queries, FastAPI backend, Vite frontend
+- **Professional Workflow**: Multi-stage review process with complete audit trails
 
-```bash
-git clone https://github.com/halbritter-lab/gene-curator.git
-cd gene-curator
-npm install
+### Architecture Transformation
+
+| Component | Current | Target | Benefits |
+|-----------|---------|---------|----------|
+| Database | Firestore | PostgreSQL 15+ | ACID compliance, complex queries, ClinGen schema |
+| Backend | Firebase Functions | FastAPI + SQLAlchemy | Type safety, ClinGen business logic, performance |
+| Frontend | Vue 3 + Vue CLI | Vue 3 + Vite + Pinia | Modern builds, state management, ClinGen UI |
+| Standards | Manual | Automated ClinGen SOP | Evidence scoring, summary generation, compliance |
+
+## Development Structure
+
+The refactor is organized into parallel work streams:
+
+```
+plan/
+├── database/           # PostgreSQL schema and migration
+├── api/               # FastAPI backend with ClinGen engine
+├── frontend/          # Vue 3 + Vite migration
+└── archived/          # Reference documentation and current codebase
 ```
 
-Ensure you have `Node.js` version `16.20.0` installed. This is the version that has been tested and is known to work with this project.
+See `plan/README.md` for complete refactoring documentation.
 
-## Setup
+## Getting Started
 
-To set up the development environment, follow these steps:
+### For Development
+1. **Choose Work Stream**: Database, API, or Frontend
+2. **Read Work Stream Plan**: `plan/{workstream}/README.md`
+3. **Review Archived Code**: `plan/archived/current_codebase/`
+4. **Follow Implementation Guide**: Each work stream has detailed instructions
 
-```bash
-# Run the development server
-npm run serve
+### For Reference
+- **Current Implementation**: `plan/archived/current_codebase/`
+- **Original Plan**: `plan/archived/PLAN_ORIGINAL.md`
+- **Firebase Documentation**: `plan/archived/firebase/README.md`
+- **Vue CLI Documentation**: `plan/archived/frontend_vue_cli/README.md`
 
-# Build for production
-npm run build
-```
+## ClinGen Integration
 
-## Usage
+The refactored system implements native support for:
+- **Evidence Scoring**: Automated calculation per SOP v11 matrix
+- **Summary Generation**: Template-driven text per Evidence Summary Template v5.1
+- **Nomenclature Validation**: ClinGen dyadic naming conventions
+- **Workflow Compliance**: Professional curation review processes
 
-Here are some examples of how to use the Gene Curator:
+## Key Features (Target)
 
-1. To view gene data:
-   - Navigate to `/genes` on the application.
-2. To manage gene data:
-   - Access the admin panel at `/admin`.
+### Scientific Rigor
+- ✅ Automatic ClinGen SOP v11 evidence scoring
+- ✅ Template-driven evidence summary generation
+- ✅ Immutable record chains with cryptographic verification
+- ✅ Complete provenance tracking with source attribution
+
+### Enhanced Performance
+- ✅ PostgreSQL for complex queries and ACID transactions
+- ✅ FastAPI backend with automatic API documentation
+- ✅ Vue 3 + Vite for 50% faster builds and development
+- ✅ Code splitting and optimized production bundles
+
+### Preserved Strengths
+- ✅ Configuration-driven workflow system
+- ✅ Dynamic form rendering based on field definitions
+- ✅ Multi-stage gene → precuration → curation workflow
+- ✅ Role-based access control (admin, curator, viewer)
 
 ## Contributing
 
-We welcome contributions from the community. Please follow our [contributing guidelines](CONTRIBUTING.md) and our [code of conduct](CODE_OF_CONDUCT.md) to contribute to the project.
+### Current Phase: Parallel Implementation
+Each work stream can be developed independently:
 
-## Architecture
+1. **Database Team**: Implement PostgreSQL schema and migration scripts
+2. **API Team**: Build FastAPI backend with ClinGen scoring engine
+3. **Frontend Team**: Migrate to Vue 3/Vite and build ClinGen components
 
-The project is built with:
-
-- [Vue.js](https://vuejs.org) (v3.2.13) - A progressive JavaScript framework.
-- [Vuetify](https://vuetifyjs.com) (v3.4.8) - A Vue UI Library with beautifully handcrafted Material Components.
-- [Firebase](https://firebase.google.com) (v10.7.1) - Backend-as-a-Service for app development.
-
-## Contact
-
-For more information and further documentation, please contact us or visit [our documentation](https://gene-curator-docs.example.com).
+### Prerequisites
+- Node.js 18+ (frontend)
+- Python 3.11+ (backend)
+- PostgreSQL 15+ (database)
+- Docker (deployment)
 
 ## License
 
-Gene Curator is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **ClinGen Consortium**: For establishing the Gene-Disease Validity Standard Operating Procedures
+- **Original Implementation**: Vue CLI + Firebase architecture that established successful workflow patterns
+- **Scientific Community**: For the principles of verifiable, attributable, and replicable genetic curation
+
+---
+
+**Note**: This is a scientific application for genetic research. The refactor prioritizes scientific rigor, data integrity, and ClinGen compliance above all other considerations.
