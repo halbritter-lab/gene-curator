@@ -25,3 +25,7 @@ pnpm-debug.log*
 # claude files and folders
 .claude/
 CLAUDE.md
+
+# planning files
+plan/
+PLAN.md
