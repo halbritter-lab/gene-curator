@@ -176,7 +176,10 @@ const menuItems = [
 
 // Computed menu items based on auth state
 const visibleMenuItems = computed(() => {
-  return menuItems.filter(item => {
+  return menuItems.map(item => ({
+    ...item,
+    children: item.children ? [...item.children] : undefined
+  })).filter(item => {
     // Check auth requirements
     if (item.requiresAuth && !authStore.isAuthenticated) {
       return false

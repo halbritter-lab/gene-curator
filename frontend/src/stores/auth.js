@@ -45,16 +45,20 @@ export const useAuthStore = defineStore('auth', {
         
         this.token = response.access_token
         this.refreshToken = response.refresh_token
-        this.user = response.user
-        this.isAuthenticated = true
         
         // Store tokens in localStorage
         localStorage.setItem('access_token', response.access_token)
         localStorage.setItem('refresh_token', response.refresh_token)
         
+        // Fetch user data using the new token
+        const userData = await authAPI.me()
+        this.user = userData
+        this.isAuthenticated = true
+        
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Login failed'
+        this.clearAuth() // Clear any partial state on error
         throw error
       } finally {
         this.loading = false
