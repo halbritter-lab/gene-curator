@@ -210,10 +210,9 @@ const visibleMenuItems = computed(() => {
 })
 
 const toggleTheme = () => {
-  const newTheme = theme.global.current.value.dark ? 'light' : 'dark'
-  
-  // Use the new Vuetify theme API
-  theme.change(newTheme)
+  // Use the modern Vuetify 3.9+ theme API
+  theme.toggle()
+  const newTheme = theme.global.current.value.dark ? 'dark' : 'light'
   localStorage.setItem('theme', newTheme)
 }
 
@@ -227,9 +226,9 @@ const handleLogout = async () => {
 }
 
 onMounted(() => {
-  // Apply saved theme on mount using new API
+  // Apply saved theme on mount using modern Vuetify 3.9+ API
   const savedTheme = localStorage.getItem('theme')
-  if (savedTheme) {
+  if (savedTheme && theme.global.name.value !== savedTheme) {
     theme.change(savedTheme)
   }
 })
