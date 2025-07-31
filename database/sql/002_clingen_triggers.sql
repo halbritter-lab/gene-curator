@@ -170,13 +170,53 @@ CREATE TRIGGER trigger_calculate_scores
     FOR EACH ROW
     EXECUTE FUNCTION calculate_clingen_scores();
 
--- Function to generate content hash for records
-CREATE OR REPLACE FUNCTION generate_record_hash()
+-- Function to generate content hash for gene records
+CREATE OR REPLACE FUNCTION generate_gene_record_hash()
 RETURNS TRIGGER AS $$
 DECLARE
     content_string TEXT;
 BEGIN
-    -- Generate deterministic content string based on core data
+    -- Generate deterministic content string based on core gene data
+    content_string := COALESCE(NEW.hgnc_id, '') || 
+                     COALESCE(NEW.approved_symbol, '') || 
+                     COALESCE(NEW.chromosome, '') || 
+                     COALESCE(NEW.details::text, '') ||
+                     COALESCE(EXTRACT(epoch FROM NEW.created_at)::text, '');
+    
+    -- Generate SHA-256 hash
+    NEW.record_hash := encode(digest(content_string, 'sha256'), 'hex');
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to generate content hash for precuration records
+CREATE OR REPLACE FUNCTION generate_precuration_record_hash()
+RETURNS TRIGGER AS $$
+DECLARE
+    content_string TEXT;
+BEGIN
+    -- Generate deterministic content string based on precuration data
+    content_string := COALESCE(NEW.gene_id::text, '') || 
+                     COALESCE(NEW.mondo_id, '') || 
+                     COALESCE(NEW.mode_of_inheritance, '') || 
+                     COALESCE(NEW.details::text, '') ||
+                     COALESCE(EXTRACT(epoch FROM NEW.created_at)::text, '');
+    
+    -- Generate SHA-256 hash
+    NEW.record_hash := encode(digest(content_string, 'sha256'), 'hex');
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to generate content hash for curation records
+CREATE OR REPLACE FUNCTION generate_curation_record_hash()
+RETURNS TRIGGER AS $$
+DECLARE
+    content_string TEXT;
+BEGIN
+    -- Generate deterministic content string based on curation data
     content_string := COALESCE(NEW.gene_id::text, '') || 
                      COALESCE(NEW.mondo_id, '') || 
                      COALESCE(NEW.mode_of_inheritance, '') || 
@@ -195,19 +235,19 @@ DROP TRIGGER IF EXISTS trigger_generate_gene_hash ON genes;
 CREATE TRIGGER trigger_generate_gene_hash
     BEFORE INSERT ON genes
     FOR EACH ROW
-    EXECUTE FUNCTION generate_record_hash();
+    EXECUTE FUNCTION generate_gene_record_hash();
 
 DROP TRIGGER IF EXISTS trigger_generate_precuration_hash ON precurations;
 CREATE TRIGGER trigger_generate_precuration_hash
     BEFORE INSERT ON precurations
     FOR EACH ROW
-    EXECUTE FUNCTION generate_record_hash();
+    EXECUTE FUNCTION generate_precuration_record_hash();
 
 DROP TRIGGER IF EXISTS trigger_generate_curation_hash ON curations;
 CREATE TRIGGER trigger_generate_curation_hash
     BEFORE INSERT ON curations
     FOR EACH ROW
-    EXECUTE FUNCTION generate_record_hash();
+    EXECUTE FUNCTION generate_curation_record_hash();
 
 -- Function to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at()

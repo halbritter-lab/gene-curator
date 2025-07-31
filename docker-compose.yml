@@ -56,23 +56,20 @@ services:
       - gene_curator_network
     command: redis-server --appendonly yes
 
-  # Frontend placeholder (will be implemented in Phase 3)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: gene_curator_ui
-  #   environment:
-  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - gene_curator_network
+  # Vue 3 + Vite Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gene_curator_ui
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - gene_curator_network
 
 volumes:
   postgres_data:

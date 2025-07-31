@@ -62,7 +62,7 @@ INSERT INTO users (
     true
 ) ON CONFLICT (email) DO NOTHING;
 
--- Sample genes from kidney genetics
+-- Sample genes from kidney genetics and other disease areas
 INSERT INTO genes (
     hgnc_id,
     approved_symbol,
@@ -73,6 +73,7 @@ INSERT INTO genes (
     gene_family,
     current_dyadic_name,
     details,
+    record_hash,
     created_by
 ) VALUES 
 (
@@ -89,9 +90,20 @@ INSERT INTO genes (
         "gene_description": "polycystin 1, transient receptor potential channel interacting",
         "omim_id": "601313",
         "ensembl_id": "ENSG00000173262",
-        "ncbi_gene_id": "5310"
+        "ncbi_gene_id": "5310",
+        "uniprot_id": "P98161",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Polycystic Kidney Disease", "Hereditary kidney disease"],
+        "constraint_metrics": {
+            "gnomad_pli": 1.0,
+            "gnomad_oe_lof": 0.02,
+            "gnomad_lof_z": 4.2,
+            "gnomad_mis_z": 2.1
+        }
     }',
-    (SELECT id FROM users WHERE email = 'admin@gene-curator.org')
+    encode(digest(concat('HGNC:9076', 'PKD1', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev')
 ),
 (
     'HGNC:9077', 
@@ -107,9 +119,20 @@ INSERT INTO genes (
         "gene_description": "polycystin 2, transient receptor potential cation channel",
         "omim_id": "173910",
         "ensembl_id": "ENSG00000118762",
-        "ncbi_gene_id": "5311"
+        "ncbi_gene_id": "5311",
+        "uniprot_id": "Q13563",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Polycystic Kidney Disease", "Hereditary kidney disease"],
+        "constraint_metrics": {
+            "gnomad_pli": 0.95,
+            "gnomad_oe_lof": 0.03,
+            "gnomad_lof_z": 3.8,
+            "gnomad_mis_z": 1.9
+        }
     }',
-    (SELECT id FROM users WHERE email = 'admin@gene-curator.org')
+    encode(digest(concat('HGNC:9077', 'PKD2', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev')
 ),
 (
     'HGNC:7773',
@@ -125,9 +148,165 @@ INSERT INTO genes (
         "gene_description": "nephrocystin 1",
         "omim_id": "607100",
         "ensembl_id": "ENSG00000144061",
-        "ncbi_gene_id": "4867"
+        "ncbi_gene_id": "4867",
+        "uniprot_id": "O15259",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Nephronophthisis", "Cystic kidney disease"],
+        "constraint_metrics": {
+            "gnomad_pli": 0.88,
+            "gnomad_oe_lof": 0.12,
+            "gnomad_lof_z": 2.5,
+            "gnomad_mis_z": 1.2
+        }
     }',
-    (SELECT id FROM users WHERE email = 'admin@gene-curator.org')
+    encode(digest(concat('HGNC:7773', 'NPHP1', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev')
+),
+(
+    'HGNC:1101',
+    'BRCA1',
+    ARRAY['RNF53'],
+    ARRAY['BRCAI', 'BRCC1'],
+    '17',
+    '17q21.31',
+    ARRAY['BRCA family', 'RING finger proteins'],
+    'BRCA1-related hereditary breast and ovarian cancer',
+    '{
+        "gene_type": "protein-coding",
+        "gene_description": "BRCA1 DNA repair associated",
+        "omim_id": "113705",
+        "ensembl_id": "ENSG00000012048",
+        "ncbi_gene_id": "672",
+        "uniprot_id": "P38398",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Hereditary breast and ovarian cancer", "Familial cancer"],
+        "constraint_metrics": {
+            "gnomad_pli": 1.0,
+            "gnomad_oe_lof": 0.01,
+            "gnomad_lof_z": 6.8,
+            "gnomad_mis_z": 3.4
+        }
+    }',
+    encode(digest(concat('HGNC:1101', 'BRCA1', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev')
+),
+(
+    'HGNC:1102',
+    'BRCA2',
+    ARRAY['FACD', 'FAD1'],
+    ARRAY['BRCAI2', 'FANCD1'],
+    '13',
+    '13q13.1',
+    ARRAY['BRCA family', 'Fanconi anemia proteins'],
+    'BRCA2-related hereditary breast and ovarian cancer',
+    '{
+        "gene_type": "protein-coding",
+        "gene_description": "BRCA2 DNA repair associated", 
+        "omim_id": "600185",
+        "ensembl_id": "ENSG00000139618",
+        "ncbi_gene_id": "675",
+        "uniprot_id": "P51587",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Hereditary breast and ovarian cancer", "Familial cancer"],
+        "constraint_metrics": {
+            "gnomad_pli": 1.0,
+            "gnomad_oe_lof": 0.02,
+            "gnomad_lof_z": 5.9,
+            "gnomad_mis_z": 2.8
+        }
+    }',
+    encode(digest(concat('HGNC:1102', 'BRCA2', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev')
+),
+(
+    'HGNC:4893',
+    'HNPP1',
+    ARRAY['HNPP'],
+    ARRAY['hereditary neuropathy with liability to pressure palsies'],
+    '17',
+    '17p12',
+    ARRAY['PMP22 family'],
+    'HNPP1-related hereditary neuropathy with liability to pressure palsies',
+    '{
+        "gene_type": "protein-coding",
+        "gene_description": "hereditary neuropathy with liability to pressure palsies 1",
+        "omim_id": "162500",
+        "ensembl_id": "ENSG00000089048",
+        "ncbi_gene_id": "5264",
+        "uniprot_id": "Q01453",
+        "clingen_haploinsufficiency_score": "2",
+        "clingen_triplosensitivity_score": "1",
+        "panelapp_green_panels": ["Peripheral neuropathy", "Hereditary motor and sensory neuropathy"],
+        "constraint_metrics": {
+            "gnomad_pli": 0.67,
+            "gnomad_oe_lof": 0.45,
+            "gnomad_lof_z": 1.8,
+            "gnomad_mis_z": 0.9
+        }
+    }',
+    encode(digest(concat('HGNC:4893', 'HNPP1', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'curator@gene-curator.dev')
+),
+(
+    'HGNC:8975',
+    'PCSK9',
+    ARRAY['FH3', 'NARC1'],
+    ARRAY['PCSK9'],
+    '1',
+    '1p32.3',
+    ARRAY['Proprotein convertase family'],
+    'PCSK9-related hypercholesterolemia',
+    '{
+        "gene_type": "protein-coding",
+        "gene_description": "proprotein convertase subtilisin/kexin type 9",
+        "omim_id": "607786",
+        "ensembl_id": "ENSG00000169174",
+        "ncbi_gene_id": "255738",
+        "uniprot_id": "Q8NBP7",
+        "clingen_haploinsufficiency_score": "1",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Familial hypercholesterolaemia", "Lipid disorders"],
+        "constraint_metrics": {
+            "gnomad_pli": 0.12,
+            "gnomad_oe_lof": 0.78,
+            "gnomad_lof_z": 0.5,
+            "gnomad_mis_z": 2.3
+        }
+    }',
+    encode(digest(concat('HGNC:8975', 'PCSK9', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'curator@gene-curator.dev')
+),
+(
+    'HGNC:2197',
+    'COL4A5',
+    ARRAY['ATS', 'CA85'],
+    ARRAY['Alport syndrome, X-linked'],
+    'X',
+    'Xq22.3',
+    ARRAY['Collagen family', 'Type IV collagen'],
+    'COL4A5-related Alport syndrome',
+    '{
+        "gene_type": "protein-coding",
+        "gene_description": "collagen type IV alpha 5 chain",
+        "omim_id": "303630",
+        "ensembl_id": "ENSG00000188153",
+        "ncbi_gene_id": "1287",
+        "uniprot_id": "P29400",
+        "clingen_haploinsufficiency_score": "3",
+        "clingen_triplosensitivity_score": "0",
+        "panelapp_green_panels": ["Alport syndrome", "Hereditary nephritis"],
+        "constraint_metrics": {
+            "gnomad_pli": 1.0,
+            "gnomad_oe_lof": 0.05,
+            "gnomad_lof_z": 4.1,
+            "gnomad_mis_z": 3.2
+        }
+    }',
+    encode(digest(concat('HGNC:2197', 'COL4A5', EXTRACT(epoch FROM NOW())::text), 'sha256'), 'hex'),
+    (SELECT id FROM users WHERE email = 'curator@gene-curator.dev')
 );
 
 -- Sample precuration

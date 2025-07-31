@@ -21,14 +21,20 @@ services:
       - ./backend:/app
       - ./plan/archived/current_codebase/src/config:/app/legacy_config  # For migration reference
 
-  # Frontend will be uncommented when implemented
-  # frontend:
-  #   environment:
-  #     VITE_API_BASE_URL: http://localhost:8000/api/v1
-  #     VITE_ENVIRONMENT: development
-  #   volumes:
-  #     - ./frontend:/app
-  #     - ./plan/archived/current_codebase/src/config:/app/legacy_config
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+      VITE_ENVIRONMENT: development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   dev_postgres_data:
