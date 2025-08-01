@@ -71,8 +71,6 @@ CREATE TABLE genes (
     alias_symbols TEXT[], -- Array of alias symbols
     chromosome VARCHAR(10),
     location VARCHAR(50), -- Chromosomal location
-    gene_family TEXT[],
-    current_dyadic_name VARCHAR(255), -- ClinGen dyadic naming
     
     -- Flexible details storage (preserves current config system)
     details JSONB DEFAULT '{}',

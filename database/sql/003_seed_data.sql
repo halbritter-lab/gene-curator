@@ -70,8 +70,6 @@ INSERT INTO genes (
     alias_symbols,
     chromosome,
     location,
-    gene_family,
-    current_dyadic_name,
     details,
     record_hash,
     created_by
@@ -83,8 +81,6 @@ INSERT INTO genes (
     ARRAY['APKD1', 'ADPKD1'],
     '16',
     '16p13.3',
-    ARRAY['Polycystin family'],
-    'PKD1-related polycystic kidney disease',
     '{
         "gene_type": "protein-coding",
         "gene_description": "polycystin 1, transient receptor potential channel interacting",

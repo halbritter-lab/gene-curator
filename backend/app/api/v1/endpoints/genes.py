@@ -106,7 +106,6 @@ async def get_genes_summary(
             "hgnc_id": gene.hgnc_id,
             "approved_symbol": gene.approved_symbol,
             "chromosome": gene.chromosome,
-            "current_dyadic_name": gene.current_dyadic_name,
         }
         for gene in genes
     ]

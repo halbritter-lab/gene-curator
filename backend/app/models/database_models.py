@@ -111,8 +111,6 @@ class Gene(Base):
     alias_symbols = Column(ARRAY(Text))
     chromosome = Column(String(10), index=True)
     location = Column(String(50))
-    gene_family = Column(ARRAY(Text))
-    current_dyadic_name = Column(String(255))
 
     # Flexible details storage
     details = Column(JSONB, default={})

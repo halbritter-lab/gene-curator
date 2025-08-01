@@ -30,9 +30,7 @@
             <template #item="{ props, item }">
               <v-list-item v-bind="props">
                 <v-list-item-title>{{ item.raw.approved_symbol }}</v-list-item-title>
-                <v-list-item-subtitle
-                  >{{ item.raw.hgnc_id }} •
-                  {{ item.raw.current_dyadic_name || 'No dyadic name' }}</v-list-item-subtitle
+                <v-list-item-subtitle>{{ item.raw.hgnc_id }}</v-list-item-subtitle
                 >
               </v-list-item>
             </template>
@@ -150,10 +148,6 @@
                 <v-col cols="12" md="3">
                   <div class="text-caption text-medium-emphasis">Chromosome</div>
                   <div class="text-body-1">{{ selectedGene.chromosome || 'Unknown' }}</div>
-                </v-col>
-                <v-col cols="12" md="3">
-                  <div class="text-caption text-medium-emphasis">Dyadic Name</div>
-                  <div class="text-body-1">{{ selectedGene.current_dyadic_name || 'Not set' }}</div>
                 </v-col>
               </v-row>
             </v-card-text>

@@ -80,7 +80,6 @@ class GeneCRUD:
                 or_(
                     Gene.approved_symbol.ilike(search_term),
                     Gene.hgnc_id.ilike(search_term),
-                    Gene.current_dyadic_name.ilike(search_term),
                     Gene.details.op("->>")("gene_description").ilike(search_term),
                     text(f"'{search_params.query}' = ANY(genes.previous_symbols)"),
                     text(f"'{search_params.query}' = ANY(genes.alias_symbols)"),
@@ -91,10 +90,6 @@ class GeneCRUD:
         if search_params.chromosome:
             query = query.filter(Gene.chromosome == search_params.chromosome)
 
-        # Filter by gene family
-        if search_params.gene_family:
-            for family in search_params.gene_family:
-                query = query.filter(Gene.gene_family.op("?")(family))
 
         # Filter by HGNC ID
         if search_params.hgnc_id:
@@ -142,8 +137,6 @@ class GeneCRUD:
             alias_symbols=gene_create.alias_symbols or [],
             chromosome=gene_create.chromosome,
             location=gene_create.location,
-            gene_family=gene_create.gene_family or [],
-            current_dyadic_name=gene_create.current_dyadic_name,
             details=gene_create.details or {},
             record_hash=record_hash,
             created_by=user_id,
@@ -229,7 +222,7 @@ class GeneCRUD:
         genes_with_dyadic_names = (
             db.query(Gene)
             .filter(
-                Gene.current_dyadic_name.isnot(None), Gene.current_dyadic_name != ""
+                Gene.details.isnot(None)
             )
             .count()
         )

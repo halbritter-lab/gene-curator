@@ -1,5 +1,8 @@
 """
 Gene-related Pydantic schemas.
+
+This module provides the core gene schemas. For complete gene schemas with all
+legacy fields and advanced features, see gene_complete.py
 """
 
 import uuid
@@ -27,12 +30,6 @@ class GeneBase(BaseModel):
     )
     location: str | None = Field(
         None, max_length=50, description="Chromosomal location (e.g., 17q21.31)"
-    )
-    gene_family: list[str] | None = Field(
-        default=[], description="Gene family classifications"
-    )
-    current_dyadic_name: str | None = Field(
-        None, max_length=255, description="ClinGen dyadic naming"
     )
     details: dict[str, Any] | None = Field(
         default={}, description="Additional gene metadata"
@@ -64,8 +61,6 @@ class GeneUpdate(BaseModel):
     alias_symbols: list[str] | None = None
     chromosome: str | None = Field(None, max_length=10)
     location: str | None = Field(None, max_length=50)
-    gene_family: list[str] | None = None
-    current_dyadic_name: str | None = Field(None, max_length=255)
     details: dict[str, Any] | None = None
 
     @field_validator("hgnc_id")
@@ -113,7 +108,6 @@ class GeneSearchQuery(BaseModel):
         None, description="Search term for gene symbol, name, or HGNC ID"
     )
     chromosome: str | None = Field(None, description="Filter by chromosome")
-    gene_family: list[str] | None = Field(None, description="Filter by gene family")
     hgnc_id: str | None = Field(None, description="Filter by specific HGNC ID")
     created_by: str | None = Field(None, description="Filter by creator")
     skip: int = Field(0, ge=0, description="Number of records to skip")
@@ -133,7 +127,6 @@ class GeneSummary(BaseModel):
     hgnc_id: str
     approved_symbol: str
     chromosome: str | None = None
-    current_dyadic_name: str | None = None
 
     class Config:
         from_attributes = True
@@ -172,3 +165,37 @@ class GeneBulkCreateResponse(BaseModel):
     total_created: int
     total_skipped: int
     total_errors: int
+
+
+# Import complete gene schemas for backward compatibility
+try:
+    from .gene_complete import (
+        GeneComplete,
+        GeneCreateComplete,
+        GeneUpdateComplete, 
+        GeneResponseComplete,
+        GeneDetailsComplete,
+        LegacyGeneData,
+        validate_gene_completeness
+    )
+    
+    # Export the complete schemas for use in advanced features
+    __all__ = [
+        # Core schemas
+        'GeneBase', 'GeneCreate', 'GeneUpdate', 'GeneResponse',
+        'GeneListResponse', 'GeneSearchQuery', 'GeneSummary',
+        'GeneStatistics', 'GeneBulkCreate', 'GeneBulkCreateResponse',
+        
+        # Complete schemas
+        'GeneComplete', 'GeneCreateComplete', 'GeneUpdateComplete',
+        'GeneResponseComplete', 'GeneDetailsComplete',
+        'LegacyGeneData', 'validate_gene_completeness'
+    ]
+    
+except ImportError:
+    # Fallback if complete schemas are not available
+    __all__ = [
+        'GeneBase', 'GeneCreate', 'GeneUpdate', 'GeneResponse',
+        'GeneListResponse', 'GeneSearchQuery', 'GeneSummary', 
+        'GeneStatistics', 'GeneBulkCreate', 'GeneBulkCreateResponse'
+    ]
