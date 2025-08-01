@@ -5,9 +5,7 @@
       <v-row align="center" justify="space-between" class="mb-4">
         <v-col cols="12" md="6">
           <h1 class="text-h4 mb-2">Gene Database</h1>
-          <p class="text-subtitle-1 text-medium-emphasis">
-            Browse and search genetic information
-          </p>
+          <p class="text-subtitle-1 text-medium-emphasis">Browse and search genetic information</p>
         </v-col>
         <v-col cols="12" md="6" class="text-md-right">
           <v-btn
@@ -49,7 +47,7 @@
                 label="Gene Family"
                 variant="outlined"
                 clearable
-                @update:modelValue="handleFilterChange"
+                @update:model-value="handleFilterChange"
               />
             </v-col>
             <v-col cols="12" md="3">
@@ -59,16 +57,11 @@
                 label="Chromosome"
                 variant="outlined"
                 clearable
-                @update:modelValue="handleFilterChange"
+                @update:model-value="handleFilterChange"
               />
             </v-col>
             <v-col cols="12" md="2">
-              <v-btn
-                color="secondary"
-                variant="outlined"
-                block
-                @click="clearFilters"
-              >
+              <v-btn color="secondary" variant="outlined" block @click="clearFilters">
                 Clear All
               </v-btn>
             </v-col>
@@ -103,8 +96,8 @@
             label="Sort by"
             variant="outlined"
             density="compact"
-            style="width: 200px;"
-            @update:modelValue="handleSortChange"
+            style="width: 200px"
+            @update:model-value="handleSortChange"
           />
         </v-col>
       </v-row>
@@ -122,7 +115,7 @@
           @click:row="handleRowClick"
         >
           <!-- Gene Symbol Column -->
-          <template v-slot:item.approved_symbol="{ item }">
+          <template #item.approved_symbol="{ item }">
             <div class="font-weight-bold">
               {{ item.approved_symbol }}
             </div>
@@ -132,7 +125,7 @@
           </template>
 
           <!-- Previous/Alias Symbols -->
-          <template v-slot:item.previous_symbols="{ item }">
+          <template #item.previous_symbols="{ item }">
             <div v-if="item.previous_symbols && item.previous_symbols.length">
               <v-chip
                 v-for="symbol in item.previous_symbols.slice(0, 2)"
@@ -151,7 +144,7 @@
           </template>
 
           <!-- Gene Family -->
-          <template v-slot:item.gene_family="{ item }">
+          <template #item.gene_family="{ item }">
             <div v-if="item.gene_family && item.gene_family.length">
               <v-chip
                 v-for="family in item.gene_family.slice(0, 1)"
@@ -171,7 +164,7 @@
           </template>
 
           <!-- Location -->
-          <template v-slot:item.location="{ item }">
+          <template #item.location="{ item }">
             <div class="d-flex flex-column">
               <span class="font-weight-medium">{{ item.chromosome || '—' }}</span>
               <span class="text-caption text-medium-emphasis">
@@ -181,7 +174,7 @@
           </template>
 
           <!-- ClinGen Score -->
-          <template v-slot:item.clingen_score="{ item }">
+          <template #item.clingen_score="{ item }">
             <v-chip
               v-if="item.details?.clingen_score !== undefined"
               :color="getScoreColor(item.details.clingen_score)"
@@ -194,7 +187,7 @@
           </template>
 
           <!-- Actions -->
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <div class="d-flex">
               <v-btn
                 :to="{ name: 'GeneDetail', params: { id: item.id } }"
@@ -215,19 +208,21 @@
           </template>
 
           <!-- Loading -->
-          <template v-slot:loading>
+          <template #loading>
             <v-skeleton-loader type="table-row@10" />
           </template>
 
           <!-- No data -->
-          <template v-slot:no-data>
+          <template #no-data>
             <div class="text-center py-8">
-              <v-icon size="64" class="mb-4 text-medium-emphasis">
-                mdi-database-search
-              </v-icon>
+              <v-icon size="64" class="mb-4 text-medium-emphasis"> mdi-database-search </v-icon>
               <h3 class="text-h6 mb-2">No genes found</h3>
               <p class="text-body-2 text-medium-emphasis">
-                {{ isSearching ? 'Try adjusting your search criteria' : 'No genes available in the database' }}
+                {{
+                  isSearching
+                    ? 'Try adjusting your search criteria'
+                    : 'No genes available in the database'
+                }}
               </p>
             </div>
           </template>
@@ -240,7 +235,7 @@
             v-model="currentPage"
             :length="genesStore.pagination.pages"
             :disabled="genesStore.loading"
-            @update:modelValue="handlePageChange"
+            @update:model-value="handlePageChange"
           />
         </div>
       </v-card>
@@ -249,207 +244,207 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.js'
-import { useGenesStore } from '@/stores/genes.js'
-import { showError } from '@/composables/useNotifications.js'
+  import { ref, computed, onMounted, watch } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth.js'
+  import { useGenesStore } from '@/stores/genes.js'
+  import { showError } from '@/composables/useNotifications.js'
 
-const router = useRouter()
-const authStore = useAuthStore()
-const genesStore = useGenesStore()
+  const router = useRouter()
+  const authStore = useAuthStore()
+  const genesStore = useGenesStore()
 
-// Search and filter state
-const searchQuery = ref('')
-const selectedFamily = ref(null)
-const selectedChromosome = ref(null)
-const sortBy = ref('approved_symbol_asc')
-const currentPage = ref(1)
+  // Search and filter state
+  const searchQuery = ref('')
+  const selectedFamily = ref(null)
+  const selectedChromosome = ref(null)
+  const sortBy = ref('approved_symbol_asc')
+  const currentPage = ref(1)
 
-// Table configuration
-const headers = [
-  {
-    title: 'Gene Symbol',
-    key: 'approved_symbol',
-    sortable: true,
-    width: '200px'
-  },
-  {
-    title: 'Previous/Alias',
-    key: 'previous_symbols',
-    sortable: false,
-    width: '180px'
-  },
-  {
-    title: 'Gene Family',
-    key: 'gene_family',
-    sortable: false,
-    width: '160px'
-  },
-  {
-    title: 'Location',
-    key: 'location',
-    sortable: true,
-    width: '120px'
-  },
-  {
-    title: 'ClinGen Score',
-    key: 'clingen_score',
-    sortable: false,
-    width: '120px'
-  },
-  {
-    title: 'Actions',
-    key: 'actions',
-    sortable: false,
-    width: '100px',
-    align: 'center'
+  // Table configuration
+  const headers = [
+    {
+      title: 'Gene Symbol',
+      key: 'approved_symbol',
+      sortable: true,
+      width: '200px'
+    },
+    {
+      title: 'Previous/Alias',
+      key: 'previous_symbols',
+      sortable: false,
+      width: '180px'
+    },
+    {
+      title: 'Gene Family',
+      key: 'gene_family',
+      sortable: false,
+      width: '160px'
+    },
+    {
+      title: 'Location',
+      key: 'location',
+      sortable: true,
+      width: '120px'
+    },
+    {
+      title: 'ClinGen Score',
+      key: 'clingen_score',
+      sortable: false,
+      width: '120px'
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      sortable: false,
+      width: '100px',
+      align: 'center'
+    }
+  ]
+
+  const sortOptions = [
+    { title: 'Gene Symbol (A-Z)', value: 'approved_symbol_asc' },
+    { title: 'Gene Symbol (Z-A)', value: 'approved_symbol_desc' },
+    { title: 'Chromosome', value: 'chromosome_asc' },
+    { title: 'Recently Updated', value: 'updated_at_desc' }
+  ]
+
+  // Computed values
+  const isSearching = computed(() => {
+    return searchQuery.value || selectedFamily.value || selectedChromosome.value
+  })
+
+  const uniqueFamilies = computed(() => {
+    const families = new Set()
+    genesStore.genes.forEach(gene => {
+      if (gene.gene_family) {
+        gene.gene_family.forEach(family => families.add(family))
+      }
+    })
+    return Array.from(families).sort()
+  })
+
+  const uniqueChromosomes = computed(() => {
+    const chromosomes = new Set()
+    genesStore.genes.forEach(gene => {
+      if (gene.chromosome) {
+        chromosomes.add(gene.chromosome)
+      }
+    })
+    return Array.from(chromosomes).sort((a, b) => {
+      // Sort chromosomes numerically, with X and Y at the end
+      if (a === 'X') return b === 'Y' ? -1 : 1
+      if (a === 'Y') return 1
+      if (b === 'X' || b === 'Y') return -1
+      return parseInt(a) - parseInt(b)
+    })
+  })
+
+  // Debounced search
+  let searchTimeout = null
+  const debounceSearch = () => {
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+      handleFilterChange()
+    }, 300)
   }
-]
 
-const sortOptions = [
-  { title: 'Gene Symbol (A-Z)', value: 'approved_symbol_asc' },
-  { title: 'Gene Symbol (Z-A)', value: 'approved_symbol_desc' },
-  { title: 'Chromosome', value: 'chromosome_asc' },
-  { title: 'Recently Updated', value: 'updated_at_desc' }
-]
+  // Event handlers
+  const handleFilterChange = async () => {
+    currentPage.value = 1
+    await performSearch()
+  }
 
-// Computed values
-const isSearching = computed(() => {
-  return searchQuery.value || selectedFamily.value || selectedChromosome.value
-})
+  const handleSortChange = async () => {
+    const [field, order] = sortBy.value.split('_')
+    await genesStore.setSorting(field, order)
+  }
 
-const uniqueFamilies = computed(() => {
-  const families = new Set()
-  genesStore.genes.forEach(gene => {
-    if (gene.gene_family) {
-      gene.gene_family.forEach(family => families.add(family))
+  const handlePageChange = async page => {
+    currentPage.value = page
+    await genesStore.setPage(page)
+  }
+
+  const handleRowClick = (event, { item }) => {
+    router.push({ name: 'GeneDetail', params: { id: item.id } })
+  }
+
+  const editGene = gene => {
+    router.push({ name: 'GeneAdmin', query: { edit: gene.id } })
+  }
+
+  const clearFilters = () => {
+    searchQuery.value = ''
+    selectedFamily.value = null
+    selectedChromosome.value = null
+    currentPage.value = 1
+    genesStore.clearSearch()
+    loadGenes()
+  }
+
+  const performSearch = async () => {
+    if (isSearching.value) {
+      try {
+        await genesStore.searchGenes({
+          query: searchQuery.value,
+          gene_family: selectedFamily.value,
+          chromosome: selectedChromosome.value,
+          page: currentPage.value
+        })
+      } catch (error) {
+        showError('Search failed. Please try again.')
+      }
+    } else {
+      await loadGenes()
     }
-  })
-  return Array.from(families).sort()
-})
+  }
 
-const uniqueChromosomes = computed(() => {
-  const chromosomes = new Set()
-  genesStore.genes.forEach(gene => {
-    if (gene.chromosome) {
-      chromosomes.add(gene.chromosome)
-    }
-  })
-  return Array.from(chromosomes).sort((a, b) => {
-    // Sort chromosomes numerically, with X and Y at the end
-    if (a === 'X') return b === 'Y' ? -1 : 1
-    if (a === 'Y') return 1
-    if (b === 'X' || b === 'Y') return -1
-    return parseInt(a) - parseInt(b)
-  })
-})
-
-// Debounced search
-let searchTimeout = null
-const debounceSearch = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    handleFilterChange()
-  }, 300)
-}
-
-// Event handlers
-const handleFilterChange = async () => {
-  currentPage.value = 1
-  await performSearch()
-}
-
-const handleSortChange = async () => {
-  const [field, order] = sortBy.value.split('_')
-  await genesStore.setSorting(field, order)
-}
-
-const handlePageChange = async (page) => {
-  currentPage.value = page
-  await genesStore.setPage(page)
-}
-
-const handleRowClick = (event, { item }) => {
-  router.push({ name: 'GeneDetail', params: { id: item.id } })
-}
-
-const editGene = (gene) => {
-  router.push({ name: 'GeneAdmin', query: { edit: gene.id } })
-}
-
-const clearFilters = () => {
-  searchQuery.value = ''
-  selectedFamily.value = null
-  selectedChromosome.value = null
-  currentPage.value = 1
-  genesStore.clearSearch()
-  loadGenes()
-}
-
-const performSearch = async () => {
-  if (isSearching.value) {
+  const loadGenes = async () => {
     try {
-      await genesStore.searchGenes({
-        query: searchQuery.value,
-        gene_family: selectedFamily.value,
-        chromosome: selectedChromosome.value,
+      await genesStore.fetchGenes({
         page: currentPage.value
       })
     } catch (error) {
-      showError('Search failed. Please try again.')
+      showError('Failed to load genes. Please try again.')
     }
-  } else {
+  }
+
+  const getScoreColor = score => {
+    if (score >= 8) return 'success'
+    if (score >= 5) return 'warning'
+    if (score >= 2) return 'info'
+    return 'error'
+  }
+
+  // Watchers
+  watch(currentPage, newPage => {
+    genesStore.pagination.page = newPage
+  })
+
+  // Lifecycle
+  onMounted(async () => {
     await loadGenes()
-  }
-}
-
-const loadGenes = async () => {
-  try {
-    await genesStore.fetchGenes({
-      page: currentPage.value
-    })
-  } catch (error) {
-    showError('Failed to load genes. Please try again.')
-  }
-}
-
-const getScoreColor = (score) => {
-  if (score >= 8) return 'success'
-  if (score >= 5) return 'warning'
-  if (score >= 2) return 'info'
-  return 'error'
-}
-
-// Watchers
-watch(currentPage, (newPage) => {
-  genesStore.pagination.page = newPage
-})
-
-// Lifecycle
-onMounted(async () => {
-  await loadGenes()
-})
+  })
 </script>
 
 <style scoped>
-.gene-table {
-  border-radius: 8px;
-}
+  .gene-table {
+    border-radius: 8px;
+  }
 
-.gene-table :deep(.v-data-table__wrapper) {
-  border-radius: 8px;
-}
+  .gene-table :deep(.v-data-table__wrapper) {
+    border-radius: 8px;
+  }
 
-.gene-table :deep(tbody tr) {
-  cursor: pointer;
-}
+  .gene-table :deep(tbody tr) {
+    cursor: pointer;
+  }
 
-.gene-table :deep(tbody tr:hover) {
-  background-color: rgba(var(--v-theme-primary), 0.04);
-}
+  .gene-table :deep(tbody tr:hover) {
+    background-color: rgba(var(--v-theme-primary), 0.04);
+  }
 
-.v-chip {
-  font-size: 0.75rem;
-}
+  .v-chip {
+    font-size: 0.75rem;
+  }
 </style>

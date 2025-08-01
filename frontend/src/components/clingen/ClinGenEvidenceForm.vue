@@ -21,7 +21,10 @@
               <v-expansion-panel title="Case-Level Data (Max 12 points)">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('genetic', 'case_level_data') }}/12 points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score: {{ getCategoryScore('genetic', 'case_level_data') }}/12
+                      points</span
+                    >
                     <v-btn
                       size="small"
                       color="primary"
@@ -32,7 +35,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="geneticEvidence.case_level_data.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="geneticEvidence.case_level_data.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No case-level evidence entries yet
                   </div>
 
@@ -58,7 +64,10 @@
               <v-expansion-panel title="Segregation Data (Max 3 points)">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('genetic', 'segregation_data') }}/3 points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score: {{ getCategoryScore('genetic', 'segregation_data') }}/3
+                      points</span
+                    >
                     <v-btn
                       size="small"
                       color="primary"
@@ -69,7 +78,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="geneticEvidence.segregation_data.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="geneticEvidence.segregation_data.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No segregation evidence entries yet
                   </div>
 
@@ -95,7 +107,10 @@
               <v-expansion-panel title="Case-Control Data (Max 6 points)">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('genetic', 'case_control_data') }}/6 points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score: {{ getCategoryScore('genetic', 'case_control_data') }}/6
+                      points</span
+                    >
                     <v-btn
                       size="small"
                       color="primary"
@@ -106,7 +121,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="geneticEvidence.case_control_data.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="geneticEvidence.case_control_data.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No case-control evidence entries yet
                   </div>
 
@@ -139,7 +157,10 @@
               <v-expansion-panel title="Functional Evidence">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('experimental', 'function') }} points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score:
+                      {{ getCategoryScore('experimental', 'function') }} points</span
+                    >
                     <v-btn
                       size="small"
                       color="secondary"
@@ -150,7 +171,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="experimentalEvidence.function.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="experimentalEvidence.function.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No functional evidence entries yet
                   </div>
 
@@ -176,7 +200,9 @@
               <v-expansion-panel title="Model Evidence">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('experimental', 'models') }} points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score: {{ getCategoryScore('experimental', 'models') }} points</span
+                    >
                     <v-btn
                       size="small"
                       color="secondary"
@@ -187,7 +213,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="experimentalEvidence.models.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="experimentalEvidence.models.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No model evidence entries yet
                   </div>
 
@@ -213,7 +242,9 @@
               <v-expansion-panel title="Rescue Evidence">
                 <v-expansion-panel-text>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span class="text-subtitle-1">Current Score: {{ getCategoryScore('experimental', 'rescue') }} points</span>
+                    <span class="text-subtitle-1"
+                      >Current Score: {{ getCategoryScore('experimental', 'rescue') }} points</span
+                    >
                     <v-btn
                       size="small"
                       color="secondary"
@@ -224,7 +255,10 @@
                     </v-btn>
                   </div>
 
-                  <div v-if="experimentalEvidence.rescue.length === 0" class="text-center py-4 text-medium-emphasis">
+                  <div
+                    v-if="experimentalEvidence.rescue.length === 0"
+                    class="text-center py-4 text-medium-emphasis"
+                  >
                     No rescue evidence entries yet
                   </div>
 
@@ -254,26 +288,21 @@
           <div class="contradictory-evidence">
             <div class="d-flex justify-space-between align-center mb-4">
               <span class="text-subtitle-1">Contradictory Evidence</span>
-              <v-btn
-                size="small"
-                color="error"
-                @click="addContradictoryEvidence"
-              >
+              <v-btn size="small" color="error" @click="addContradictoryEvidence">
                 <v-icon start size="small">mdi-plus</v-icon>
                 Add Evidence
               </v-btn>
             </div>
 
-            <v-alert
-              type="info"
-              variant="tonal"
-              class="mb-4"
-              density="compact"
-            >
-              Contradictory evidence may result in a "Disputed" classification requiring expert review.
+            <v-alert type="info" variant="tonal" class="mb-4" density="compact">
+              Contradictory evidence may result in a "Disputed" classification requiring expert
+              review.
             </v-alert>
 
-            <div v-if="contradictoryEvidence.length === 0" class="text-center py-4 text-medium-emphasis">
+            <div
+              v-if="contradictoryEvidence.length === 0"
+              class="text-center py-4 text-medium-emphasis"
+            >
               No contradictory evidence entries
             </div>
 
@@ -300,97 +329,105 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import EvidenceEntryForm from './EvidenceEntryForm.vue'
+  import { ref, computed, watch } from 'vue'
+  import EvidenceEntryForm from './EvidenceEntryForm.vue'
 
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    default: () => ({
-      genetic_evidence: {
-        case_level_data: [],
-        segregation_data: [],
-        case_control_data: []
-      },
-      experimental_evidence: {
-        function: [],
-        models: [],
-        rescue: []
-      },
-      contradictory_evidence: []
+  const props = defineProps({
+    modelValue: {
+      type: Object,
+      default: () => ({
+        genetic_evidence: {
+          case_level_data: [],
+          segregation_data: [],
+          case_control_data: []
+        },
+        experimental_evidence: {
+          function: [],
+          models: [],
+          rescue: []
+        },
+        contradictory_evidence: []
+      })
+    }
+  })
+
+  const emit = defineEmits(['update:modelValue'])
+
+  const activeTab = ref('genetic')
+
+  // Local data
+  const geneticEvidence = ref(
+    props.modelValue.genetic_evidence || {
+      case_level_data: [],
+      segregation_data: [],
+      case_control_data: []
+    }
+  )
+
+  const experimentalEvidence = ref(
+    props.modelValue.experimental_evidence || {
+      function: [],
+      models: [],
+      rescue: []
+    }
+  )
+
+  const contradictoryEvidence = ref(props.modelValue.contradictory_evidence || [])
+
+  // Watch for changes and emit updates
+  watch(
+    [geneticEvidence, experimentalEvidence, contradictoryEvidence],
+    () => {
+      emit('update:modelValue', {
+        genetic_evidence: geneticEvidence.value,
+        experimental_evidence: experimentalEvidence.value,
+        contradictory_evidence: contradictoryEvidence.value
+      })
+    },
+    { deep: true }
+  )
+
+  const getCategoryScore = (evidenceType, category) => {
+    const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
+    if (!evidence[category]) return 0
+    return evidence[category].reduce((sum, item) => sum + (item.points || 0), 0).toFixed(1)
+  }
+
+  const addEvidence = (evidenceType, category) => {
+    const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
+    evidence[category].push({
+      pmid: '',
+      description: '',
+      points: 0,
+      evidence_type: category.replace('_data', '').replace('_', ' ')
     })
   }
-})
 
-const emit = defineEmits(['update:modelValue'])
+  const removeEvidence = (evidenceType, category, index) => {
+    const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
+    evidence[category].splice(index, 1)
+  }
 
-const activeTab = ref('genetic')
+  const addContradictoryEvidence = () => {
+    contradictoryEvidence.value.push({
+      pmid: '',
+      description: '',
+      points: 0,
+      evidence_type: 'contradictory'
+    })
+  }
 
-// Local data
-const geneticEvidence = ref(props.modelValue.genetic_evidence || {
-  case_level_data: [],
-  segregation_data: [],
-  case_control_data: []
-})
-
-const experimentalEvidence = ref(props.modelValue.experimental_evidence || {
-  function: [],
-  models: [],
-  rescue: []
-})
-
-const contradictoryEvidence = ref(props.modelValue.contradictory_evidence || [])
-
-// Watch for changes and emit updates
-watch([geneticEvidence, experimentalEvidence, contradictoryEvidence], () => {
-  emit('update:modelValue', {
-    genetic_evidence: geneticEvidence.value,
-    experimental_evidence: experimentalEvidence.value,
-    contradictory_evidence: contradictoryEvidence.value
-  })
-}, { deep: true })
-
-const getCategoryScore = (evidenceType, category) => {
-  const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
-  if (!evidence[category]) return 0
-  return evidence[category].reduce((sum, item) => sum + (item.points || 0), 0).toFixed(1)
-}
-
-const addEvidence = (evidenceType, category) => {
-  const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
-  evidence[category].push({
-    pmid: '',
-    description: '',
-    points: 0,
-    evidence_type: category.replace('_data', '').replace('_', ' ')
-  })
-}
-
-const removeEvidence = (evidenceType, category, index) => {
-  const evidence = evidenceType === 'genetic' ? geneticEvidence.value : experimentalEvidence.value
-  evidence[category].splice(index, 1)
-}
-
-const addContradictoryEvidence = () => {
-  contradictoryEvidence.value.push({
-    pmid: '',
-    description: '',
-    points: 0,
-    evidence_type: 'contradictory'
-  })
-}
-
-const removeContradictoryEvidence = (index) => {
-  contradictoryEvidence.value.splice(index, 1)
-}
+  const removeContradictoryEvidence = index => {
+    contradictoryEvidence.value.splice(index, 1)
+  }
 </script>
 
 <style scoped>
-.v-expansion-panel {
-  margin-bottom: 8px;
-}
+  .v-expansion-panel {
+    margin-bottom: 8px;
+  }
 
-.v-tab {
-  text-transform: none;
-}
+  .v-tab {
+    text-transform: none;
+  }
 </style>

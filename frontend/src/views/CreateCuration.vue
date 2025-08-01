@@ -17,30 +17,30 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from 'vue-router'
-import { showSuccess } from '@/composables/useNotifications.js'
-import CurationForm from '@/components/clingen/CurationForm.vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import { showSuccess } from '@/composables/useNotifications.js'
+  import CurationForm from '@/components/clingen/CurationForm.vue'
 
-const router = useRouter()
-const route = useRoute()
+  const router = useRouter()
+  const route = useRoute()
 
-const geneId = route.query.gene_id || null
-const precurationId = route.query.precuration_id || null
+  const geneId = route.query.gene_id || null
+  const precurationId = route.query.precuration_id || null
 
-const handleSubmit = (curation) => {
-  // Navigate to the curation detail page
-  router.push({ 
-    name: 'CurationDetail', 
-    params: { id: curation.id } 
-  })
-}
+  const handleSubmit = curation => {
+    // Navigate to the curation detail page
+    router.push({
+      name: 'CurationDetail',
+      params: { id: curation.id }
+    })
+  }
 
-const handleCancel = () => {
-  // Navigate back to curations list
-  router.push({ name: 'Curations' })
-}
+  const handleCancel = () => {
+    // Navigate back to curations list
+    router.push({ name: 'Curations' })
+  }
 
-const handleSaved = (curation) => {
-  showSuccess('Curation saved successfully')
-}
+  const handleSaved = curation => {
+    showSuccess('Curation saved successfully')
+  }
 </script>

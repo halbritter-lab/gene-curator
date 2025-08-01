@@ -21,10 +21,10 @@
           <div class="mb-6">
             <h2 class="text-h5 mb-3">About the Project</h2>
             <p class="text-body-1 mb-4">
-              Gene Curator is a sophisticated Vue.js-based platform for genetic information curation and management, 
-              featuring a multi-stage workflow system. The project has undergone a major architectural transformation 
-              to implement native ClinGen Standard Operating Procedure (SOP v11) compliance and migrate to a modern 
-              three-tier architecture.
+              Gene Curator is a sophisticated Vue.js-based platform for genetic information curation
+              and management, featuring a multi-stage workflow system. The project has undergone a
+              major architectural transformation to implement native ClinGen Standard Operating
+              Procedure (SOP v11) compliance and migrate to a modern three-tier architecture.
             </p>
           </div>
 
@@ -83,7 +83,8 @@
           <div class="text-center">
             <h2 class="text-h5 mb-3">Halbritter Lab</h2>
             <p class="text-body-1 mb-4">
-              Developed by the Halbritter Laboratory for advancing genetic research and clinical applications.
+              Developed by the Halbritter Laboratory for advancing genetic research and clinical
+              applications.
             </p>
             <v-btn
               href="https://github.com/halbritter-lab/gene-curator"
@@ -101,5 +102,5 @@
 </template>
 
 <script setup>
-// Static content component
+  // Static content component
 </script>

@@ -25,28 +25,28 @@ export const useGenesStore = defineStore('genes', {
   }),
 
   getters: {
-    getGeneById: (state) => (id) => {
+    getGeneById: state => id => {
       return state.genes.find(gene => gene.id === id)
     },
-    
-    getGeneByHgnc: (state) => (hgncId) => {
+
+    getGeneByHgnc: state => hgncId => {
       return state.genes.find(gene => gene.hgnc_id === hgncId)
     },
 
-    filteredGenes: (state) => {
+    filteredGenes: state => {
       if (!state.searchResults) return state.genes
       return state.searchResults.genes || []
     },
 
-    totalGenes: (state) => {
+    totalGenes: state => {
       return state.searchResults?.total || state.pagination.total
     },
 
-    hasNextPage: (state) => {
+    hasNextPage: state => {
       return state.pagination.page < state.pagination.pages
     },
 
-    hasPrevPage: (state) => {
+    hasPrevPage: state => {
       return state.pagination.page > 1
     }
   },
@@ -65,7 +65,7 @@ export const useGenesStore = defineStore('genes', {
         }
 
         const response = await genesAPI.getGenes(queryParams)
-        
+
         this.genes = response.genes
         this.pagination = {
           page: response.page,
@@ -95,9 +95,9 @@ export const useGenesStore = defineStore('genes', {
 
         this.searchParams = params
         const response = await genesAPI.searchGenes(params)
-        
+
         this.searchResults = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Search failed'
@@ -114,7 +114,7 @@ export const useGenesStore = defineStore('genes', {
 
         const response = await genesAPI.getGeneById(geneId)
         this.currentGene = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch gene'
@@ -131,7 +131,7 @@ export const useGenesStore = defineStore('genes', {
 
         const response = await genesAPI.getGeneByHgnc(hgncId)
         this.currentGene = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch gene'
@@ -147,11 +147,11 @@ export const useGenesStore = defineStore('genes', {
         this.error = null
 
         const response = await genesAPI.createGene(geneData)
-        
+
         // Add to local state
         this.genes.unshift(response)
         this.pagination.total += 1
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to create gene'
@@ -167,17 +167,17 @@ export const useGenesStore = defineStore('genes', {
         this.error = null
 
         const response = await genesAPI.updateGene(geneId, geneData)
-        
+
         // Update local state
         const index = this.genes.findIndex(gene => gene.id === geneId)
         if (index !== -1) {
           this.genes[index] = response
         }
-        
+
         if (this.currentGene?.id === geneId) {
           this.currentGene = response
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to update gene'
@@ -193,15 +193,15 @@ export const useGenesStore = defineStore('genes', {
         this.error = null
 
         await genesAPI.deleteGene(geneId)
-        
+
         // Remove from local state
         this.genes = this.genes.filter(gene => gene.id !== geneId)
         this.pagination.total -= 1
-        
+
         if (this.currentGene?.id === geneId) {
           this.currentGene = null
         }
-        
+
         return true
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to delete gene'
@@ -217,10 +217,10 @@ export const useGenesStore = defineStore('genes', {
         this.error = null
 
         const response = await genesAPI.bulkCreateGenes(genes)
-        
+
         // Refresh the genes list after bulk creation
         await this.fetchGenes()
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Bulk creation failed'
@@ -237,7 +237,7 @@ export const useGenesStore = defineStore('genes', {
 
         const response = await genesAPI.getGeneHistory(geneId)
         this.geneHistory = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch gene history'
@@ -251,7 +251,7 @@ export const useGenesStore = defineStore('genes', {
       try {
         const response = await genesAPI.getGeneStatistics()
         this.statistics = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch statistics'
@@ -263,7 +263,7 @@ export const useGenesStore = defineStore('genes', {
       try {
         const response = await genesAPI.getGeneSummary()
         this.summary = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch summary'
@@ -295,7 +295,7 @@ export const useGenesStore = defineStore('genes', {
       this.searchParams.sort_by = sortBy
       this.searchParams.sort_order = sortOrder
       this.pagination.page = 1
-      
+
       if (this.searchResults) {
         await this.searchGenes()
       } else {

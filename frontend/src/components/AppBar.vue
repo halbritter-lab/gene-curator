@@ -12,13 +12,9 @@
 
     <!-- Toolbar Title -->
     <v-toolbar-title>
-      <span class="clickable" @click="$router.push('/')">
-        Gene Curator
-      </span>
-      <br>
-      <span class="version-info">
-        Version: {{ version }} - Build: {{ buildHash }}
-      </span>
+      <span class="clickable" @click="$router.push('/')"> Gene Curator </span>
+      <br />
+      <span class="version-info"> Version: {{ version }} - Build: {{ buildHash }} </span>
     </v-toolbar-title>
 
     <v-spacer />
@@ -26,26 +22,22 @@
     <!-- Navigation Menu -->
     <template v-for="item in visibleMenuItems" :key="item.name">
       <v-menu v-if="item.children" offset-y>
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-btn text v-bind="props">
             <v-icon v-if="item.icon" start>{{ item.icon }}</v-icon>
             {{ item.title }}
           </v-btn>
         </template>
         <v-list>
-          <v-list-item 
-            v-for="child in item.children" 
-            :key="child.name"
-            :to="child.to"
-          >
-            <template v-slot:prepend v-if="child.icon">
+          <v-list-item v-for="child in item.children" :key="child.name" :to="child.to">
+            <template v-if="child.icon" #prepend>
               <v-icon>{{ child.icon }}</v-icon>
             </template>
             <v-list-item-title>{{ child.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
-      
+
       <v-btn v-else :to="item.to" text>
         <v-icon v-if="item.icon" start>{{ item.icon }}</v-icon>
         {{ item.title }}
@@ -62,7 +54,7 @@
     <!-- User Menu -->
     <template v-if="authStore.isAuthenticated">
       <v-menu offset-y>
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
           <v-btn icon v-bind="props">
             <v-avatar size="32">
               <v-icon>mdi-account-circle</v-icon>
@@ -76,13 +68,13 @@
           </v-list-item>
           <v-divider />
           <v-list-item :to="{ name: 'UserProfile' }">
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon>mdi-account</v-icon>
             </template>
             <v-list-item-title>Profile</v-list-item-title>
           </v-list-item>
           <v-list-item @click="handleLogout">
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon>mdi-logout</v-icon>
             </template>
             <v-list-item-title>Logout</v-list-item-title>
@@ -90,7 +82,7 @@
         </v-list>
       </v-menu>
     </template>
-    
+
     <!-- Login Button -->
     <v-btn v-else icon :to="{ name: 'Login' }">
       <v-icon>mdi-login</v-icon>
@@ -99,198 +91,200 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { useTheme } from 'vuetify'
-import { useAuthStore } from '@/stores/auth.js'
+  import { ref, computed, onMounted, nextTick } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useTheme } from 'vuetify'
+  import { useAuthStore } from '@/stores/auth.js'
 
-const router = useRouter()
-const theme = useTheme()
-const authStore = useAuthStore()
+  const router = useRouter()
+  const theme = useTheme()
+  const authStore = useAuthStore()
 
-// Version info
-const version = ref('0.3.0')
-const buildHash = ref('dev')
+  // Version info
+  const version = ref('0.3.0')
+  const buildHash = ref('dev')
 
-// Theme
-const isDark = computed(() => theme.global.current.value.dark)
+  // Theme
+  const isDark = computed(() => theme.global.current.value.dark)
 
-// Menu configuration
-const menuItems = [
-  {
-    name: 'home',
-    title: 'Home',
-    to: { name: 'Home' },
-    icon: 'mdi-home',
-    requiresAuth: false
-  },
-  {
-    name: 'genes',
-    title: 'Genes',
-    to: { name: 'Genes' },
-    icon: 'mdi-dna',
-    requiresAuth: false
-  },
-  {
-    name: 'curation',
-    title: 'Curation',
-    icon: 'mdi-clipboard-check',
-    requiresAuth: true,
-    requiredRoles: ['admin', 'curator'],
-    children: [
-      {
-        name: 'precurations',
-        title: 'Pre-curations',
-        to: { name: 'Precurations' },
-        icon: 'mdi-clipboard-text'
-      },
-      {
-        name: 'curations',
-        title: 'Curations',
-        to: { name: 'Curations' },
-        icon: 'mdi-clipboard-check-multiple'
-      },
-      {
-        name: 'create-precuration',
-        title: 'Create Pre-curation',
-        to: { name: 'CreatePrecuration' },
-        icon: 'mdi-plus-circle'
-      },
-      {
-        name: 'create-curation',
-        title: 'Create Curation',
-        to: { name: 'CreateCuration' },
-        icon: 'mdi-plus-circle-multiple'
-      }
-    ]
-  },
-  {
-    name: 'admin',
-    title: 'Admin',
-    icon: 'mdi-cog',
-    requiresAuth: true,
-    requiredRoles: ['admin'],
-    children: [
-      {
-        name: 'gene-admin',
-        title: 'Gene Management',
-        to: { name: 'GeneAdmin' },
-        icon: 'mdi-database-edit',
-        requiredRoles: ['admin']
-      },
-      {
-        name: 'user-management',
-        title: 'User Management',
-        to: { name: 'UserManagement' },
-        icon: 'mdi-account-group',
-        requiredRoles: ['admin']
-      }
-    ]
-  },
-  {
-    name: 'help',
-    title: 'Help',
-    icon: 'mdi-help-circle',
-    children: [
-      {
-        name: 'about',
-        title: 'About',
-        to: { name: 'About' },
-        icon: 'mdi-information'
-      },
-      {
-        name: 'faq',
-        title: 'FAQ',
-        to: { name: 'FAQ' },
-        icon: 'mdi-frequently-asked-questions'
-      }
-    ]
-  }
-]
-
-// Computed menu items based on auth state
-const visibleMenuItems = computed(() => {
-  return menuItems.map(item => ({
-    ...item,
-    children: item.children ? [...item.children] : undefined
-  })).filter(item => {
-    // Check auth requirements
-    if (item.requiresAuth && !authStore.isAuthenticated) {
-      return false
+  // Menu configuration
+  const menuItems = [
+    {
+      name: 'home',
+      title: 'Home',
+      to: { name: 'Home' },
+      icon: 'mdi-home',
+      requiresAuth: false
+    },
+    {
+      name: 'genes',
+      title: 'Genes',
+      to: { name: 'Genes' },
+      icon: 'mdi-dna',
+      requiresAuth: false
+    },
+    {
+      name: 'curation',
+      title: 'Curation',
+      icon: 'mdi-clipboard-check',
+      requiresAuth: true,
+      requiredRoles: ['admin', 'curator'],
+      children: [
+        {
+          name: 'precurations',
+          title: 'Pre-curations',
+          to: { name: 'Precurations' },
+          icon: 'mdi-clipboard-text'
+        },
+        {
+          name: 'curations',
+          title: 'Curations',
+          to: { name: 'Curations' },
+          icon: 'mdi-clipboard-check-multiple'
+        },
+        {
+          name: 'create-precuration',
+          title: 'Create Pre-curation',
+          to: { name: 'CreatePrecuration' },
+          icon: 'mdi-plus-circle'
+        },
+        {
+          name: 'create-curation',
+          title: 'Create Curation',
+          to: { name: 'CreateCuration' },
+          icon: 'mdi-plus-circle-multiple'
+        }
+      ]
+    },
+    {
+      name: 'admin',
+      title: 'Admin',
+      icon: 'mdi-cog',
+      requiresAuth: true,
+      requiredRoles: ['admin'],
+      children: [
+        {
+          name: 'gene-admin',
+          title: 'Gene Management',
+          to: { name: 'GeneAdmin' },
+          icon: 'mdi-database-edit',
+          requiredRoles: ['admin']
+        },
+        {
+          name: 'user-management',
+          title: 'User Management',
+          to: { name: 'UserManagement' },
+          icon: 'mdi-account-group',
+          requiredRoles: ['admin']
+        }
+      ]
+    },
+    {
+      name: 'help',
+      title: 'Help',
+      icon: 'mdi-help-circle',
+      children: [
+        {
+          name: 'about',
+          title: 'About',
+          to: { name: 'About' },
+          icon: 'mdi-information'
+        },
+        {
+          name: 'faq',
+          title: 'FAQ',
+          to: { name: 'FAQ' },
+          icon: 'mdi-frequently-asked-questions'
+        }
+      ]
     }
-    
-    // Check role requirements
-    if (item.requiredRoles && !authStore.hasAnyRole(item.requiredRoles)) {
-      return false
-    }
-    
-    // Filter children based on role requirements
-    if (item.children) {
-      item.children = item.children.filter(child => {
-        if (child.requiredRoles && !authStore.hasAnyRole(child.requiredRoles)) {
+  ]
+
+  // Computed menu items based on auth state
+  const visibleMenuItems = computed(() => {
+    return menuItems
+      .map(item => ({
+        ...item,
+        children: item.children ? [...item.children] : undefined
+      }))
+      .filter(item => {
+        // Check auth requirements
+        if (item.requiresAuth && !authStore.isAuthenticated) {
           return false
         }
+
+        // Check role requirements
+        if (item.requiredRoles && !authStore.hasAnyRole(item.requiredRoles)) {
+          return false
+        }
+
+        // Filter children based on role requirements
+        if (item.children) {
+          item.children = item.children.filter(child => {
+            if (child.requiredRoles && !authStore.hasAnyRole(child.requiredRoles)) {
+              return false
+            }
+            return true
+          })
+
+          // Hide parent if no children are visible
+          if (item.children.length === 0) {
+            return false
+          }
+        }
+
         return true
       })
-      
-      // Hide parent if no children are visible
-      if (item.children.length === 0) {
-        return false
-      }
-    }
-    
-    return true
   })
-})
 
-const toggleTheme = () => {
-  // Use the modern Vuetify 3.9+ theme API
-  theme.toggle()
-  const newTheme = theme.global.current.value.dark ? 'dark' : 'light'
-  localStorage.setItem('theme', newTheme)
-}
-
-const handleLogout = async () => {
-  try {
-    await authStore.logout()
-    router.push({ name: 'Home' })
-  } catch (error) {
-    console.error('Logout error:', error)
+  const toggleTheme = () => {
+    // Use the modern Vuetify 3.9+ theme API
+    theme.toggle()
+    const newTheme = theme.global.current.value.dark ? 'dark' : 'light'
+    localStorage.setItem('theme', newTheme)
   }
-}
 
-onMounted(() => {
-  // Apply saved theme on mount using modern Vuetify 3.9+ API
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme && theme.global.name.value !== savedTheme) {
-    theme.change(savedTheme)
+  const handleLogout = async () => {
+    try {
+      await authStore.logout()
+      router.push({ name: 'Home' })
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
   }
-})
+
+  onMounted(() => {
+    // Apply saved theme on mount using modern Vuetify 3.9+ API
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme && theme.global.name.value !== savedTheme) {
+      theme.change(savedTheme)
+    }
+  })
 </script>
 
 <style scoped>
-.app-logo {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
+  .app-logo {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
 
-.app-logo:hover {
-  transform: scale(1.05);
-}
+  .app-logo:hover {
+    transform: scale(1.05);
+  }
 
-.clickable {
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
+  .clickable {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
 
-.clickable:hover {
-  opacity: 0.8;
-}
+  .clickable:hover {
+    opacity: 0.8;
+  }
 
-.version-info {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  line-height: 1;
-  margin-top: -4px;
-}
+  .version-info {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    line-height: 1;
+    margin-top: -4px;
+  }
 </style>

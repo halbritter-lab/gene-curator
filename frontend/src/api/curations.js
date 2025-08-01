@@ -29,8 +29,8 @@ export const curationsAPI = {
    * Get curation summary list
    */
   async getCurationSummary(limit = 100) {
-    const response = await apiClient.get('/curations/summary', { 
-      params: { limit } 
+    const response = await apiClient.get('/curations/summary', {
+      params: { limit }
     })
     return response.data
   },

@@ -29,8 +29,8 @@ export const precurationsAPI = {
    * Get precuration summary list
    */
   async getPrecurationSummary(limit = 100) {
-    const response = await apiClient.get('/precurations/summary', { 
-      params: { limit } 
+    const response = await apiClient.get('/precurations/summary', {
+      params: { limit }
     })
     return response.data
   },

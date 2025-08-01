@@ -16,29 +16,29 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from 'vue-router'
-import { showSuccess } from '@/composables/useNotifications.js'
-import PrecurationForm from '@/components/clingen/PrecurationForm.vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import { showSuccess } from '@/composables/useNotifications.js'
+  import PrecurationForm from '@/components/clingen/PrecurationForm.vue'
 
-const router = useRouter()
-const route = useRoute()
+  const router = useRouter()
+  const route = useRoute()
 
-const geneId = route.query.gene_id || null
+  const geneId = route.query.gene_id || null
 
-const handleSubmit = (precuration) => {
-  // Navigate to the precuration detail page
-  router.push({ 
-    name: 'PrecurationDetail', 
-    params: { id: precuration.id } 
-  })
-}
+  const handleSubmit = precuration => {
+    // Navigate to the precuration detail page
+    router.push({
+      name: 'PrecurationDetail',
+      params: { id: precuration.id }
+    })
+  }
 
-const handleCancel = () => {
-  // Navigate back to precurations list
-  router.push({ name: 'Precurations' })
-}
+  const handleCancel = () => {
+    // Navigate back to precurations list
+    router.push({ name: 'Precurations' })
+  }
 
-const handleSaved = (precuration) => {
-  showSuccess('Pre-curation saved successfully')
-}
+  const handleSaved = precuration => {
+    showSuccess('Pre-curation saved successfully')
+  }
 </script>

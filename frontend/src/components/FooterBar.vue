@@ -3,9 +3,7 @@
     <v-container>
       <v-row align="center" justify="center">
         <v-col cols="12" md="6" class="text-center text-md-left">
-          <span class="text-caption">
-            © {{ currentYear }} Gene Curator - Halbritter Lab
-          </span>
+          <span class="text-caption"> © {{ currentYear }} Gene Curator - Halbritter Lab </span>
         </v-col>
         <v-col cols="12" md="6" class="text-center text-md-right">
           <v-btn
@@ -28,28 +26,28 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+  import { computed } from 'vue'
 
-const currentYear = computed(() => new Date().getFullYear())
+  const currentYear = computed(() => new Date().getFullYear())
 
-const footerLinks = [
-  {
-    name: 'github',
-    title: 'GitHub',
-    url: 'https://github.com/halbritter-lab/gene-curator',
-    icon: 'mdi-github'
-  },
-  {
-    name: 'documentation',
-    title: 'Docs',
-    url: 'https://github.com/halbritter-lab/gene-curator/wiki',
-    icon: 'mdi-book-open-variant'
-  }
-]
+  const footerLinks = [
+    {
+      name: 'github',
+      title: 'GitHub',
+      url: 'https://github.com/halbritter-lab/gene-curator',
+      icon: 'mdi-github'
+    },
+    {
+      name: 'documentation',
+      title: 'Docs',
+      url: 'https://github.com/halbritter-lab/gene-curator/wiki',
+      icon: 'mdi-book-open-variant'
+    }
+  ]
 </script>
 
 <style scoped>
-.v-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
+  .v-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
 </style>

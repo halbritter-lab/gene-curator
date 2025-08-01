@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Auto-formatting script for Gene Curator frontend.
- * 
+ *
  * This script applies automatic code formatting using ESLint and Prettier.
  */
 
@@ -19,12 +19,12 @@ const projectRoot = join(__dirname, '..')
 function runCommand(cmd, description) {
   console.log(`🔧 ${description}...`)
   try {
-    const result = execSync(cmd, { 
+    const result = execSync(cmd, {
       cwd: projectRoot,
       stdio: 'pipe',
       encoding: 'utf-8'
     })
-    
+
     console.log(`✅ ${description} completed`)
     if (result && result.trim()) {
       console.log(`   Changes: ${result.trim()}`)
@@ -44,23 +44,23 @@ function runCommand(cmd, description) {
 
 function main() {
   console.log('🎨 Starting Gene Curator Frontend Auto-Formatting')
-  console.log('=' .repeat(60))
-  
+  console.log('='.repeat(60))
+
   const formatters = [
     ['npm run format', 'Prettier auto-formatting'],
     ['npm run lint', 'ESLint auto-fixes']
   ]
-  
+
   const failedFormatters = []
-  
+
   for (const [cmd, description] of formatters) {
     if (!runCommand(cmd, description)) {
       failedFormatters.push(description)
     }
   }
-  
-  console.log('\n' + '='.repeat(60))
-  
+
+  console.log(`\n${'='.repeat(60)}`)
+
   if (failedFormatters.length > 0) {
     console.log(`❌ ${failedFormatters.length} formatter(s) failed:`)
     failedFormatters.forEach(formatter => {

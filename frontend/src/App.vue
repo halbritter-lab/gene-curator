@@ -1,14 +1,14 @@
 <template>
   <v-app>
     <AppBar />
-    
+
     <v-main>
       <v-container fluid>
         <router-view />
       </v-container>
     </v-main>
 
-    <MessageSnackbar 
+    <MessageSnackbar
       v-model="snackbarState.show"
       :message="snackbarState.message"
       :color="snackbarState.color"
@@ -19,79 +19,79 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth.js'
-import { snackbarState } from '@/composables/useNotifications.js'
-import AppBar from '@/components/AppBar.vue'
-import FooterBar from '@/components/FooterBar.vue'
-import MessageSnackbar from '@/components/MessageSnackbar.vue'
+  import { onMounted } from 'vue'
+  import { useAuthStore } from '@/stores/auth.js'
+  import { snackbarState } from '@/composables/useNotifications.js'
+  import AppBar from '@/components/AppBar.vue'
+  import FooterBar from '@/components/FooterBar.vue'
+  import MessageSnackbar from '@/components/MessageSnackbar.vue'
 
-const authStore = useAuthStore()
+  const authStore = useAuthStore()
 
-onMounted(async () => {
-  // Initialize authentication state on app startup
-  await authStore.initialize()
-})
+  onMounted(async () => {
+    // Initialize authentication state on app startup
+    await authStore.initialize()
+  })
 </script>
 
 <style>
-/* Global styles */
-.v-application {
-  font-family: 'Roboto', sans-serif;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--v-theme-surface);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--v-theme-primary);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--v-theme-primary-darken-1);
-}
-
-/* Loading state */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-/* Error state */
-.error-container {
-  text-align: center;
-  padding: 2rem;
-}
-
-/* Table styles */
-.gene-table .v-data-table__wrapper {
-  border-radius: 8px;
-}
-
-/* Form styles */
-.form-container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Card styles */
-.info-card {
-  margin-bottom: 1rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .v-container {
-    padding: 8px;
+  /* Global styles */
+  .v-application {
+    font-family: 'Roboto', sans-serif;
   }
-}
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--v-theme-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--v-theme-primary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--v-theme-primary-darken-1);
+  }
+
+  /* Loading state */
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+
+  /* Error state */
+  .error-container {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  /* Table styles */
+  .gene-table .v-data-table__wrapper {
+    border-radius: 8px;
+  }
+
+  /* Form styles */
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Card styles */
+  .info-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .v-container {
+      padding: 8px;
+    }
+  }
 </style>

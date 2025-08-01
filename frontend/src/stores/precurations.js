@@ -29,33 +29,33 @@ export const usePrecurationsStore = defineStore('precurations', {
   }),
 
   getters: {
-    getPrecurationById: (state) => (id) => {
+    getPrecurationById: state => id => {
       return state.precurations.find(precuration => precuration.id === id)
     },
-    
-    getPrecurationsByGene: (state) => (geneId) => {
+
+    getPrecurationsByGene: state => geneId => {
       return state.precurations.filter(precuration => precuration.gene_id === geneId)
     },
 
-    filteredPrecurations: (state) => {
+    filteredPrecurations: state => {
       if (!state.searchResults) return state.precurations
       return state.searchResults.precurations || []
     },
 
-    totalPrecurations: (state) => {
+    totalPrecurations: state => {
       return state.searchResults?.total || state.pagination.total
     },
 
-    hasNextPage: (state) => {
+    hasNextPage: state => {
       return state.pagination.page < state.pagination.pages
     },
 
-    hasPrevPage: (state) => {
+    hasPrevPage: state => {
       return state.pagination.page > 1
     },
 
-    pendingPrecurations: (state) => {
-      return state.precurations.filter(p => 
+    pendingPrecurations: state => {
+      return state.precurations.filter(p =>
         ['Draft', 'In_Primary_Review', 'In_Secondary_Review'].includes(p.status)
       )
     }
@@ -75,7 +75,7 @@ export const usePrecurationsStore = defineStore('precurations', {
         }
 
         const response = await precurationsAPI.getPrecurations(queryParams)
-        
+
         this.precurations = response.precurations
         this.pagination = {
           page: response.page,
@@ -105,9 +105,9 @@ export const usePrecurationsStore = defineStore('precurations', {
 
         this.searchParams = params
         const response = await precurationsAPI.searchPrecurations(params)
-        
+
         this.searchResults = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Search failed'
@@ -124,7 +124,7 @@ export const usePrecurationsStore = defineStore('precurations', {
 
         const response = await precurationsAPI.getPrecurationById(precurationId)
         this.currentPrecuration = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch precuration'
@@ -144,7 +144,7 @@ export const usePrecurationsStore = defineStore('precurations', {
         const existingIds = new Set(this.precurations.map(p => p.id))
         const newPrecurations = response.filter(p => !existingIds.has(p.id))
         this.precurations.push(...newPrecurations)
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch precurations'
@@ -160,11 +160,11 @@ export const usePrecurationsStore = defineStore('precurations', {
         this.error = null
 
         const response = await precurationsAPI.createPrecuration(precurationData)
-        
+
         // Add to local state
         this.precurations.unshift(response)
         this.pagination.total += 1
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to create precuration'
@@ -180,17 +180,17 @@ export const usePrecurationsStore = defineStore('precurations', {
         this.error = null
 
         const response = await precurationsAPI.updatePrecuration(precurationId, precurationData)
-        
+
         // Update local state
         const index = this.precurations.findIndex(p => p.id === precurationId)
         if (index !== -1) {
           this.precurations[index] = response
         }
-        
+
         if (this.currentPrecuration?.id === precurationId) {
           this.currentPrecuration = response
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to update precuration'
@@ -206,15 +206,15 @@ export const usePrecurationsStore = defineStore('precurations', {
         this.error = null
 
         await precurationsAPI.deletePrecuration(precurationId)
-        
+
         // Remove from local state
         this.precurations = this.precurations.filter(p => p.id !== precurationId)
         this.pagination.total -= 1
-        
+
         if (this.currentPrecuration?.id === precurationId) {
           this.currentPrecuration = null
         }
-        
+
         return true
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to delete precuration'
@@ -230,17 +230,17 @@ export const usePrecurationsStore = defineStore('precurations', {
         this.error = null
 
         const response = await precurationsAPI.precurationWorkflowAction(precurationId, action)
-        
+
         // Update local state
         const index = this.precurations.findIndex(p => p.id === precurationId)
         if (index !== -1) {
           this.precurations[index] = response
         }
-        
+
         if (this.currentPrecuration?.id === precurationId) {
           this.currentPrecuration = response
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Workflow action failed'
@@ -257,7 +257,7 @@ export const usePrecurationsStore = defineStore('precurations', {
 
         const response = await precurationsAPI.getPrecurationHistory(precurationId)
         this.precurationHistory = response.history
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch precuration history'
@@ -271,7 +271,7 @@ export const usePrecurationsStore = defineStore('precurations', {
       try {
         const response = await precurationsAPI.getPrecurationStatistics()
         this.statistics = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch statistics'
@@ -283,7 +283,7 @@ export const usePrecurationsStore = defineStore('precurations', {
       try {
         const response = await precurationsAPI.getPrecurationSummary()
         this.summary = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch summary'
@@ -315,7 +315,7 @@ export const usePrecurationsStore = defineStore('precurations', {
       this.searchParams.sort_by = sortBy
       this.searchParams.sort_order = sortOrder
       this.pagination.page = 1
-      
+
       if (this.searchResults) {
         await this.searchPrecurations()
       } else {

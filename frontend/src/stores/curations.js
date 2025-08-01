@@ -35,53 +35,51 @@ export const useCurationsStore = defineStore('curations', {
   }),
 
   getters: {
-    getCurationById: (state) => (id) => {
+    getCurationById: state => id => {
       return state.curations.find(curation => curation.id === id)
     },
-    
-    getCurationsByGene: (state) => (geneId) => {
+
+    getCurationsByGene: state => geneId => {
       return state.curations.filter(curation => curation.gene_id === geneId)
     },
 
-    getCurationsByVerdict: (state) => (verdict) => {
+    getCurationsByVerdict: state => verdict => {
       return state.curations.filter(curation => curation.verdict === verdict)
     },
 
-    filteredCurations: (state) => {
+    filteredCurations: state => {
       if (!state.searchResults) return state.curations
       return state.searchResults.curations || []
     },
 
-    totalCurations: (state) => {
+    totalCurations: state => {
       return state.searchResults?.total || state.pagination.total
     },
 
-    hasNextPage: (state) => {
+    hasNextPage: state => {
       return state.pagination.page < state.pagination.pages
     },
 
-    hasPrevPage: (state) => {
+    hasPrevPage: state => {
       return state.pagination.page > 1
     },
 
-    pendingCurations: (state) => {
-      return state.curations.filter(c => 
+    pendingCurations: state => {
+      return state.curations.filter(c =>
         ['Draft', 'In_Primary_Review', 'In_Secondary_Review'].includes(c.status)
       )
     },
 
-    highConfidenceCurations: (state) => {
-      return state.curations.filter(c => 
-        ['Definitive', 'Strong'].includes(c.verdict)
-      )
+    highConfidenceCurations: state => {
+      return state.curations.filter(c => ['Definitive', 'Strong'].includes(c.verdict))
     },
 
-    curationsWithContradictoryEvidence: (state) => {
+    curationsWithContradictoryEvidence: state => {
       return state.curations.filter(c => c.has_contradictory_evidence)
     },
 
     // ClinGen-specific getters
-    verdictDistribution: (state) => {
+    verdictDistribution: state => {
       const distribution = {}
       state.curations.forEach(curation => {
         distribution[curation.verdict] = (distribution[curation.verdict] || 0) + 1
@@ -89,16 +87,19 @@ export const useCurationsStore = defineStore('curations', {
       return distribution
     },
 
-    averageScores: (state) => {
+    averageScores: state => {
       if (state.curations.length === 0) return null
-      
-      const totals = state.curations.reduce((acc, curation) => {
-        acc.genetic += curation.genetic_evidence_score
-        acc.experimental += curation.experimental_evidence_score
-        acc.total += curation.total_score
-        return acc
-      }, { genetic: 0, experimental: 0, total: 0 })
-      
+
+      const totals = state.curations.reduce(
+        (acc, curation) => {
+          acc.genetic += curation.genetic_evidence_score
+          acc.experimental += curation.experimental_evidence_score
+          acc.total += curation.total_score
+          return acc
+        },
+        { genetic: 0, experimental: 0, total: 0 }
+      )
+
       const count = state.curations.length
       return {
         avg_genetic_score: (totals.genetic / count).toFixed(2),
@@ -122,7 +123,7 @@ export const useCurationsStore = defineStore('curations', {
         }
 
         const response = await curationsAPI.getCurations(queryParams)
-        
+
         this.curations = response.curations
         this.pagination = {
           page: response.page,
@@ -152,9 +153,9 @@ export const useCurationsStore = defineStore('curations', {
 
         this.searchParams = params
         const response = await curationsAPI.searchCurations(params)
-        
+
         this.searchResults = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Search failed'
@@ -171,7 +172,7 @@ export const useCurationsStore = defineStore('curations', {
 
         const response = await curationsAPI.getCurationById(curationId)
         this.currentCuration = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch curation'
@@ -191,7 +192,7 @@ export const useCurationsStore = defineStore('curations', {
         const existingIds = new Set(this.curations.map(c => c.id))
         const newCurations = response.filter(c => !existingIds.has(c.id))
         this.curations.push(...newCurations)
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch curations'
@@ -207,7 +208,7 @@ export const useCurationsStore = defineStore('curations', {
         this.error = null
 
         const response = await curationsAPI.getCurationsByVerdict(verdict)
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch curations by verdict'
@@ -224,7 +225,7 @@ export const useCurationsStore = defineStore('curations', {
 
         const response = await curationsAPI.getCurationScoreSummary(curationId)
         this.currentScoreSummary = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch score summary'
@@ -240,11 +241,11 @@ export const useCurationsStore = defineStore('curations', {
         this.error = null
 
         const response = await curationsAPI.createCuration(curationData)
-        
+
         // Add to local state
         this.curations.unshift(response)
         this.pagination.total += 1
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to create curation'
@@ -260,17 +261,17 @@ export const useCurationsStore = defineStore('curations', {
         this.error = null
 
         const response = await curationsAPI.updateCuration(curationId, curationData)
-        
+
         // Update local state
         const index = this.curations.findIndex(c => c.id === curationId)
         if (index !== -1) {
           this.curations[index] = response
         }
-        
+
         if (this.currentCuration?.id === curationId) {
           this.currentCuration = response
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to update curation'
@@ -286,15 +287,15 @@ export const useCurationsStore = defineStore('curations', {
         this.error = null
 
         await curationsAPI.deleteCuration(curationId)
-        
+
         // Remove from local state
         this.curations = this.curations.filter(c => c.id !== curationId)
         this.pagination.total -= 1
-        
+
         if (this.currentCuration?.id === curationId) {
           this.currentCuration = null
         }
-        
+
         return true
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to delete curation'
@@ -310,17 +311,17 @@ export const useCurationsStore = defineStore('curations', {
         this.error = null
 
         const response = await curationsAPI.curationWorkflowAction(curationId, action)
-        
+
         // Update local state
         const index = this.curations.findIndex(c => c.id === curationId)
         if (index !== -1) {
           this.curations[index] = response
         }
-        
+
         if (this.currentCuration?.id === curationId) {
           this.currentCuration = response
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Workflow action failed'
@@ -337,7 +338,7 @@ export const useCurationsStore = defineStore('curations', {
 
         const response = await curationsAPI.getCurationHistory(curationId)
         this.curationHistory = response.history
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch curation history'
@@ -351,7 +352,7 @@ export const useCurationsStore = defineStore('curations', {
       try {
         const response = await curationsAPI.getCurationStatistics()
         this.statistics = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch statistics'
@@ -363,7 +364,7 @@ export const useCurationsStore = defineStore('curations', {
       try {
         const response = await curationsAPI.getCurationSummary()
         this.summary = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch summary'
@@ -375,7 +376,7 @@ export const useCurationsStore = defineStore('curations', {
       try {
         const response = await curationsAPI.getScoreDistribution()
         this.scoreDistribution = response
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Failed to fetch score distribution'
@@ -407,7 +408,7 @@ export const useCurationsStore = defineStore('curations', {
       this.searchParams.sort_by = sortBy
       this.searchParams.sort_order = sortOrder
       this.pagination.page = 1
-      
+
       if (this.searchResults) {
         await this.searchCurations()
       } else {

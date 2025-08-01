@@ -30,9 +30,9 @@ const routes = [
   },
   {
     path: '/login',
-    name: 'Login', 
+    name: 'Login',
     component: Login,
-    meta: { 
+    meta: {
       title: 'Login',
       requiresGuest: true // Redirect authenticated users away
     }
@@ -41,7 +41,7 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register,
-    meta: { 
+    meta: {
       title: 'Register',
       requiresGuest: true
     }
@@ -50,7 +50,7 @@ const routes = [
     path: '/genes',
     name: 'Genes',
     component: GenesTable,
-    meta: { 
+    meta: {
       title: 'Genes',
       requiresAuth: false // Public access for viewing
     }
@@ -60,7 +60,7 @@ const routes = [
     name: 'GeneDetail',
     component: GeneDetail,
     props: true,
-    meta: { 
+    meta: {
       title: 'Gene Details',
       requiresAuth: false
     }
@@ -69,7 +69,7 @@ const routes = [
     path: '/admin/genes',
     name: 'GeneAdmin',
     component: GeneAdmin,
-    meta: { 
+    meta: {
       title: 'Gene Administration',
       requiresAuth: true,
       requiredRoles: ['admin'] // Only admins can manage genes (bulk upload/delete)
@@ -79,7 +79,7 @@ const routes = [
     path: '/precurations',
     name: 'Precurations',
     component: PrecurationsTable,
-    meta: { 
+    meta: {
       title: 'Pre-curations',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -89,7 +89,7 @@ const routes = [
     path: '/precurations/create',
     name: 'CreatePrecuration',
     component: CreatePrecuration,
-    meta: { 
+    meta: {
       title: 'Create Pre-curation',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -100,7 +100,7 @@ const routes = [
     name: 'PrecurationDetail',
     component: PrecurationDetail,
     props: true,
-    meta: { 
+    meta: {
       title: 'Pre-curation Details',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -110,7 +110,7 @@ const routes = [
     path: '/curations',
     name: 'Curations',
     component: CurationsTable,
-    meta: { 
+    meta: {
       title: 'Curations',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -120,7 +120,7 @@ const routes = [
     path: '/curations/create',
     name: 'CreateCuration',
     component: CreateCuration,
-    meta: { 
+    meta: {
       title: 'Create Curation',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -131,7 +131,7 @@ const routes = [
     name: 'CurationDetail',
     component: CurationDetail,
     props: true,
-    meta: { 
+    meta: {
       title: 'Curation Details',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
@@ -141,7 +141,7 @@ const routes = [
     path: '/profile',
     name: 'UserProfile',
     component: UserProfile,
-    meta: { 
+    meta: {
       title: 'User Profile',
       requiresAuth: true
     }
@@ -150,7 +150,7 @@ const routes = [
     path: '/admin/users',
     name: 'UserManagement',
     component: UserManagement,
-    meta: { 
+    meta: {
       title: 'User Management',
       requiresAuth: true,
       requiredRoles: ['admin']
@@ -197,7 +197,7 @@ const router = createRouter({
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Initialize auth store if not already done
   if (!authStore.isAuthenticated && authStore.token) {
     try {

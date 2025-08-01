@@ -12,10 +12,10 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAdmin: (state) => state.user?.role === 'admin',
-    isCurator: (state) => ['admin', 'curator'].includes(state.user?.role),
-    isViewer: (state) => ['admin', 'curator', 'viewer'].includes(state.user?.role),
-    userRole: (state) => state.user?.role || 'guest'
+    isAdmin: state => state.user?.role === 'admin',
+    isCurator: state => ['admin', 'curator'].includes(state.user?.role),
+    isViewer: state => ['admin', 'curator', 'viewer'].includes(state.user?.role),
+    userRole: state => state.user?.role || 'guest'
   },
 
   actions: {
@@ -40,21 +40,21 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.loading = true
         this.error = null
-        
+
         const response = await authAPI.login(credentials)
-        
+
         this.token = response.access_token
         this.refreshToken = response.refresh_token
-        
+
         // Store tokens in localStorage
         localStorage.setItem('access_token', response.access_token)
         localStorage.setItem('refresh_token', response.refresh_token)
-        
+
         // Fetch user data using the new token
         const userData = await authAPI.me()
         this.user = userData
         this.isAuthenticated = true
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Login failed'
@@ -69,9 +69,9 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.loading = true
         this.error = null
-        
+
         const response = await authAPI.register(userData)
-        
+
         // Auto-login after successful registration
         if (response.user) {
           await this.login({
@@ -79,7 +79,7 @@ export const useAuthStore = defineStore('auth', {
             password: userData.password
           })
         }
-        
+
         return response
       } catch (error) {
         this.error = error.response?.data?.detail || 'Registration failed'
@@ -106,12 +106,12 @@ export const useAuthStore = defineStore('auth', {
         if (!this.refreshToken) {
           throw new Error('No refresh token available')
         }
-        
+
         const response = await authAPI.refresh(this.refreshToken)
-        
+
         this.token = response.access_token
         localStorage.setItem('access_token', response.access_token)
-        
+
         return response.access_token
       } catch (error) {
         this.clearAuth()
@@ -125,7 +125,7 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = null
       this.isAuthenticated = false
       this.error = null
-      
+
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
     },
@@ -136,13 +136,13 @@ export const useAuthStore = defineStore('auth', {
 
     hasRole(requiredRole) {
       if (!this.user) return false
-      
+
       const roleHierarchy = {
-        'viewer': ['viewer'],
-        'curator': ['viewer', 'curator'],
-        'admin': ['viewer', 'curator', 'admin']
+        viewer: ['viewer'],
+        curator: ['viewer', 'curator'],
+        admin: ['viewer', 'curator', 'admin']
       }
-      
+
       const userRoles = roleHierarchy[this.user.role] || []
       return userRoles.includes(requiredRole)
     },

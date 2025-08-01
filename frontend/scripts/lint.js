@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Comprehensive linting script for Gene Curator frontend.
- * 
+ *
  * This script runs all linting tools in the correct order and provides
  * a unified interface for code quality checks.
  */
@@ -20,12 +20,12 @@ const projectRoot = join(__dirname, '..')
 function runCommand(cmd, description) {
   console.log(`🔍 ${description}...`)
   try {
-    const result = execSync(cmd, { 
+    const result = execSync(cmd, {
       cwd: projectRoot,
       stdio: 'pipe',
       encoding: 'utf-8'
     })
-    
+
     console.log(`✅ ${description} passed`)
     if (result && result.trim()) {
       console.log(`   Output: ${result.trim()}`)
@@ -45,30 +45,30 @@ function runCommand(cmd, description) {
 
 function main() {
   console.log('🚀 Starting Gene Curator Frontend Linting Suite')
-  console.log('=' .repeat(60))
-  
+  console.log('='.repeat(60))
+
   const checks = [
     ['npm run lint:check', 'ESLint linting'],
     ['npm run format:check', 'Prettier formatting check']
   ]
-  
+
   const failedChecks = []
-  
+
   for (const [cmd, description] of checks) {
     if (!runCommand(cmd, description)) {
       failedChecks.push(description)
     }
   }
-  
-  console.log('\n' + '='.repeat(60))
-  
+
+  console.log(`\n${'='.repeat(60)}`)
+
   if (failedChecks.length > 0) {
     console.log(`❌ ${failedChecks.length} check(s) failed:`)
     failedChecks.forEach(check => {
       console.log(`   - ${check}`)
     })
     console.log('\n💡 Run individual tools to see detailed error messages:')
-    console.log('   - npm run lint:check')  
+    console.log('   - npm run lint:check')
     console.log('   - npm run format:check')
     console.log('\n🔧 Or run fixes:')
     console.log('   - npm run lint (auto-fix ESLint issues)')

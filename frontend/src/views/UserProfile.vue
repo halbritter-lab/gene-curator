@@ -43,7 +43,9 @@
                     <template #prepend>
                       <v-icon>mdi-account</v-icon>
                     </template>
-                    <v-list-item-title>{{ userProfile?.name || 'Not specified' }}</v-list-item-title>
+                    <v-list-item-title>{{
+                      userProfile?.name || 'Not specified'
+                    }}</v-list-item-title>
                     <v-list-item-subtitle>Full Name</v-list-item-subtitle>
                   </v-list-item>
                   <v-list-item>
@@ -68,7 +70,9 @@
                     <template #prepend>
                       <v-icon>mdi-login</v-icon>
                     </template>
-                    <v-list-item-title>{{ formatDate(userProfile?.last_login) || 'Never' }}</v-list-item-title>
+                    <v-list-item-title>{{
+                      formatDate(userProfile?.last_login) || 'Never'
+                    }}</v-list-item-title>
                     <v-list-item-subtitle>Last Login</v-list-item-subtitle>
                   </v-list-item>
                   <v-list-item>
@@ -78,8 +82,8 @@
                       </v-icon>
                     </template>
                     <v-list-item-title>
-                      <v-chip 
-                        :color="userProfile?.is_active ? 'success' : 'error'" 
+                      <v-chip
+                        :color="userProfile?.is_active ? 'success' : 'error'"
                         size="small"
                         variant="flat"
                       >
@@ -92,7 +96,7 @@
               </v-col>
 
               <!-- Activity Summary -->
-              <v-col cols="12" md="6" v-if="userActivity">
+              <v-col v-if="userActivity" cols="12" md="6">
                 <h3 class="text-h6 mb-3">Activity Summary</h3>
                 <v-list>
                   <v-list-item>
@@ -120,7 +124,9 @@
                     <template #prepend>
                       <v-icon color="success">mdi-check-circle</v-icon>
                     </template>
-                    <v-list-item-title>{{ userActivity.curations_approved || 0 }}</v-list-item-title>
+                    <v-list-item-title>{{
+                      userActivity.curations_approved || 0
+                    }}</v-list-item-title>
                     <v-list-item-subtitle>Curations Approved</v-list-item-subtitle>
                   </v-list-item>
                   <v-list-item class="pt-3">
@@ -173,11 +179,11 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn 
-              @click="changePassword" 
+            <v-btn
               :loading="passwordLoading"
               :disabled="!passwordFormValid"
               color="primary"
+              @click="changePassword"
             >
               Change Password
             </v-btn>
@@ -195,143 +201,145 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="4000">
       {{ snackbar.message }}
       <template #actions>
-        <v-btn variant="text" @click="snackbar.show = false">
-          Close
-        </v-btn>
+        <v-btn variant="text" @click="snackbar.show = false"> Close </v-btn>
       </template>
     </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useAuthStore } from '@/stores/auth.js'
-import { useUsersStore } from '@/stores/users.js'
-import { authApi } from '@/api/auth.js'
+  import { ref, onMounted, watch } from 'vue'
+  import { useAuthStore } from '@/stores/auth.js'
+  import { useUsersStore } from '@/stores/users.js'
+  import { authApi } from '@/api/auth.js'
 
-const authStore = useAuthStore()
-const usersStore = useUsersStore()
+  const authStore = useAuthStore()
+  const usersStore = useUsersStore()
 
-// Reactive state
-const userProfile = ref(null)
-const userActivity = ref(null)
-const loading = ref(false)
-const passwordLoading = ref(false)
-const passwordFormValid = ref(false)
-const passwordForm = ref(null)
+  // Reactive state
+  const userProfile = ref(null)
+  const userActivity = ref(null)
+  const loading = ref(false)
+  const passwordLoading = ref(false)
+  const passwordFormValid = ref(false)
+  const passwordForm = ref(null)
 
-// Password change form
-const passwordData = ref({
-  current_password: '',
-  new_password: ''
-})
-
-// Snackbar
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: 'success'
-})
-
-// Form validation rules
-const rules = {
-  required: value => !!value || 'This field is required',
-  minLength: value => (value && value.length >= 8) || 'Minimum 8 characters required'
-}
-
-// Methods
-const getRoleColor = (role) => {
-  const colors = { admin: 'error', curator: 'warning', viewer: 'info' }
-  return colors[role] || 'grey'
-}
-
-const getRoleIcon = (role) => {
-  const icons = { admin: 'mdi-shield-crown', curator: 'mdi-pencil', viewer: 'mdi-eye' }
-  return icons[role] || 'mdi-account'
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Unknown'
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  // Password change form
+  const passwordData = ref({
+    current_password: '',
+    new_password: ''
   })
-}
 
-async function loadUserProfile() {
-  if (!authStore.user?.id) {
-    // If we don't have user ID from auth store, use the auth store data
-    userProfile.value = authStore.user
-    return
+  // Snackbar
+  const snackbar = ref({
+    show: false,
+    message: '',
+    color: 'success'
+  })
+
+  // Form validation rules
+  const rules = {
+    required: value => !!value || 'This field is required',
+    minLength: value => (value && value.length >= 8) || 'Minimum 8 characters required'
   }
 
-  loading.value = true
-  
-  try {
-    // Fetch complete user profile from database
-    const profile = await usersStore.fetchUser(authStore.user.id)
-    userProfile.value = profile
-
-    // Fetch user activity
-    const activity = await usersStore.fetchUserActivity(authStore.user.id)
-    userActivity.value = activity
-  } catch (error) {
-    console.error('Failed to load user profile:', error)
-    // Fallback to auth store data
-    userProfile.value = authStore.user
-    showSnackbar('Failed to load complete profile information', 'warning')
-  } finally {
-    loading.value = false
+  // Methods
+  const getRoleColor = role => {
+    const colors = { admin: 'error', curator: 'warning', viewer: 'info' }
+    return colors[role] || 'grey'
   }
-}
 
-async function changePassword() {
-  if (!passwordForm.value) return
-  
-  const { valid } = await passwordForm.value.validate()
-  if (!valid) return
+  const getRoleIcon = role => {
+    const icons = { admin: 'mdi-shield-crown', curator: 'mdi-pencil', viewer: 'mdi-eye' }
+    return icons[role] || 'mdi-account'
+  }
 
-  passwordLoading.value = true
-  
-  try {
-    await authApi.changePassword(passwordData.value)
-    
-    // Clear form
-    passwordData.value = {
-      current_password: '',
-      new_password: ''
+  const formatDate = dateString => {
+    if (!dateString) return 'Unknown'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  async function loadUserProfile() {
+    if (!authStore.user?.id) {
+      // If we don't have user ID from auth store, use the auth store data
+      userProfile.value = authStore.user
+      return
     }
-    passwordForm.value.reset()
-    
-    showSnackbar('Password changed successfully', 'success')
-  } catch (error) {
-    const message = error.response?.data?.detail || 'Failed to change password'
-    showSnackbar(message, 'error')
-  } finally {
-    passwordLoading.value = false
-  }
-}
 
-function showSnackbar(message, color = 'success') {
-  snackbar.value = {
-    show: true,
-    message,
-    color
-  }
-}
+    loading.value = true
 
-// Watch for auth changes
-watch(() => authStore.user, (newUser) => {
-  if (newUser) {
-    loadUserProfile()
-  }
-}, { immediate: true })
+    try {
+      // Fetch complete user profile from database
+      const profile = await usersStore.fetchUser(authStore.user.id)
+      userProfile.value = profile
 
-// Initialize
-onMounted(() => {
-  if (authStore.user) {
-    loadUserProfile()
+      // Fetch user activity
+      const activity = await usersStore.fetchUserActivity(authStore.user.id)
+      userActivity.value = activity
+    } catch (error) {
+      console.error('Failed to load user profile:', error)
+      // Fallback to auth store data
+      userProfile.value = authStore.user
+      showSnackbar('Failed to load complete profile information', 'warning')
+    } finally {
+      loading.value = false
+    }
   }
-})
+
+  async function changePassword() {
+    if (!passwordForm.value) return
+
+    const { valid } = await passwordForm.value.validate()
+    if (!valid) return
+
+    passwordLoading.value = true
+
+    try {
+      await authApi.changePassword(passwordData.value)
+
+      // Clear form
+      passwordData.value = {
+        current_password: '',
+        new_password: ''
+      }
+      passwordForm.value.reset()
+
+      showSnackbar('Password changed successfully', 'success')
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Failed to change password'
+      showSnackbar(message, 'error')
+    } finally {
+      passwordLoading.value = false
+    }
+  }
+
+  function showSnackbar(message, color = 'success') {
+    snackbar.value = {
+      show: true,
+      message,
+      color
+    }
+  }
+
+  // Watch for auth changes
+  watch(
+    () => authStore.user,
+    newUser => {
+      if (newUser) {
+        loadUserProfile()
+      }
+    },
+    { immediate: true }
+  )
+
+  // Initialize
+  onMounted(() => {
+    if (authStore.user) {
+      loadUserProfile()
+    }
+  })
 </script>

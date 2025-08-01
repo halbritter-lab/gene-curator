@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <h1 class="text-h4 mb-6">Gene Administration</h1>
-        
+
         <!-- Action Tabs -->
         <v-tabs v-model="activeTab" class="mb-6">
           <v-tab value="add">Add Gene</v-tab>
@@ -23,7 +23,9 @@
                 <div class="text-center pa-8">
                   <v-icon size="64" class="mb-4 text-medium-emphasis">mdi-form-select</v-icon>
                   <h3 class="text-h6 mb-2">Gene Form</h3>
-                  <p class="text-body-2 text-medium-emphasis">Coming soon - Individual gene creation and editing form</p>
+                  <p class="text-body-2 text-medium-emphasis">
+                    Coming soon - Individual gene creation and editing form
+                  </p>
                 </div>
               </v-card-text>
             </v-card>
@@ -40,7 +42,9 @@
                 <div class="text-center pa-8">
                   <v-icon size="64" class="mb-4 text-medium-emphasis">mdi-file-upload</v-icon>
                   <h3 class="text-h6 mb-2">Bulk Import</h3>
-                  <p class="text-body-2 text-medium-emphasis">Coming soon - CSV file upload and bulk gene import</p>
+                  <p class="text-body-2 text-medium-emphasis">
+                    Coming soon - CSV file upload and bulk gene import
+                  </p>
                 </div>
               </v-card-text>
             </v-card>
@@ -54,10 +58,14 @@
                 <div class="text-center pa-8">
                   <v-icon size="64" class="mb-4 text-medium-emphasis">mdi-table-edit</v-icon>
                   <h3 class="text-h6 mb-2">Gene Management</h3>
-                  <p class="text-body-2 text-medium-emphasis">Coming soon - Advanced gene management table with editing capabilities</p>
+                  <p class="text-body-2 text-medium-emphasis">
+                    Coming soon - Advanced gene management table with editing capabilities
+                  </p>
                   <v-divider class="my-4" />
                   <p class="text-body-2">
-                    For now, use the <router-link to="/genes" class="text-decoration-none">Genes page</router-link> to browse existing genes.
+                    For now, use the
+                    <router-link to="/genes" class="text-decoration-none">Genes page</router-link>
+                    to browse existing genes.
                   </p>
                 </div>
               </v-card-text>
@@ -72,13 +80,14 @@
       <v-card>
         <v-card-title>Confirm Deletion</v-card-title>
         <v-card-text>
-          Are you sure you want to delete the gene <strong>{{ geneToDelete?.approved_symbol }}</strong>?
-          This action cannot be undone.
+          Are you sure you want to delete the gene
+          <strong>{{ geneToDelete?.approved_symbol }}</strong
+          >? This action cannot be undone.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" @click="confirmDelete" :loading="loading">Delete</v-btn>
+          <v-btn color="error" :loading="loading" @click="confirmDelete">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -86,101 +95,102 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useGenesStore } from '@/stores/genes.js'
-import { showSuccess, showError } from '@/composables/useNotifications.js'
+  import { ref, onMounted } from 'vue'
+  import { useRoute, useRouter } from 'vue-router'
+  import { useGenesStore } from '@/stores/genes.js'
+  import { showSuccess, showError } from '@/composables/useNotifications.js'
 
-const route = useRoute()
-const router = useRouter()
-const genesStore = useGenesStore()
+  const route = useRoute()
+  const router = useRouter()
+  const genesStore = useGenesStore()
 
-const activeTab = ref('add')
-const loading = ref(false)
-const editingGene = ref(null)
-const deleteDialog = ref(false)
-const geneToDelete = ref(null)
+  const activeTab = ref('add')
+  const loading = ref(false)
+  const editingGene = ref(null)
+  const deleteDialog = ref(false)
+  const geneToDelete = ref(null)
 
-const handleGeneSubmit = async (geneData) => {
-  try {
-    loading.value = true
-    
-    if (editingGene.value) {
-      await genesStore.updateGene(editingGene.value.id, geneData)
-      showSuccess('Gene updated successfully!')
-    } else {
-      await genesStore.createGene(geneData)
-      showSuccess('Gene created successfully!')
+  const handleGeneSubmit = async geneData => {
+    try {
+      loading.value = true
+
+      if (editingGene.value) {
+        await genesStore.updateGene(editingGene.value.id, geneData)
+        showSuccess('Gene updated successfully!')
+      } else {
+        await genesStore.createGene(geneData)
+        showSuccess('Gene created successfully!')
+      }
+
+      // Reset form
+      editingGene.value = null
+    } catch (error) {
+      console.error('Gene operation failed:', error)
+      showError('Operation failed. Please try again.')
+    } finally {
+      loading.value = false
     }
-    
-    // Reset form
+  }
+
+  const handleBulkSubmit = async genes => {
+    try {
+      loading.value = true
+      const result = await genesStore.bulkCreateGenes(genes)
+      showSuccess(
+        `Bulk import completed: ${result.total_created} genes created, ${result.total_skipped} skipped`
+      )
+    } catch (error) {
+      console.error('Bulk import failed:', error)
+      showError('Bulk import failed. Please try again.')
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleEdit = async gene => {
+    editingGene.value = gene
+    activeTab.value = 'add'
+  }
+
+  const handleDelete = gene => {
+    geneToDelete.value = gene
+    deleteDialog.value = true
+  }
+
+  const confirmDelete = async () => {
+    try {
+      loading.value = true
+      await genesStore.deleteGene(geneToDelete.value.id)
+      showSuccess('Gene deleted successfully!')
+      deleteDialog.value = false
+      geneToDelete.value = null
+    } catch (error) {
+      console.error('Delete failed:', error)
+      showError('Failed to delete gene. Please try again.')
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleCancel = () => {
     editingGene.value = null
-    
-  } catch (error) {
-    console.error('Gene operation failed:', error)
-    showError('Operation failed. Please try again.')
-  } finally {
-    loading.value = false
   }
-}
 
-const handleBulkSubmit = async (genes) => {
-  try {
-    loading.value = true
-    const result = await genesStore.bulkCreateGenes(genes)
-    showSuccess(`Bulk import completed: ${result.total_created} genes created, ${result.total_skipped} skipped`)
-  } catch (error) {
-    console.error('Bulk import failed:', error)
-    showError('Bulk import failed. Please try again.')
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleEdit = async (gene) => {
-  editingGene.value = gene
-  activeTab.value = 'add'
-}
-
-const handleDelete = (gene) => {
-  geneToDelete.value = gene
-  deleteDialog.value = true
-}
-
-const confirmDelete = async () => {
-  try {
-    loading.value = true
-    await genesStore.deleteGene(geneToDelete.value.id)
-    showSuccess('Gene deleted successfully!')
-    deleteDialog.value = false
-    geneToDelete.value = null
-  } catch (error) {
-    console.error('Delete failed:', error)
-    showError('Failed to delete gene. Please try again.')
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleCancel = () => {
-  editingGene.value = null
-}
-
-onMounted(() => {
-  // Check if editing from query params
-  if (route.query.edit) {
-    const geneId = route.query.edit
-    const gene = genesStore.getGeneById(geneId)
-    if (gene) {
-      editingGene.value = gene
-      activeTab.value = 'add'
+  onMounted(() => {
+    // Check if editing from query params
+    if (route.query.edit) {
+      const geneId = route.query.edit
+      const gene = genesStore.getGeneById(geneId)
+      if (gene) {
+        editingGene.value = gene
+        activeTab.value = 'add'
+      }
     }
-  }
-})
+  })
 </script>
 
 <style scoped>
-.v-tabs {
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
+  .v-tabs {
+    border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  }
 </style>

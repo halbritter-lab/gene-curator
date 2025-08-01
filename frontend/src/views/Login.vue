@@ -33,12 +33,12 @@
                 :type="showPassword ? 'text' : 'password'"
                 prepend-inner-icon="mdi-lock"
                 :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                @click:append-inner="showPassword = !showPassword"
                 variant="outlined"
                 :rules="passwordRules"
                 :error-messages="fieldErrors.password"
                 required
                 class="mb-4"
+                @click:append-inner="showPassword = !showPassword"
               />
 
               <v-alert
@@ -65,14 +65,8 @@
               </v-btn>
 
               <div class="text-center">
-                <p class="text-body-2 mb-2">
-                  Don't have an account?
-                </p>
-                <v-btn
-                  :to="{ name: 'Register' }"
-                  variant="text"
-                  color="primary"
-                >
+                <p class="text-body-2 mb-2">Don't have an account?</p>
+                <v-btn :to="{ name: 'Register' }" variant="text" color="primary">
                   Create Account
                 </v-btn>
               </div>
@@ -91,24 +85,24 @@
               <v-btn
                 size="small"
                 variant="outlined"
-                @click="quickLogin('admin')"
                 :loading="authStore.loading"
+                @click="quickLogin('admin')"
               >
                 Login as Admin
               </v-btn>
               <v-btn
                 size="small"
                 variant="outlined"
-                @click="quickLogin('curator')"
                 :loading="authStore.loading"
+                @click="quickLogin('curator')"
               >
                 Login as Curator
               </v-btn>
               <v-btn
                 size="small"
                 variant="outlined"
-                @click="quickLogin('viewer')"
                 :loading="authStore.loading"
+                @click="quickLogin('viewer')"
               >
                 Login as Viewer
               </v-btn>
@@ -121,110 +115,113 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.js'
-import { showSuccess, showError } from '@/composables/useNotifications.js'
+  import { ref, reactive, computed } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth.js'
+  import { showSuccess, showError } from '@/composables/useNotifications.js'
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
+  const router = useRouter()
+  const route = useRoute()
+  const authStore = useAuthStore()
 
-// Form state
-const loginForm = ref(null)
-const formValid = ref(false)
-const showPassword = ref(false)
+  // Form state
+  const loginForm = ref(null)
+  const formValid = ref(false)
+  const showPassword = ref(false)
 
-const credentials = reactive({
-  email: '',
-  password: ''
-})
+  const credentials = reactive({
+    email: '',
+    password: ''
+  })
 
-const fieldErrors = reactive({
-  email: [],
-  password: []
-})
+  const fieldErrors = reactive({
+    email: [],
+    password: []
+  })
 
-// Development mode check
-const isDevelopment = computed(() => {
-  return import.meta.env.DEV || import.meta.env.MODE === 'development'
-})
+  // Development mode check
+  const isDevelopment = computed(() => {
+    return import.meta.env.DEV || import.meta.env.MODE === 'development'
+  })
 
-// Validation rules
-const emailRules = [
-  (v) => !!v || 'Email is required',
-  (v) => /.+@.+\..+/.test(v) || 'Email must be valid'
-]
+  // Validation rules
+  const emailRules = [
+    v => !!v || 'Email is required',
+    v => /.+@.+\..+/.test(v) || 'Email must be valid'
+  ]
 
-const passwordRules = [
-  (v) => !!v || 'Password is required',
-  (v) => v.length >= 6 || 'Password must be at least 6 characters'
-]
+  const passwordRules = [
+    v => !!v || 'Password is required',
+    v => v.length >= 6 || 'Password must be at least 6 characters'
+  ]
 
-// Development quick login credentials
-const devCredentials = {
-  admin: { email: 'admin@gene-curator.dev', password: 'admin123' },
-  curator: { email: 'curator@gene-curator.dev', password: 'curator123' },
-  viewer: { email: 'viewer@gene-curator.dev', password: 'viewer123' }
-}
-
-const handleLogin = async () => {
-  if (!formValid.value) return
-
-  try {
-    // Clear previous errors
-    fieldErrors.email = []
-    fieldErrors.password = []
-    authStore.clearError()
-
-    await authStore.login(credentials)
-    
-    showSuccess('Login successful!')
-    
-    // Redirect to intended page or home
-    const redirectTo = route.query.redirect || { name: 'Home' }
-    router.push(redirectTo)
-    
-  } catch (error) {
-    console.error('Login error:', error)
-    
-    // Handle specific field errors
-    if (error.response?.data?.detail) {
-      const detail = error.response.data.detail
-      if (detail.includes('email')) {
-        fieldErrors.email = [detail]
-      } else if (detail.includes('password')) {
-        fieldErrors.password = [detail]
-      }
-    }
-    
-    showError('Login failed. Please check your credentials.')
+  // Development quick login credentials
+  const devCredentials = {
+    admin: { email: 'admin@gene-curator.dev', password: 'admin123' },
+    curator: { email: 'curator@gene-curator.dev', password: 'curator123' },
+    viewer: { email: 'viewer@gene-curator.dev', password: 'viewer123' }
   }
-}
 
-const quickLogin = async (role) => {
-  const creds = devCredentials[role]
-  if (!creds) return
+  const handleLogin = async () => {
+    if (!formValid.value) return
 
-  credentials.email = creds.email
-  credentials.password = creds.password
-  
-  await handleLogin()
-}
+    try {
+      // Clear previous errors
+      fieldErrors.email = []
+      fieldErrors.password = []
+      authStore.clearError()
+
+      await authStore.login(credentials)
+
+      showSuccess('Login successful!')
+
+      // Redirect to intended page or home
+      const redirectTo = route.query.redirect || { name: 'Home' }
+      router.push(redirectTo)
+    } catch (error) {
+      console.error('Login error:', error)
+
+      // Handle specific field errors
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail
+        if (detail.includes('email')) {
+          fieldErrors.email = [detail]
+        } else if (detail.includes('password')) {
+          fieldErrors.password = [detail]
+        }
+      }
+
+      showError('Login failed. Please check your credentials.')
+    }
+  }
+
+  const quickLogin = async role => {
+    const creds = devCredentials[role]
+    if (!creds) return
+
+    credentials.email = creds.email
+    credentials.password = creds.password
+
+    await handleLogin()
+  }
 </script>
 
 <style scoped>
-.fill-height {
-  min-height: 100vh;
-  background: linear-gradient(135deg, rgb(var(--v-theme-surface)) 0%, rgb(var(--v-theme-background)) 100%);
-}
+  .fill-height {
+    min-height: 100vh;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--v-theme-surface)) 0%,
+      rgb(var(--v-theme-background)) 100%
+    );
+  }
 
-.gap-2 {
-  gap: 0.5rem;
-}
+  .gap-2 {
+    gap: 0.5rem;
+  }
 
-.v-card {
-  backdrop-filter: blur(10px);
-  background: rgba(var(--v-theme-surface), 0.9);
-}
+  .v-card {
+    backdrop-filter: blur(10px);
+    background: rgba(var(--v-theme-surface), 0.9);
+  }
 </style>

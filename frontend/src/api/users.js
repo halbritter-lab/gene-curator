@@ -16,22 +16,22 @@ const apiClient = axios.create({
 
 // Add auth token to requests
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('access_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
   }
 )
 
 // Handle token refresh on 401 responses
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.response?.status === 401) {
       // Try to refresh token
       const refreshToken = localStorage.getItem('refresh_token')
@@ -40,10 +40,10 @@ apiClient.interceptors.response.use(
           const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {
             refresh_token: refreshToken
           })
-          
+
           const { access_token } = response.data
           localStorage.setItem('access_token', access_token)
-          
+
           // Retry the original request
           error.config.headers.Authorization = `Bearer ${access_token}`
           return apiClient.request(error.config)
@@ -72,8 +72,8 @@ export const usersApi = {
    * Search users by name or email
    */
   async searchUsers(query, params = {}) {
-    const response = await apiClient.get('/search', { 
-      params: { q: query, ...params } 
+    const response = await apiClient.get('/search', {
+      params: { q: query, ...params }
     })
     return response.data
   },

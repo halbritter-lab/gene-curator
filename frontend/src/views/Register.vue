@@ -32,11 +32,11 @@
                 :type="showPassword ? 'text' : 'password'"
                 prepend-inner-icon="mdi-lock"
                 :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                @click:append-inner="showPassword = !showPassword"
                 variant="outlined"
                 :rules="passwordRules"
                 required
                 class="mb-3"
+                @click:append-inner="showPassword = !showPassword"
               />
 
               <v-text-field
@@ -45,11 +45,11 @@
                 :type="showConfirmPassword ? 'text' : 'password'"
                 prepend-inner-icon="mdi-lock-check"
                 :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                @click:append-inner="showConfirmPassword = !showConfirmPassword"
                 variant="outlined"
                 :rules="confirmPasswordRules"
                 required
                 class="mb-4"
+                @click:append-inner="showConfirmPassword = !showConfirmPassword"
               />
 
               <v-alert
@@ -76,16 +76,8 @@
               </v-btn>
 
               <div class="text-center">
-                <p class="text-body-2 mb-2">
-                  Already have an account?
-                </p>
-                <v-btn
-                  :to="{ name: 'Login' }"
-                  variant="text"
-                  color="primary"
-                >
-                  Sign In
-                </v-btn>
+                <p class="text-body-2 mb-2">Already have an account?</p>
+                <v-btn :to="{ name: 'Login' }" variant="text" color="primary"> Sign In </v-btn>
               </div>
             </v-form>
           </v-card-text>
@@ -96,71 +88,74 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.js'
-import { showSuccess, showError } from '@/composables/useNotifications.js'
+  import { ref, reactive } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth.js'
+  import { showSuccess, showError } from '@/composables/useNotifications.js'
 
-const router = useRouter()
-const authStore = useAuthStore()
+  const router = useRouter()
+  const authStore = useAuthStore()
 
-// Form state
-const registerForm = ref(null)
-const formValid = ref(false)
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
-const confirmPassword = ref('')
+  // Form state
+  const registerForm = ref(null)
+  const formValid = ref(false)
+  const showPassword = ref(false)
+  const showConfirmPassword = ref(false)
+  const confirmPassword = ref('')
 
-const userData = reactive({
-  email: '',
-  password: ''
-})
+  const userData = reactive({
+    email: '',
+    password: ''
+  })
 
-// Validation rules
-const emailRules = [
-  (v) => !!v || 'Email is required',
-  (v) => /.+@.+\..+/.test(v) || 'Email must be valid'
-]
+  // Validation rules
+  const emailRules = [
+    v => !!v || 'Email is required',
+    v => /.+@.+\..+/.test(v) || 'Email must be valid'
+  ]
 
-const passwordRules = [
-  (v) => !!v || 'Password is required',
-  (v) => v.length >= 6 || 'Password must be at least 6 characters',
-  (v) => /(?=.*[a-z])/.test(v) || 'Password must contain at least one lowercase letter',
-  (v) => /(?=.*[A-Z])/.test(v) || 'Password must contain at least one uppercase letter',
-  (v) => /(?=.*\d)/.test(v) || 'Password must contain at least one number'
-]
+  const passwordRules = [
+    v => !!v || 'Password is required',
+    v => v.length >= 6 || 'Password must be at least 6 characters',
+    v => /(?=.*[a-z])/.test(v) || 'Password must contain at least one lowercase letter',
+    v => /(?=.*[A-Z])/.test(v) || 'Password must contain at least one uppercase letter',
+    v => /(?=.*\d)/.test(v) || 'Password must contain at least one number'
+  ]
 
-const confirmPasswordRules = [
-  (v) => !!v || 'Please confirm your password',
-  (v) => v === userData.password || 'Passwords do not match'
-]
+  const confirmPasswordRules = [
+    v => !!v || 'Please confirm your password',
+    v => v === userData.password || 'Passwords do not match'
+  ]
 
-const handleRegister = async () => {
-  if (!formValid.value) return
+  const handleRegister = async () => {
+    if (!formValid.value) return
 
-  try {
-    authStore.clearError()
+    try {
+      authStore.clearError()
 
-    await authStore.register(userData)
-    
-    showSuccess('Account created successfully! You are now logged in.')
-    router.push({ name: 'Home' })
-    
-  } catch (error) {
-    console.error('Registration error:', error)
-    showError('Registration failed. Please try again.')
+      await authStore.register(userData)
+
+      showSuccess('Account created successfully! You are now logged in.')
+      router.push({ name: 'Home' })
+    } catch (error) {
+      console.error('Registration error:', error)
+      showError('Registration failed. Please try again.')
+    }
   }
-}
 </script>
 
 <style scoped>
-.fill-height {
-  min-height: 100vh;
-  background: linear-gradient(135deg, rgb(var(--v-theme-surface)) 0%, rgb(var(--v-theme-background)) 100%);
-}
+  .fill-height {
+    min-height: 100vh;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--v-theme-surface)) 0%,
+      rgb(var(--v-theme-background)) 100%
+    );
+  }
 
-.v-card {
-  backdrop-filter: blur(10px);
-  background: rgba(var(--v-theme-surface), 0.9);
-}
+  .v-card {
+    backdrop-filter: blur(10px);
+    background: rgba(var(--v-theme-surface), 0.9);
+  }
 </style>

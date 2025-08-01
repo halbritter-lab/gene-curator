@@ -4,23 +4,15 @@
       <v-icon start :color="verdictColor">{{ verdictIcon }}</v-icon>
       ClinGen Score Breakdown
     </v-card-title>
-    
+
     <v-card-text>
       <!-- Overall Score Display -->
       <div class="text-center mb-6">
-        <v-chip 
-          :color="verdictColor" 
-          size="large" 
-          class="text-h6 px-4 py-2 mb-2"
-        >
+        <v-chip :color="verdictColor" size="large" class="text-h6 px-4 py-2 mb-2">
           {{ score.verdict }}
         </v-chip>
-        <div class="text-h4 font-weight-bold">
-          {{ score.total_score.toFixed(1) }}/18
-        </div>
-        <div class="text-subtitle-1 text-medium-emphasis">
-          Total Evidence Score
-        </div>
+        <div class="text-h4 font-weight-bold">{{ score.total_score.toFixed(1) }}/18</div>
+        <div class="text-subtitle-1 text-medium-emphasis">Total Evidence Score</div>
       </div>
 
       <!-- Score Breakdown -->
@@ -54,10 +46,10 @@
 
       <!-- Evidence Breakdown -->
       <v-divider class="my-4" />
-      
+
       <div class="evidence-breakdown">
         <h4 class="text-subtitle-1 font-weight-medium mb-3">Evidence Summary</h4>
-        
+
         <v-row class="text-body-2">
           <v-col cols="6">
             <div class="mb-2">
@@ -98,7 +90,7 @@
         class="mt-4"
         density="compact"
       >
-        <template v-slot:prepend>
+        <template #prepend>
           <v-icon>mdi-alert-triangle</v-icon>
         </template>
         This curation has contradictory evidence that may impact the classification.
@@ -106,7 +98,7 @@
 
       <!-- Classification Rationale -->
       <v-divider class="my-4" />
-      
+
       <div class="classification-rationale">
         <h4 class="text-subtitle-1 font-weight-medium mb-2">Classification Rationale</h4>
         <p class="text-body-2 text-medium-emphasis">
@@ -117,20 +109,10 @@
 
     <v-card-actions v-if="showActions">
       <v-spacer />
-      <v-btn
-        v-if="detailedView"
-        variant="text"
-        color="primary"
-        @click="$emit('view-details')"
-      >
+      <v-btn v-if="detailedView" variant="text" color="primary" @click="$emit('view-details')">
         View Evidence Details
       </v-btn>
-      <v-btn
-        v-if="allowEdit"
-        variant="text"
-        color="primary"
-        @click="$emit('edit-curation')"
-      >
+      <v-btn v-if="allowEdit" variant="text" color="primary" @click="$emit('edit-curation')">
         Edit Curation
       </v-btn>
     </v-card-actions>
@@ -138,72 +120,72 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+  import { computed } from 'vue'
 
-const props = defineProps({
-  score: {
-    type: Object,
-    required: true
-  },
-  showActions: {
-    type: Boolean,
-    default: false
-  },
-  detailedView: {
-    type: Boolean,
-    default: false
-  },
-  allowEdit: {
-    type: Boolean,
-    default: false
-  }
-})
+  const props = defineProps({
+    score: {
+      type: Object,
+      required: true
+    },
+    showActions: {
+      type: Boolean,
+      default: false
+    },
+    detailedView: {
+      type: Boolean,
+      default: false
+    },
+    allowEdit: {
+      type: Boolean,
+      default: false
+    }
+  })
 
-const emit = defineEmits(['view-details', 'edit-curation'])
+  const emit = defineEmits(['view-details', 'edit-curation'])
 
-const verdictColor = computed(() => {
-  const colors = {
-    'Definitive': 'success',
-    'Strong': 'info',
-    'Moderate': 'warning',
-    'Limited': 'orange',
-    'No Known Disease Relationship': 'grey',
-    'Disputed': 'error',
-    'Refuted': 'error'
-  }
-  return colors[props.score.verdict] || 'grey'
-})
+  const verdictColor = computed(() => {
+    const colors = {
+      Definitive: 'success',
+      Strong: 'info',
+      Moderate: 'warning',
+      Limited: 'orange',
+      'No Known Disease Relationship': 'grey',
+      Disputed: 'error',
+      Refuted: 'error'
+    }
+    return colors[props.score.verdict] || 'grey'
+  })
 
-const verdictIcon = computed(() => {
-  const icons = {
-    'Definitive': 'mdi-check-circle',
-    'Strong': 'mdi-check-circle-outline',
-    'Moderate': 'mdi-alert-circle',
-    'Limited': 'mdi-help-circle',
-    'No Known Disease Relationship': 'mdi-minus-circle',
-    'Disputed': 'mdi-alert-triangle',
-    'Refuted': 'mdi-close-circle'
-  }
-  return icons[props.score.verdict] || 'mdi-help-circle'
-})
+  const verdictIcon = computed(() => {
+    const icons = {
+      Definitive: 'mdi-check-circle',
+      Strong: 'mdi-check-circle-outline',
+      Moderate: 'mdi-alert-circle',
+      Limited: 'mdi-help-circle',
+      'No Known Disease Relationship': 'mdi-minus-circle',
+      Disputed: 'mdi-alert-triangle',
+      Refuted: 'mdi-close-circle'
+    }
+    return icons[props.score.verdict] || 'mdi-help-circle'
+  })
 </script>
 
 <style scoped>
-.score-card {
-  max-width: 100%;
-}
+  .score-card {
+    max-width: 100%;
+  }
 
-.score-breakdown {
-  border-radius: 8px;
-  background-color: rgba(var(--v-theme-surface-variant), 0.5);
-  padding: 16px;
-}
+  .score-breakdown {
+    border-radius: 8px;
+    background-color: rgba(var(--v-theme-surface-variant), 0.5);
+    padding: 16px;
+  }
 
-.evidence-breakdown {
-  font-size: 0.875rem;
-}
+  .evidence-breakdown {
+    font-size: 0.875rem;
+  }
 
-.v-progress-linear {
-  border-radius: 4px;
-}
+  .v-progress-linear {
+    border-radius: 4px;
+  }
 </style>

@@ -8,25 +8,25 @@
 </template>
 
 <script setup>
-defineProps({
-  label: {
-    type: String,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  },
-  monospace: {
-    type: Boolean,
-    default: false
-  }
-})
+  defineProps({
+    label: {
+      type: String,
+      required: true
+    },
+    value: {
+      type: String,
+      default: ''
+    },
+    monospace: {
+      type: Boolean,
+      default: false
+    }
+  })
 </script>
 
 <style scoped>
-.font-monospace {
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-}
+  .font-monospace {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+  }
 </style>

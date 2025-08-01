@@ -13,22 +13,22 @@ const apiClient = axios.create({
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('access_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
   }
 )
 
 // Response interceptor to handle token refresh
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -40,10 +40,10 @@ apiClient.interceptors.response.use(
           const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {
             refresh_token: refreshToken
           })
-          
+
           const { access_token } = response.data
           localStorage.setItem('access_token', access_token)
-          
+
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${access_token}`
           return apiClient(originalRequest)
