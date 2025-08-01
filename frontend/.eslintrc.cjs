@@ -5,11 +5,7 @@ module.exports = {
     es2022: true,
     browser: true
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:vue/vue3-recommended',
-    '@vue/eslint-config-prettier'
-  ],
+  extends: ['eslint:recommended', 'plugin:vue/vue3-recommended', '@vue/eslint-config-prettier'],
   plugins: ['vue'],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -28,7 +24,7 @@ module.exports = {
     'vue/require-default-prop': 'warn',
     'vue/require-prop-types': 'error',
     'vue/no-v-html': 'warn',
-    
+
     // General JavaScript rules
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
@@ -39,8 +35,8 @@ module.exports = {
     'template-curly-spacing': 'error',
     'arrow-spacing': 'error',
     'comma-dangle': ['error', 'never'],
-    'quotes': ['error', 'single', { avoidEscape: true }],
-    'semi': ['error', 'never']
+    quotes: ['error', 'single', { avoidEscape: true }],
+    semi: ['error', 'never']
   },
   ignorePatterns: [
     'dist/**',
@@ -48,6 +44,6 @@ module.exports = {
     '.output/**',
     'coverage/**',
     '*.config.js',
-    '*.config.ts'  
+    '*.config.ts'
   ]
 }
