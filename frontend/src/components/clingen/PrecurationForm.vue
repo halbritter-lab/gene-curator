@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formRef" @submit.prevent="handleSubmit">
+  <v-form ref="formRef" @submit.prevent="handleFormSubmit">
     <v-container>
       <v-row>
         <v-col cols="12">
@@ -158,7 +158,7 @@
         <v-col cols="12" md="6">
           <v-select
             v-model="formData.status"
-            :items="statusOptions"
+            :items="availableStatusOptions"
             label="Status"
             variant="outlined"
             :disabled="!canChangeStatus"
@@ -264,13 +264,22 @@ const decisionOptions = [
   { title: 'Undecided - More evidence needed', value: 'Undecided' }
 ]
 
-const statusOptions = [
-  { title: 'Draft', value: 'Draft' },
-  { title: 'In Primary Review', value: 'In_Primary_Review' },
-  { title: 'In Secondary Review', value: 'In_Secondary_Review' },
-  { title: 'Approved', value: 'Approved' },
-  { title: 'Rejected', value: 'Rejected' }
-]
+const availableStatusOptions = computed(() => {
+  const baseOptions = [
+    { title: 'Draft', value: 'Draft' },
+    { title: 'In Primary Review', value: 'In_Primary_Review' },
+    { title: 'In Secondary Review', value: 'In_Secondary_Review' },
+    { title: 'Approved', value: 'Approved' },
+    { title: 'Rejected', value: 'Rejected' }
+  ]
+  
+  // Only allow 'Published' if the current status is 'Approved'
+  if (isEditing.value && formData.value.status === 'Approved') {
+    baseOptions.splice(-1, 0, { title: 'Published', value: 'Published' })
+  }
+  
+  return baseOptions
+})
 
 const decisionHint = computed(() => {
   const hints = {
@@ -342,6 +351,12 @@ const saveDraft = async () => {
   }
 
   await handleSubmit('Draft')
+}
+
+const handleFormSubmit = async () => {
+  // Use the form data status or default to 'Draft'
+  const status = isEditing.value ? formData.value.status : 'Draft'
+  await handleSubmit(status)
 }
 
 const handleSubmit = async (status = 'Draft') => {

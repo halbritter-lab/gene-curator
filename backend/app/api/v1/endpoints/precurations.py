@@ -29,7 +29,7 @@ from app.schemas.precuration import (
 router = APIRouter()
 
 
-@router.get("/", response_model=PrecurationListResponse)
+@router.get("/")
 async def list_precurations(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(
@@ -47,8 +47,30 @@ async def list_precurations(
         db=db, skip=skip, limit=limit, sort_by=sort_by, sort_order=sort_order
     )
 
+    # Convert precurations to dict format, excluding gene relationship
+    precuration_dicts = []
+    for p in precurations:
+        precuration_dict = {
+            "id": str(p.id),
+            "gene_id": str(p.gene_id),
+            "mondo_id": p.mondo_id,
+            "mode_of_inheritance": p.mode_of_inheritance,
+            "lumping_splitting_decision": p.lumping_splitting_decision,
+            "rationale": p.rationale,
+            "status": p.status,
+            "details": p.details,
+            "record_hash": p.record_hash,
+            "previous_hash": p.previous_hash,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+            "created_by": str(p.created_by) if p.created_by else None,
+            "updated_by": str(p.updated_by) if p.updated_by else None,
+            "gene": None  # Exclude gene info for now
+        }
+        precuration_dicts.append(precuration_dict)
+
     return {
-        "precurations": precurations,
+        "precurations": precuration_dicts,
         "total": total,
         "skip": skip,
         "limit": limit,
@@ -149,9 +171,7 @@ async def get_precuration(
     return precuration
 
 
-@router.post(
-    "/", response_model=PrecurationResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_precuration(
     precuration_data: PrecurationCreate,
     db: Session = Depends(get_db),
@@ -162,9 +182,28 @@ async def create_precuration(
 
     Requires curator or admin privileges.
     """
-    return precuration_crud.create(
+    precuration = precuration_crud.create(
         db=db, precuration_create=precuration_data, user_id=str(current_user.id)
     )
+
+    # Manual serialization to avoid Gene object validation issues
+    return {
+        "id": str(precuration.id),
+        "gene_id": str(precuration.gene_id),
+        "mondo_id": precuration.mondo_id,
+        "mode_of_inheritance": precuration.mode_of_inheritance,
+        "lumping_splitting_decision": precuration.lumping_splitting_decision,
+        "rationale": precuration.rationale,
+        "status": precuration.status,
+        "details": precuration.details,
+        "record_hash": precuration.record_hash,
+        "previous_hash": precuration.previous_hash,
+        "created_at": precuration.created_at.isoformat() if precuration.created_at else None,
+        "updated_at": precuration.updated_at.isoformat() if precuration.updated_at else None,
+        "created_by": str(precuration.created_by) if precuration.created_by else None,
+        "updated_by": str(precuration.updated_by) if precuration.updated_by else None,
+        "gene": None  # Exclude gene info for now
+    }
 
 
 @router.put("/{precuration_id}", response_model=PrecurationResponse)

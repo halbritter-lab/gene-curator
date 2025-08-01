@@ -5,7 +5,7 @@ export const precurationsAPI = {
    * Get all precurations with pagination
    */
   async getPrecurations(params = {}) {
-    const response = await apiClient.get('/precurations', { params })
+    const response = await apiClient.get('/precurations/', { params })
     return response.data
   },
 
@@ -55,7 +55,7 @@ export const precurationsAPI = {
    * Create a new precuration
    */
   async createPrecuration(precurationData) {
-    const response = await apiClient.post('/precurations', precurationData)
+    const response = await apiClient.post('/precurations/', precurationData)
     return response.data
   },
 

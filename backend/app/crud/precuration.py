@@ -53,16 +53,15 @@ class PrecurationCRUD:
         sort_order: str = "desc",
     ) -> tuple[list[Precuration], int]:
         """Get multiple precurations with pagination and sorting."""
-        query = db.query(Precuration).join(Gene, Precuration.gene_id == Gene.id)
+        # Simplified query without JOIN to avoid 500 error
+        query = db.query(Precuration)
 
         # Get total count
         total = query.count()
 
-        # Apply sorting
+        # Apply sorting (only on Precuration columns)
         if hasattr(Precuration, sort_by):
             order_column = getattr(Precuration, sort_by)
-        elif hasattr(Gene, sort_by):
-            order_column = getattr(Gene, sort_by)
         else:
             order_column = Precuration.created_at
 
