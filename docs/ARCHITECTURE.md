@@ -1,256 +1,492 @@
-# Gene Curator - System Architecture
+# Gene Curator: Schema-Agnostic Architecture
 
 ## Overview
 
-Gene Curator implements a comprehensive three-tier genetic curation platform with native ClinGen SOP v11 compliance. This document outlines the overall system architecture and design principles.
+Gene Curator is a **methodology-agnostic** curation platform that supports any scientific approach to gene-disease association through configurable schemas. The platform adapts to different curation methodologies through dynamic configuration rather than hard-coded implementations.
 
-## Architecture Summary
+## Architectural Principles
 
+### 1. Schema-Driven Design
+**Everything is configurable through schemas**: field definitions, validation rules, scoring algorithms, workflow states, and UI components. No curation methodology is hard-coded into the system.
+
+### 2. Universal Platform
+The same codebase supports:
+- **ClinGen SOP v11** gene-disease validity curation
+- **GenCC-based** classification approaches  
+- **Custom institutional** methodologies
+- **Future methodologies** not yet developed
+
+### 3. Clean Separation of Concerns
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Frontend       │    │   Backend       │    │   Database      │
-│  Vue 3 + Vite   │◄──►│  FastAPI        │◄──►│  PostgreSQL     │
-│  + Pinia        │    │  + SQLAlchemy   │    │  + JSONB        │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-      │                          │                      │
-      ▼                          ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ • ClinGen UI    │    │ • Evidence      │    │ • ClinGen       │
-│ • Real-time     │    │   Scoring       │    │   Schema        │
-│   Validation    │    │ • Auto Summary  │    │ • Triggers      │
-│ • Workflow      │    │ • RBAC          │    │ • Constraints   │
-│   Management    │    │ • JWT Auth      │    │ • Audit Log     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-## Tier 1: Database Layer (PostgreSQL + JSONB)
-
-### Core Responsibilities
-- **ClinGen Schema Enforcement**: Native SOP v11 compliance at database level
-- **Evidence Storage**: JSONB structure for flexible, queryable evidence data
-- **Automated Scoring**: Database triggers calculate ClinGen scores automatically
-- **Data Integrity**: Content-addressable records with SHA-256 hashing
-- **Audit Trail**: Complete change tracking with user attribution
-
-### Key Features
-- PostgreSQL 15+ with ACID compliance
-- JSONB for structured, indexed evidence data
-- Database-level ClinGen score validation
-- Automated evidence summary generation triggers
-- Provenance tracking with immutable record chains
-
-### Performance Optimizations
-- GIN indexes on JSONB evidence structures
-- Computed columns for score calculations
-- Partial indexes for workflow states
-- Connection pooling for concurrent access
-
-## Tier 2: API Layer (FastAPI + SQLAlchemy)
-
-### Core Responsibilities
-- **RESTful API**: Standard HTTP endpoints with OpenAPI documentation
-- **ClinGen Business Logic**: Evidence scoring engine and summary generation
-- **Authentication**: JWT-based auth with role-based access control
-- **Data Validation**: Pydantic schemas with ClinGen-specific validators
-- **Workflow Management**: Multi-stage approval process
-
-### Key Features
-- FastAPI with automatic OpenAPI/Swagger documentation
-- SQLAlchemy ORM with database model mapping
-- Pydantic schemas for type-safe request/response handling
-- JWT authentication with refresh token support
-- Background tasks for intensive operations
-
-### API Structure
-```
-/api/v1/
-├── auth/           # Authentication endpoints
-├── genes/          # Gene management
-├── precurations/   # Pre-curation workflow
-├── curations/      # ClinGen curation management
-└── users/          # User administration
+Schema Definitions → Define what/how to curate
+Scoring Engines   → Calculate verdicts/classifications  
+Dynamic UI        → Render forms and interfaces
+Flexible Storage  → Store evidence in any structure
 ```
 
-## Tier 3: Frontend Layer (Vue 3 + Vite + Pinia)
+## System Architecture
 
-### Core Responsibilities
-- **User Interface**: Modern, responsive Vue 3 application
-- **ClinGen Components**: Specialized evidence entry and scoring interfaces
-- **Real-time Validation**: Client-side ClinGen compliance checking
-- **State Management**: Pinia stores for API data management
-- **Workflow UI**: Multi-stage curation process interface
+### High-Level Architecture
 
-### Key Features
-- Vue 3 Composition API with TypeScript support
-- Vite build system for fast development and production builds
-- Pinia for predictable state management
-- Vuetify Material Design components
-- Real-time score calculation matching backend logic
-
-### Component Architecture
 ```
-src/
-├── components/
-│   ├── clingen/         # ClinGen-specific components
-│   └── common/          # Reusable UI components
-├── stores/              # Pinia state management
-├── views/               # Page-level components
-├── api/                 # API client layer
-└── router/              # Vue Router configuration
-```
-
-## Data Flow Architecture
-
-### Complete Workflow Data Flow
-```
-┌─────────────────┐
-│ GENE REGISTRY   │ 
-│ (HGNC Compliant)│
-└────────┬────────┘
-         │ Gene Selection
-         ▼
-┌─────────────────┐     ┌──────────────────────┐
-│ PRE-CURATION    │────►│ LUMPING/SPLITTING    │
-│ • MONDO ID      │     │ • Lump: Same entity  │
-│ • Inheritance   │     │ • Split: Distinct    │
-│ • Rationale     │     │ • Undecided: More    │
-└────────┬────────┘     │   evidence needed    │
-         │              └──────────────────────┘
-         ▼
-┌─────────────────┐
-│ CURATION        │
-│ • Evidence      │──┐
-│   Collection    │  │   ┌────────────────────┐
-│ • ClinGen       │  ├──►│ GENETIC EVIDENCE   │
-│   Scoring       │  │   │ • Case-level (12)  │
-│ • Summary Gen   │  │   │ • Segregation (3)  │
-└────────┬────────┘  │   │ • Case-control (6) │
-         │           │   └────────────────────┘
-         ▼           │
-┌─────────────────┐  │   ┌────────────────────┐
-│ FINAL VERDICT   │  └──►│ EXPERIMENTAL       │
-│ • Definitive    │      │ EVIDENCE (Max 6)   │
-│ • Strong        │      │ • Function         │
-│ • Moderate      │      │ • Models           │
-│ • Limited       │      │ • Rescue           │
-│ • No Known      │      └────────────────────┘
-│ • Disputed      │
-│ • Refuted       │
-└─────────────────┘
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│   Schema Repository │    │  Scoring Engine     │    │   Dynamic Frontend  │
+│                     │    │     Registry        │    │                     │
+│ • Methodology Defs  │◄──►│                     │◄──►│                     │
+│ • Version Control   │    │ • ClinGen Engine    │    │ • Form Generation   │
+│ • Validation Rules  │    │ • GenCC Engine      │    │ • Real-time Scoring │
+│ • UI Configuration  │    │ • Custom Engines    │    │ • Schema Selection  │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+         │                           │                           │
+         └───────────────────────────┼───────────────────────────┘
+                                     │
+         ┌─────────────────────────────────────────────────────────┐
+         │              Flexible Data Storage Layer                │
+         │                                                         │
+         │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+         │  │ Evidence    │  │ Computed    │  │ Workflow    │    │
+         │  │ Data        │  │ Scores      │  │ States      │    │
+         │  │ (JSONB)     │  │ (JSONB)     │  │ (Dynamic)   │    │
+         │  └─────────────┘  └─────────────┘  └─────────────┘    │
+         └─────────────────────────────────────────────────────────┘
 ```
 
-## Technology Stack
+## Core Components
 
-### Current Implementation
-- **Database**: PostgreSQL 15+ with ACID compliance and ClinGen schema support
-- **Backend**: FastAPI + SQLAlchemy with automated ClinGen scoring engine
-- **Frontend**: Vue 3.4.21 + Vite + Pinia with ClinGen-specific UI components
-- **UI Framework**: Vuetify 3.9.3 (Material Design)
-- **Authentication**: JWT + FastAPI Security with role-based access control
-- **Build System**: Vite 5.2.8 (modern ESM-based builds)
-- **State Management**: Pinia 2.1.7 with Composition API
-- **Standards Compliance**: Automated ClinGen SOP v11 evidence scoring and summary generation
+### 1. Schema Repository
+**Purpose**: Store and manage curation methodology definitions
 
-### Legacy Architecture (Pre-Migration)
-- **Frontend**: Vue.js 3.2.13 with Vue CLI Service 5.0.0
-- **Backend**: Firebase 10.7.1 (Firestore + Authentication)
-- **Build**: Vue CLI (deprecated, migrated to Vite)
+**Key Features**:
+- Version control for methodology evolution
+- Schema inheritance and customization
+- Validation of schema definitions
+- User/institution preferences
 
-## Design Principles
-
-### 1. ClinGen Standards as Database Constraints
-Evidence scoring rules are implemented as database logic, ensuring consistent compliance across all application layers.
-
-### 2. Hybrid Data Structure
-Relational columns for core metrics with JSONB for detailed evidence, providing both structure and flexibility.
-
-### 3. Immutable Provenance
-Every record is content-addressable with SHA-256 hashes, enabling tamper-evident scientific collaboration.
-
-### 4. API-First Design
-Clear separation between data, business logic, and presentation layers with OpenAPI documentation.
-
-## Deployment Architecture
-
-### Development Environment
-```bash
-# Backend
-make dev           # FastAPI with hot reload (:8000)
-
-# Frontend  
-make dev           # Vite dev server (:3000)
-
-# Database
-docker-compose up postgres  # PostgreSQL with seed data
+**Database Tables**:
+```sql
+curation_schemas  → Store methodology definitions
+workflow_pairs    → Combine precuration + curation schemas
+schema_selections → User/institution preferences
 ```
 
-### Production Environment
+### 2. Scoring Engine Registry
+**Purpose**: Pluggable calculation engines for different methodologies
+
+**Key Features**:
+- Runtime engine selection based on schema
+- Consistent interface for all methodologies
+- Custom engine registration
+- Validation and error handling
+
+**Supported Engines**:
+- `clingen_sop_v11` → ClinGen Standard Operating Procedure v11
+- `gencc_based` → GenCC classification approaches
+- `qualitative_assessment` → Institution-specific qualitative methods
+- `custom_*` → User-defined scoring algorithms
+
+### 3. Dynamic User Interface
+**Purpose**: Generate forms and interfaces from schema definitions
+
+**Key Features**:
+- Real-time form generation from schemas
+- Live validation and scoring updates
+- Methodology switching interface
+- Responsive, accessible design
+
+**Component Types**:
+- `DynamicForm` → Renders complete curation forms
+- `EvidenceTable` → Dynamic evidence entry tables
+- `PMIDInput` → Literature reference validation
+- `ScoreDisplay` → Real-time scoring visualization
+
+### 4. Flexible Data Storage
+**Purpose**: Store evidence data in any structure required by schemas
+
+**Key Features**:
+- JSONB-based evidence storage
+- Schema-aware validation triggers
+- Performance-optimized indexing
+- Complete audit trails
+
+## Database Architecture
+
+### Schema-Agnostic Design
+
+```sql
+-- Core flexible storage
+CREATE TABLE curations (
+    id UUID PRIMARY KEY,
+    gene_id UUID REFERENCES genes(id),
+    workflow_pair_id UUID REFERENCES workflow_pairs(id),
+    
+    -- Current workflow state (defined by schema)
+    current_stage ENUM('precuration', 'curation'),
+    current_status VARCHAR(50) NOT NULL,
+    
+    -- Flexible evidence storage
+    precuration_data JSONB DEFAULT '{}',
+    curation_data JSONB DEFAULT '{}',
+    
+    -- Schema-computed results
+    computed_scores JSONB DEFAULT '{}',
+    computed_verdict VARCHAR(100),
+    computed_summary TEXT,
+    
+    -- Audit and integrity
+    created_by UUID REFERENCES users(id),
+    updated_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    record_hash VARCHAR(64) UNIQUE,
+    previous_hash VARCHAR(64)
+);
+
+-- Schema definitions
+CREATE TABLE curation_schemas (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    schema_type ENUM('precuration', 'curation', 'combined'),
+    
+    -- Complete schema definition
+    field_definitions JSONB NOT NULL,
+    validation_rules JSONB NOT NULL,
+    scoring_configuration JSONB,
+    workflow_states JSONB NOT NULL,
+    ui_configuration JSONB NOT NULL,
+    
+    -- Metadata
+    description TEXT,
+    institution VARCHAR(255),
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT true,
+    
+    UNIQUE(name, version)
+);
+
+-- Schema pairing system
+CREATE TABLE workflow_pairs (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    
+    precuration_schema_id UUID REFERENCES curation_schemas(id),
+    curation_schema_id UUID REFERENCES curation_schemas(id),
+    
+    -- How data flows between stages
+    data_mapping JSONB NOT NULL,
+    
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT true
+);
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Load Balancer │    │  Application    │    │   Database      │
-│   (nginx/ALB)   │◄──►│  (Docker)       │◄──►│  (PostgreSQL)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌─────────────────┐
-                       │  Static Assets  │
-                       │  (CDN/S3)       │
-                       └─────────────────┘
+
+### Dynamic Triggers
+
+```sql
+-- Schema-aware scoring trigger
+CREATE OR REPLACE FUNCTION calculate_dynamic_scores()
+RETURNS TRIGGER AS $$
+DECLARE
+    schema_config JSONB;
+    scoring_engine VARCHAR(100);
+    scoring_result JSONB;
+BEGIN
+    -- Get schema configuration
+    SELECT cs.scoring_configuration INTO schema_config
+    FROM curation_schemas cs
+    JOIN workflow_pairs wp ON wp.curation_schema_id = cs.id
+    WHERE wp.id = NEW.workflow_pair_id;
+    
+    -- Extract scoring engine
+    scoring_engine := schema_config->>'engine';
+    
+    -- Call appropriate scoring function
+    CASE scoring_engine
+        WHEN 'clingen_sop_v11' THEN
+            scoring_result := calculate_clingen_scores(NEW.curation_data, schema_config);
+        WHEN 'gencc_based' THEN
+            scoring_result := calculate_gencc_scores(NEW.curation_data, schema_config);
+        WHEN 'qualitative_assessment' THEN
+            scoring_result := calculate_qualitative_scores(NEW.curation_data, schema_config);
+        ELSE
+            RAISE EXCEPTION 'Unknown scoring engine: %', scoring_engine;
+    END CASE;
+    
+    -- Update computed fields
+    NEW.computed_scores := scoring_result->'scores';
+    NEW.computed_verdict := scoring_result->>'verdict';
+    NEW.computed_summary := scoring_result->>'summary';
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_calculate_scores
+    BEFORE INSERT OR UPDATE ON curations
+    FOR EACH ROW
+    EXECUTE FUNCTION calculate_dynamic_scores();
 ```
 
-## Key Innovations
+## API Architecture
 
-### 1. ClinGen Native Compliance
-- **Database Level**: Evidence scoring implemented as database triggers and constraints
-- **API Level**: Automatic SOP v11 scoring and summary generation  
-- **Frontend Level**: Specialized components for evidence entry and display
+### Schema Management Endpoints
 
-### 2. Scientific Rigor
-- **Immutable Records**: Content-addressable with SHA-256 hashes
-- **Provenance Tracking**: Complete audit trail with source attribution
-- **Evidence Validation**: Automated compliance checking
-- **Quality Control**: Multi-stage professional review workflow
+```python
+# Schema CRUD operations
+POST   /api/v1/schemas                    # Create new schema
+GET    /api/v1/schemas                    # List schemas (with filtering)
+GET    /api/v1/schemas/{id}               # Get specific schema
+PUT    /api/v1/schemas/{id}               # Update schema
+DELETE /api/v1/schemas/{id}               # Delete schema
 
-### 3. Modern Architecture
-- **Type Safety**: End-to-end TypeScript with Pydantic validation
-- **Performance**: PostgreSQL queries, Vite builds, code splitting
-- **Developer Experience**: Hot reload, auto-documentation, comprehensive testing
-- **Scalability**: Containerized deployment with horizontal scaling capability
+# Schema pairing
+POST   /api/v1/workflow-pairs             # Create schema pair
+GET    /api/v1/workflow-pairs             # List workflow pairs
+GET    /api/v1/workflow-pairs/{id}        # Get specific pair
 
-## Security & Compliance
+# User preferences
+GET    /api/v1/users/me/default-schemas   # Get user's default schemas
+POST   /api/v1/users/me/default-schemas   # Set default schemas
 
-### Authentication & Authorization
-- JWT tokens with stateless authentication
-- Role-based access control (viewer/curator/admin)
-- API key support for external integrations
-- Session management with token blacklisting
+# Scoring engines
+GET    /api/v1/scoring/engines            # List available engines
+POST   /api/v1/scoring/calculate          # Calculate scores
+POST   /api/v1/scoring/validate           # Validate evidence
+```
+
+### Dynamic Curation Endpoints
+
+```python
+# Flexible curation operations
+POST   /api/v1/curations                  # Create curation (any schema)
+GET    /api/v1/curations                  # List curations (multi-schema)
+GET    /api/v1/curations/{id}             # Get curation with computed scores
+PUT    /api/v1/curations/{id}/evidence    # Update evidence data
+POST   /api/v1/curations/{id}/workflow    # Advance workflow state
+
+# Schema-aware validation
+POST   /api/v1/curations/validate-evidence  # Validate against schema
+POST   /api/v1/curations/preview-scores     # Preview scoring results
+```
+
+## Frontend Architecture
+
+### Schema-Driven Components
+
+```vue
+<!-- Dynamic form generation -->
+<template>
+  <div class="curation-form">
+    <!-- Schema selection -->
+    <SchemaSelector 
+      v-model="selectedWorkflowPair"
+      :available-pairs="availableWorkflowPairs"
+    />
+    
+    <!-- Dynamic form based on selected schema -->
+    <DynamicForm
+      v-if="selectedWorkflowPair"
+      :schema="currentSchema"
+      v-model="evidenceData"
+      @validate="validateEvidence"
+      @score="calculateScores"
+    />
+    
+    <!-- Real-time scoring display -->
+    <ScoreCard
+      v-if="currentScores"
+      :scores="currentScores"
+      :verdict="currentVerdict"
+      :schema="currentSchema"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { useSchemaStore } from '@/stores/schema'
+import { useScoringService } from '@/services/scoring'
+
+const schemaStore = useSchemaStore()
+const scoringService = useScoringService()
+
+const selectedWorkflowPair = ref(null)
+const evidenceData = ref({})
+const currentScores = ref(null)
+const currentVerdict = ref('')
+
+// Get schema definition
+const currentSchema = computed(() => {
+  return selectedWorkflowPair.value?.curation_schema
+})
+
+// Real-time scoring
+watch(evidenceData, async (newData) => {
+  if (currentSchema.value && Object.keys(newData).length > 0) {
+    const result = await scoringService.calculateScores({
+      evidence_data: newData,
+      schema_config: currentSchema.value.scoring_configuration,
+      engine_name: currentSchema.value.scoring_configuration.engine
+    })
+    
+    currentScores.value = result.scores
+    currentVerdict.value = result.verdict
+  }
+}, { deep: true })
+</script>
+```
+
+## Example Schema Definitions
+
+### ClinGen SOP v11 Schema (Condensed)
+
+```json
+{
+  "metadata": {
+    "name": "ClinGen_SOP_v11",
+    "version": "1.0.0",
+    "type": "curation",
+    "description": "ClinGen Standard Operating Procedure v11 for Gene-Disease Validity"
+  },
+  "field_definitions": {
+    "genetic_evidence": {
+      "type": "object",
+      "properties": {
+        "case_level_data": {
+          "type": "array",
+          "ui_component": "EvidenceTable",
+          "item_schema": {
+            "pmid": {"type": "string", "required": true, "validation": "pmid_format"},
+            "proband_label": {"type": "string", "required": true},
+            "variant_type": {"type": "enum", "options": ["null", "missense"]},
+            "points": {"type": "number", "min": 0, "max": 2}
+          },
+          "scoring": {"max_total_points": 12}
+        }
+      }
+    }
+  },
+  "scoring_configuration": {
+    "engine": "clingen_sop_v11",
+    "verdicts": {
+      "Definitive": {"conditions": [{"field": "total_score", "operator": ">=", "value": 12}]},
+      "Strong": {"conditions": [{"field": "total_score", "operator": ">=", "value": 7}]}
+    }
+  }
+}
+```
+
+### GenCC-Based Schema
+
+```json
+{
+  "metadata": {
+    "name": "GenCC_Classification",
+    "version": "1.0.0",
+    "type": "curation",
+    "description": "GenCC-based gene-disease classification"
+  },
+  "field_definitions": {
+    "clinical_evidence": {
+      "type": "object",
+      "properties": {
+        "phenotype_overlap": {"type": "enum", "options": ["complete", "partial", "minimal"]},
+        "inheritance_pattern": {"type": "enum", "options": ["consistent", "inconsistent"]},
+        "population_data": {"type": "number", "min": 0, "max": 10}
+      }
+    }
+  },
+  "scoring_configuration": {
+    "engine": "gencc_based",
+    "verdicts": {
+      "Definitive": {"conditions": [{"field": "confidence_score", "operator": ">=", "value": 8}]},
+      "Strong": {"conditions": [{"field": "confidence_score", "operator": ">=", "value": 6}]},
+      "Moderate": {"conditions": [{"field": "confidence_score", "operator": ">=", "value": 4}]}
+    }
+  }
+}
+```
+
+### Custom Institutional Schema
+
+```json
+{
+  "metadata": {
+    "name": "Institution_Custom",
+    "version": "1.0.0",
+    "type": "curation",
+    "description": "Custom institutional methodology"
+  },
+  "field_definitions": {
+    "literature_review": {
+      "type": "object",
+      "properties": {
+        "study_quality": {"type": "enum", "options": ["high", "medium", "low"]},
+        "evidence_strength": {"type": "enum", "options": ["strong", "moderate", "weak"]},
+        "consistency": {"type": "boolean"}
+      }
+    }
+  },
+  "scoring_configuration": {
+    "engine": "qualitative_assessment",
+    "verdicts": {
+      "Strong Association": {"conditions": [{"field": "overall_assessment", "operator": "==", "value": "strong"}]},
+      "Moderate Association": {"conditions": [{"field": "overall_assessment", "operator": "==", "value": "moderate"}]},
+      "Weak Association": {"conditions": [{"field": "overall_assessment", "operator": "==", "value": "weak"}]}
+    }
+  }
+}
+```
+
+## Migration from ClinGen-Centric Architecture
+
+### Key Changes
+
+1. **Database**: Replace fixed columns with flexible JSONB storage
+2. **API**: Add schema management endpoints and dynamic validation
+3. **Frontend**: Replace static forms with dynamic generation
+4. **Scoring**: Convert ClinGen logic to pluggable engine
+
+### ClinGen Compatibility
+
+The existing ClinGen functionality is preserved as the default schema, ensuring no disruption to current users while enabling future flexibility.
+
+## Performance Considerations
+
+### Database Optimization
+
+```sql
+-- JSONB indexing for common queries
+CREATE INDEX idx_curations_evidence_gin 
+ON curations USING GIN (curation_data);
+
+CREATE INDEX idx_curations_scores_gin 
+ON curations USING GIN (computed_scores);
+
+-- Schema-specific indexes
+CREATE INDEX idx_curations_by_workflow_pair 
+ON curations (workflow_pair_id);
+```
+
+### Caching Strategy
+
+- Schema definitions cached at application level
+- Scoring results cached for identical evidence sets
+- UI components lazy-loaded based on schema requirements
+
+## Security Considerations
+
+### Schema Validation
+- Comprehensive validation of schema definitions
+- Prevention of malicious schema configurations
+- Role-based access to schema creation/modification
 
 ### Data Integrity
 - Content addressing with SHA-256 hashes
 - Complete audit trail with user attribution
-- Database constraints for ClinGen compliance
-- Pydantic validation with custom validators
+- Schema-aware data validation
 
-### Scientific Standards
-- Immutable records with version chaining
-- Complete evidence source attribution
-- Automated ClinGen SOP v11 validation
-- Multi-stage review and approval workflow
-
-## Migration Strategy
-
-The platform migrated from Firebase to PostgreSQL while preserving:
-- **Configuration System**: Existing workflow configs enhanced with ClinGen features
-- **User Experience**: Familiar interfaces with enhanced ClinGen capabilities
-- **Data Integrity**: Complete migration with validation and backup procedures
-- **Functionality**: All existing features plus new ClinGen compliance features
-
----
-
-## Related Documentation
-
-- [Database Schema](./DATABASE_SCHEMA.md) - Detailed PostgreSQL schema design
-- [API Reference](./API_REFERENCE.md) - Complete FastAPI endpoint documentation
-- [Frontend Guide](./FRONTEND_GUIDE.md) - Vue 3 components and state management
-- [ClinGen Compliance](./CLINGEN_COMPLIANCE.md) - SOP v11 implementation details
-- [Workflow Documentation](./WORKFLOW.md) - Complete curation process
+This architecture transforms Gene Curator from a ClinGen-specific tool into a universal platform for gene-disease curation that can adapt to any scientific methodology through configuration rather than code changes.

@@ -2,18 +2,53 @@
 
 ## Overview
 
-The Gene Curator database implements a PostgreSQL schema with native ClinGen SOP v11 compliance. This document provides comprehensive details of the database design, including tables, relationships, JSONB structures, and automated scoring mechanisms.
+The Gene Curator database implements a **scope-based, schema-agnostic** PostgreSQL design that supports any curation methodology through flexible JSONB storage, multi-stage workflows, and clinical specialty organization. This document provides comprehensive details of the database design that enables methodology flexibility and rigorous quality assurance through 4-eyes principle review.
 
 ## Schema Design Principles
 
-1. **ClinGen Standards as Database Constraints**: Evidence scoring rules implemented as database logic
-2. **Hybrid Structure**: Relational columns for core metrics, JSONB for detailed evidence
-3. **Immutable Provenance**: Every record is content-addressable and verifiable
-4. **Performance First**: Optimized for complex queries and real-time scoring
+1. **Scope-Based Organization**: Clinical specialties (kidney-genetics, cardio-genetics) organize all curation work
+2. **Multi-Stage Workflow**: 5-stage pipeline (entry → precuration → curation → review → active status)
+3. **Quality Assurance**: 4-eyes principle with mandatory peer review before activation
+4. **Methodology Agnostic**: No curation approach is privileged or hard-coded
+5. **Flexible Evidence Storage**: JSONB adapts to any evidence structure with draft states
+6. **Schema-Driven Validation**: Rules defined in schema configurations, not database constraints
+7. **Immutable Provenance**: Every record is content-addressable and verifiable
+8. **Performance Optimized**: Efficient indexing for scope-based queries and multi-curation management
 
-## Core Database Tables
+## Core Schema Tables
 
-### 1. Users Table (RBAC Foundation)
+### 1. Scopes Table (Clinical Specialty Organization)
+
+```sql
+CREATE TABLE scopes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) UNIQUE NOT NULL,              -- kidney-genetics, cardio-genetics, etc.
+    display_name VARCHAR(255) NOT NULL,             -- "Kidney Genetics", "Cardio Genetics"
+    description TEXT,
+    
+    -- Scope configuration
+    institution VARCHAR(255),                       -- Owning institution
+    is_active BOOLEAN DEFAULT true,
+    
+    -- Default schema preferences for this scope
+    default_workflow_pair_id UUID REFERENCES workflow_pairs(id),
+    
+    -- Metadata
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    CONSTRAINT valid_scope_name CHECK (name ~ '^[a-z0-9-]+$')
+);
+```
+
+**Key Features:**
+- **Clinical Specialty Organization**: Each scope represents a clinical domain
+- **Institution Support**: Scopes can be institution-specific or shared
+- **Default Schemas**: Each scope can have preferred methodology defaults
+- **Naming Convention**: Enforced lowercase-hyphen format for consistency
+
+### 2. Users Table (RBAC Foundation)
 
 ```sql
 CREATE TABLE users (
@@ -22,7 +57,11 @@ CREATE TABLE users (
     hashed_password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     role user_role NOT NULL DEFAULT 'viewer', -- viewer|curator|admin
+    institution VARCHAR(255),                  -- User's institutional affiliation
     is_active BOOLEAN DEFAULT true,
+    
+    -- Scope assignments (users can work in multiple scopes)
+    assigned_scopes UUID[] DEFAULT '{}',       -- Array of scope_ids user can access
     last_login TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -33,18 +72,96 @@ CREATE TABLE users (
 
 **Key Features:**
 - **Role-Based Access Control**: `viewer` (read-only), `curator` (create/edit), `admin` (all permissions)
+- **Scope-Based Access**: Users assigned to specific clinical specialties
+- **Multi-Scope Support**: Users can work across multiple clinical domains
+- **Institutional Affiliation**: Links users to organizations for schema preferences
 - **JWT Integration**: Works with FastAPI Security for token-based auth
-- **Audit Trail**: Tracks last login and account status
-- **Email Validation**: Regex constraint ensures valid email format
 
-**Indexes:**
+### 3. Curation Schemas Table (Methodology Definitions)
+
 ```sql
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
-CREATE INDEX idx_users_active ON users(is_active) WHERE is_active = true;
+CREATE TABLE curation_schemas (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    schema_type schema_type NOT NULL, -- precuration|curation|combined
+    
+    -- Complete schema definition (JSONB)
+    field_definitions JSONB NOT NULL,      -- What data to collect
+    validation_rules JSONB NOT NULL,       -- How to validate data
+    scoring_configuration JSONB,           -- How to calculate scores/verdicts
+    workflow_states JSONB NOT NULL,        -- State machine definition
+    ui_configuration JSONB NOT NULL,       -- How to render forms
+    
+    -- Metadata
+    description TEXT,
+    institution VARCHAR(255),              -- Institutional ownership
+    based_on_schema UUID REFERENCES curation_schemas(id), -- Schema inheritance
+    
+    -- Audit
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT true,
+    
+    UNIQUE(name, version)
+);
 ```
 
-### 2. Genes Table (HGNC Compliant)
+**Key Features:**
+- **Methodology Storage**: Complete definition of any curation approach
+- **Version Control**: Full versioning for schema evolution
+- **Schema Inheritance**: Base schemas can be extended for customization
+- **Institution Support**: Organizations can have private schemas
+
+### 4. Workflow Pairs Table (Schema Combinations)
+
+```sql
+CREATE TABLE workflow_pairs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    
+    -- Schema pairing
+    precuration_schema_id UUID REFERENCES curation_schemas(id),
+    curation_schema_id UUID REFERENCES curation_schemas(id),
+    
+    -- Data flow configuration
+    data_mapping JSONB NOT NULL,           -- How precuration data flows to curation
+    
+    -- Metadata
+    description TEXT,
+    institution VARCHAR(255),
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT true,
+    
+    UNIQUE(name, version)
+);
+```
+
+**Key Features:**
+- **Schema Pairing**: Combines precuration + curation methodologies
+- **Data Flow**: Defines how data moves between workflow stages
+- **Reusability**: Same schemas can be paired in different combinations
+
+### 5. Schema Selections Table (User Preferences)
+
+```sql
+CREATE TABLE schema_selections (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    institution VARCHAR(255),
+    workflow_pair_id UUID REFERENCES workflow_pairs(id),
+    is_default BOOLEAN DEFAULT false,
+    
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    -- Ensure only one default per user
+    UNIQUE(user_id, is_default) DEFERRABLE INITIALLY DEFERRED
+);
+```
+
+### 6. Genes Table (Gene Registry)
 
 ```sql
 CREATE TABLE genes (
@@ -55,10 +172,9 @@ CREATE TABLE genes (
     alias_symbols TEXT[],                          -- Array of aliases
     chromosome VARCHAR(10),                        -- 1-22, X, Y, MT
     location VARCHAR(50),                          -- Chromosomal position
-    details TEXT[],                            -- Gene family classifications
-    details VARCHAR(255),              -- ClinGen dyadic naming
+    gene_type VARCHAR(100),                        -- protein_coding, lncRNA, etc.
     
-    -- Configuration-driven details (preserves flexibility)
+    -- Flexible gene details (methodology-agnostic)
     details JSONB DEFAULT '{}',
     
     -- Provenance & integrity
@@ -76,40 +192,56 @@ CREATE TABLE genes (
 ```
 
 **Key Features:**
-- **HGNC Compliance**: Validates HGNC ID format with constraints
-- **Dyadic Naming**: Supports ClinGen gene-disease naming conventions
-- **Flexible Configuration**: JSONB `details` preserves existing config-driven UI system
-- **Content Integrity**: SHA-256 hashing enables verification and distributed collaboration
-- **Change Tracking**: Immutable record chaining with `previous_hash`
+- **HGNC Compliance**: Validates HGNC ID format
+- **Flexible Details**: JSONB accommodates any gene-specific data
+- **Content Integrity**: SHA-256 hashing for verification
 
-**Indexes:**
+### 7. Gene-Scope Assignments Table
+
 ```sql
-CREATE INDEX idx_genes_hgnc_id ON genes(hgnc_id);
-CREATE INDEX idx_genes_symbol ON genes(approved_symbol);
-CREATE INDEX idx_genes_chromosome ON genes(chromosome);
-CREATE INDEX idx_genes_details_gin ON genes USING GIN (details);
-CREATE INDEX idx_genes_created_by ON genes(created_by);
-CREATE INDEX idx_genes_updated_at ON genes(updated_at);
+CREATE TABLE gene_scope_assignments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    gene_id UUID NOT NULL REFERENCES genes(id) ON DELETE CASCADE,
+    scope_id UUID NOT NULL REFERENCES scopes(id) ON DELETE CASCADE,
+    
+    -- Optional curator assignment for this gene-scope combination
+    assigned_curator_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- Assignment metadata
+    assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+    
+    UNIQUE(gene_id, scope_id)
+);
 ```
 
-### 3. Precurations Table (Workflow Intermediate)
+**Key Features:**
+- **Gene-Scope Pairing**: Links genes to clinical specialties
+- **Curator Assignment**: Optional assignment of specific curators to gene-scope combinations
+- **Uniqueness**: One assignment per gene-scope pair
+- **Audit Trail**: Tracks who assigned genes to scopes and when
+
+### 8. Precurations Table (Multi-Stage Workflow - Stage 1)
 
 ```sql
 CREATE TABLE precurations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     gene_id UUID NOT NULL REFERENCES genes(id) ON DELETE CASCADE,
+    scope_id UUID NOT NULL REFERENCES scopes(id) ON DELETE CASCADE,
+    precuration_schema_id UUID NOT NULL REFERENCES curation_schemas(id),
     
-    -- Core precuration data
-    mondo_id VARCHAR(50) NOT NULL,                 -- MONDO:0000001 format
-    mode_of_inheritance TEXT NOT NULL,             -- AR, AD, XL, etc.
-    lumping_splitting_decision precuration_decision DEFAULT 'Undecided',
-    rationale TEXT,                                -- Required for decisions
+    -- Workflow state
+    status VARCHAR(50) NOT NULL DEFAULT 'draft', -- draft|in_review|completed
     
-    -- Workflow management
-    status workflow_status DEFAULT 'Draft',        -- Draft|Review|Approved|Published
+    -- Flexible evidence storage (schema-driven)
+    evidence_data JSONB DEFAULT '{}',
     
-    -- Configuration-driven details
-    details JSONB NOT NULL DEFAULT '{}',
+    -- Draft management
+    is_draft BOOLEAN DEFAULT true,
+    auto_saved_at TIMESTAMPTZ,
     
     -- Provenance tracking
     record_hash VARCHAR(64) NOT NULL UNIQUE,
@@ -121,201 +253,135 @@ CREATE TABLE precurations (
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
     updated_by UUID REFERENCES users(id) ON DELETE SET NULL,
     
-    CONSTRAINT valid_mondo_id CHECK (mondo_id ~* '^MONDO:[0-9]+$')
+    -- Ensure multiple precurations per gene-scope are allowed
+    -- (no unique constraint on gene_id, scope_id)
+    
+    FOREIGN KEY (gene_id, scope_id) REFERENCES gene_scope_assignments(gene_id, scope_id)
 );
 ```
 
 **Key Features:**
-- **Lumping/Splitting Logic**: Core ClinGen requirement for entity definition
-- **MONDO Integration**: Validates MONDO ontology identifiers
-- **Workflow States**: Draft → Review → Approved progression
-- **Flexible Details**: Configuration-driven field system preserved from legacy
+- **Scope-Based**: Links to specific clinical specialties
+- **Multiple Per Gene-Scope**: Allows multiple precurations for the same gene within a scope
+- **Draft Management**: Supports save/resume functionality with auto-save timestamps
+- **Schema-Driven**: Uses precuration schemas for methodology flexibility
+- **Content Integrity**: Immutable records with cryptographic hashing
 
-**Indexes:**
-```sql
-CREATE INDEX idx_precurations_gene_id ON precurations(gene_id);
-CREATE INDEX idx_precurations_mondo_id ON precurations(mondo_id);
-CREATE INDEX idx_precurations_decision ON precurations(lumping_splitting_decision);
-CREATE INDEX idx_precurations_status ON precurations(status);
-CREATE INDEX idx_precurations_details_gin ON precurations USING GIN (details);
-CREATE INDEX idx_precurations_created_by ON precurations(created_by);
-```
-
-### 4. Curations Table (ClinGen SOP v11 Core)
+### 9. Curations Table (Multi-Stage Workflow - Stage 2)
 
 ```sql
 CREATE TABLE curations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     gene_id UUID NOT NULL REFERENCES genes(id) ON DELETE CASCADE,
-    precuration_id UUID REFERENCES precurations(id) ON DELETE SET NULL,
+    scope_id UUID NOT NULL REFERENCES scopes(id) ON DELETE CASCADE,
+    curation_schema_id UUID NOT NULL REFERENCES curation_schemas(id),
     
-    -- Entity definition
-    mondo_id VARCHAR(50) NOT NULL,
-    mode_of_inheritance TEXT NOT NULL,
-    disease_name TEXT NOT NULL,
+    -- Required precuration reference
+    precuration_id UUID NOT NULL REFERENCES precurations(id) ON DELETE CASCADE,
     
-    -- *** CORE CLINGEN METRICS (Automated Calculation) ***
-    verdict curation_verdict NOT NULL,             -- SOP v11 classifications
-    genetic_evidence_score NUMERIC(4, 2) NOT NULL DEFAULT 0.0,    -- Max 12
-    experimental_evidence_score NUMERIC(4, 2) NOT NULL DEFAULT 0.0, -- Max 6
-    total_score NUMERIC(4, 2) GENERATED ALWAYS AS 
-        (genetic_evidence_score + experimental_evidence_score) STORED, -- Max 18
-    has_contradictory_evidence BOOLEAN NOT NULL DEFAULT false,
+    -- Workflow state
+    status VARCHAR(50) NOT NULL DEFAULT 'draft', -- draft|pending_review|completed
     
-    -- *** CLINGEN WORKFLOW & SUMMARY ***
-    summary_text TEXT,                            -- Auto-generated from Template v5.1
-    gcep_affiliation TEXT NOT NULL,               -- "Cardiovascular GCEP"
-    sop_version VARCHAR(10) NOT NULL DEFAULT 'v11',
-    status workflow_status DEFAULT 'Draft',
-    approved_at TIMESTAMPTZ,
-    approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
-    published_at TIMESTAMPTZ,
+    -- Flexible evidence storage (schema-driven)
+    evidence_data JSONB DEFAULT '{}',
     
-    -- *** DECENTRALIZATION READY ***
-    record_hash VARCHAR(64) NOT NULL UNIQUE,      -- Content-addressable
-    previous_hash VARCHAR(64),                    -- Version chaining
-    origin_node_id UUID,                          -- Multi-node deployment
+    -- Schema-computed results (populated by triggers)
+    computed_scores JSONB DEFAULT '{}',
+    computed_verdict VARCHAR(100),
+    computed_summary TEXT,
     
-    -- *** DETAILED EVIDENCE STORE (JSONB) ***
-    details JSONB NOT NULL,                       -- Complete evidence structure
+    -- Draft management
+    is_draft BOOLEAN DEFAULT true,
+    auto_saved_at TIMESTAMPTZ,
     
-    -- *** METADATA ***
+    -- Provenance tracking
+    record_hash VARCHAR(64) NOT NULL UNIQUE,
+    previous_hash VARCHAR(64),
+    
+    -- Metadata
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
     updated_by UUID REFERENCES users(id) ON DELETE SET NULL,
     
-    -- *** SOP v11 CONSTRAINTS ***
-    CONSTRAINT valid_genetic_score CHECK (genetic_evidence_score >= 0 AND genetic_evidence_score <= 12),
-    CONSTRAINT valid_experimental_score CHECK (experimental_evidence_score >= 0 AND experimental_evidence_score <= 6),
-    CONSTRAINT valid_total_score CHECK (total_score <= 18),
-    CONSTRAINT valid_mondo_id CHECK (mondo_id ~* '^MONDO:[0-9]+$'),
-    CONSTRAINT approved_metadata CHECK (
-        (approved_at IS NULL AND approved_by IS NULL) OR 
-        (approved_at IS NOT NULL AND approved_by IS NOT NULL)
+    -- Ensure multiple curations per gene-scope are allowed
+    -- (no unique constraint on gene_id, scope_id)
+    
+    FOREIGN KEY (gene_id, scope_id) REFERENCES gene_scope_assignments(gene_id, scope_id)
+);
+```
+
+**Key Features:**
+- **Precuration Dependency**: Every curation must reference a precuration
+- **Scope-Based**: Links to specific clinical specialties
+- **Multiple Per Gene-Scope**: Allows multiple curations for the same gene within a scope
+- **Schema-Driven Scoring**: Dynamic computation based on methodology
+- **Draft Management**: Supports save/resume functionality
+- **Content Integrity**: Immutable records with cryptographic hashing
+
+### 10. Reviews Table (Multi-Stage Workflow - 4-Eyes Principle)
+
+```sql
+CREATE TABLE reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    curation_id UUID NOT NULL REFERENCES curations(id) ON DELETE CASCADE,
+    
+    -- 4-eyes principle: reviewer must be different from curation creator
+    reviewer_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- Review outcome
+    status review_status NOT NULL, -- pending|approved|rejected|needs_revision
+    review_comments TEXT,
+    
+    -- Review metadata
+    reviewed_at TIMESTAMPTZ,
+    review_duration_minutes INTEGER,
+    
+    -- Audit trail
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    -- Ensure reviewer is different from curation creator
+    CONSTRAINT different_reviewer CHECK (
+        reviewer_id != (SELECT created_by FROM curations WHERE id = curation_id)
     )
 );
 ```
 
 **Key Features:**
-- **Native ClinGen Scoring**: Database-level enforcement of SOP v11 point maximums
-- **Automated Evidence Calculation**: Computed columns with triggers
-- **Professional Workflow**: Draft → Review → Approved → Published states
-- **Summary Generation**: Template-driven evidence summaries
-- **Scientific Integrity**: Immutable records with cryptographic content addressing
+- **4-Eyes Principle**: Enforced different reviewer constraint
+- **Review States**: Comprehensive review workflow management
+- **Review Tracking**: Duration and detailed comments
+- **Quality Assurance**: Mandatory review before curation activation
 
-**Indexes:**
+### 11. Active Curations Table (Multi-Stage Workflow - Active Status Management)
+
 ```sql
--- Core ClinGen queries
-CREATE INDEX idx_curations_gene_id ON curations(gene_id);
-CREATE INDEX idx_curations_mondo_id ON curations(mondo_id);
-CREATE INDEX idx_curations_verdict ON curations(verdict);
-CREATE INDEX idx_curations_scores ON curations(genetic_evidence_score, experimental_evidence_score);
-CREATE INDEX idx_curations_total_score ON curations(total_score);
-CREATE INDEX idx_curations_gcep ON curations(gcep_affiliation);
-CREATE INDEX idx_curations_status ON curations(status);
-CREATE INDEX idx_curations_approved ON curations(approved_at) WHERE approved_at IS NOT NULL;
-CREATE INDEX idx_curations_published ON curations(published_at) WHERE published_at IS NOT NULL;
-
--- Advanced JSONB indexes for evidence queries
-CREATE INDEX idx_curations_details_gin ON curations USING GIN (details);
-CREATE INDEX idx_curations_genetic_evidence ON curations USING GIN ((details->'genetic_evidence'));
-CREATE INDEX idx_curations_experimental_evidence ON curations USING GIN ((details->'experimental_evidence'));
-CREATE INDEX idx_curations_external_evidence ON curations USING GIN ((details->'external_evidence'));
-CREATE INDEX idx_curations_workflow_status ON curations USING GIN ((details->'curation_workflow'->'status'));
-CREATE INDEX idx_curations_provenance ON curations USING GIN ((details->'ancillary_data'));
+CREATE TABLE active_curations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    gene_id UUID NOT NULL REFERENCES genes(id) ON DELETE CASCADE,
+    scope_id UUID NOT NULL REFERENCES scopes(id) ON DELETE CASCADE,
+    curation_id UUID NOT NULL REFERENCES curations(id) ON DELETE CASCADE,
+    
+    -- Active status management
+    activated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    activated_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    -- Previous active curation (for audit trail)
+    replaced_curation_id UUID REFERENCES curations(id),
+    
+    -- Only one active curation per gene-scope
+    UNIQUE(gene_id, scope_id),
+    
+    FOREIGN KEY (gene_id, scope_id) REFERENCES gene_scope_assignments(gene_id, scope_id)
+);
 ```
 
-## JSONB Evidence Structure (curations.details)
-
-The `details` JSONB column stores the complete ClinGen evidence hierarchy:
-
-### Structure Overview
-```json
-{
-  "genetic_evidence": {
-    "case_level_data": [...],      // Max 12 points total
-    "segregation_data": [...],     // Max 3 points total  
-    "case_control_data": [...]     // Max 6 points total
-  },
-  "experimental_evidence": {
-    "function": [...],             // Biochemical function evidence
-    "models": [...],               // Model organism evidence
-    "rescue": [...]                // Rescue evidence
-  },
-  "contradictory_evidence": [...], // Evidence against gene-disease relationship
-  "external_evidence": [...],     // Supporting data from other sources
-  "curation_workflow": {...},     // Workflow metadata and review log
-  "ancillary_data": {...}         // Additional supporting data
-}
-```
-
-### Detailed Evidence Entry Format
-
-#### Genetic Evidence - Case Level Data
-```json
-{
-  "case_level_data": [
-    {
-      "pmid": "12345678",
-      "proband_label": "Smith et al, Proband 1", 
-      "hpo_terms": ["HP:0001250", "HP:0000505"],
-      "variant_type": "Predicted or Proven Null",
-      "is_de_novo": true,
-      "functional_impact_evidence": "Western blot showed no protein product",
-      "points": 2.0,
-      "rationale": "De novo null variant in highly constrained gene"
-    }
-  ]
-}
-```
-
-#### Experimental Evidence - Function
-```json
-{
-  "function": [
-    {
-      "type": "Biochemical Function",
-      "pmid": "55566677",
-      "description": "Enzyme assay demonstrated loss of catalytic activity", 
-      "points": 0.5,
-      "methodology": "In vitro enzyme kinetics",
-      "significance": "Functional validation of pathogenicity"
-    }
-  ]
-}
-```
-
-#### Workflow & Review Tracking
-```json
-{
-  "curation_workflow": {
-    "status": "In_Primary_Review",
-    "clingen_compliance_status": "Validated",
-    "primary_curator": "curator1@institution.edu",
-    "secondary_curator": "senior_curator@institution.edu",
-    "review_log": [
-      {
-        "timestamp": "2024-07-31T10:00:00Z",
-        "user_email": "system@gene-curator.org",
-        "action": "curation_created",
-        "comment": "Automated curation with ClinGen scoring",
-        "changes_made": {
-          "genetic_evidence_score": 12.0,
-          "experimental_evidence_score": 4.0,
-          "verdict": "Definitive"
-        }
-      }
-    ],
-    "flags": {
-      "conflicting_evidence": false,
-      "insufficient_evidence": false,
-      "clingen_compliant": true,
-      "ready_for_gencc_submission": true
-    }
-  }
-}
-```
+**Key Features:**
+- **One Active Per Scope**: Unique constraint ensures single active curation per gene-scope
+- **Activation Tracking**: Complete audit trail of status changes
+- **Replacement History**: Links to previously active curations
+- **Automatic Archiving**: Previous active curations become archived when new ones are activated
 
 ## Database Enums
 
@@ -323,83 +389,59 @@ The `details` JSONB column stores the complete ClinGen evidence hierarchy:
 -- User roles for RBAC
 CREATE TYPE user_role AS ENUM ('viewer', 'curator', 'admin');
 
--- Precuration decision tracking
-CREATE TYPE precuration_decision AS ENUM ('Lump', 'Split', 'Undecided');
+-- Schema types
+CREATE TYPE schema_type AS ENUM ('precuration', 'curation', 'combined');
 
--- ClinGen SOP v11 verdict classifications
-CREATE TYPE curation_verdict AS ENUM (
-    'Definitive', 
-    'Strong', 
-    'Moderate', 
-    'Limited', 
-    'No Known Disease Relationship', 
-    'Disputed', 
-    'Refuted'
-);
-
--- Workflow status for all entities
-CREATE TYPE workflow_status AS ENUM (
-    'Draft',
-    'In_Primary_Review',
-    'In_Secondary_Review', 
-    'Approved',
-    'Published',
-    'Rejected'
-);
+-- Review status for 4-eyes principle
+CREATE TYPE review_status AS ENUM ('pending', 'approved', 'rejected', 'needs_revision');
 ```
 
-## ClinGen Scoring Engine (Database Triggers)
+**Note**: 
+- Verdict enums and workflow status enums are **NOT** defined at database level - they are defined within schema configurations to maintain methodology flexibility
+- The `current_stage` enum has been removed as workflow stages are now handled by separate tables
+- Draft states and workflow statuses are managed as VARCHAR fields to allow schema-driven customization
 
-### Automated Scoring Trigger
+## Dynamic Scoring Engine (Schema-Aware Triggers)
+
+### Flexible Scoring Trigger
 
 ```sql
-CREATE OR REPLACE FUNCTION calculate_clingen_scores()
+CREATE OR REPLACE FUNCTION calculate_dynamic_scores()
 RETURNS TRIGGER AS $$
 DECLARE
-    genetic_score NUMERIC(4,2) := 0.0;
-    experimental_score NUMERIC(4,2) := 0.0;
-    case_level_total NUMERIC(4,2) := 0.0;
-    segregation_total NUMERIC(4,2) := 0.0;
-    case_control_total NUMERIC(4,2) := 0.0;
-    experimental_total NUMERIC(4,2) := 0.0;
+    schema_config JSONB;
+    scoring_engine VARCHAR(100);
+    scoring_result JSONB;
 BEGIN
-    -- Calculate genetic evidence score (SOP v11 rules)
-    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
-    INTO case_level_total
-    FROM jsonb_array_elements(NEW.details->'genetic_evidence'->'case_level_data') AS evidence;
+    -- Get schema configuration for this curation
+    SELECT cs.scoring_configuration INTO schema_config
+    FROM curation_schemas cs
+    WHERE cs.id = NEW.curation_schema_id;
     
-    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
-    INTO segregation_total
-    FROM jsonb_array_elements(NEW.details->'genetic_evidence'->'segregation_data') AS evidence;
-    
-    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
-    INTO case_control_total
-    FROM jsonb_array_elements(NEW.details->'genetic_evidence'->'case_control_data') AS evidence;
-    
-    -- Apply SOP v11 maximums: Case-level (12), Segregation (3), Case-control (6)
-    genetic_score := LEAST(
-        LEAST(case_level_total, 12.0) + 
-        LEAST(segregation_total, 3.0) + 
-        LEAST(case_control_total, 6.0),
-        12.0  -- Overall genetic maximum
-    );
-    
-    -- Calculate experimental evidence score (max 6 points total)
-    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
-    INTO experimental_total
-    FROM (
-        SELECT evidence FROM jsonb_array_elements(NEW.details->'experimental_evidence'->'function') AS evidence
-        UNION ALL
-        SELECT evidence FROM jsonb_array_elements(NEW.details->'experimental_evidence'->'models') AS evidence
-        UNION ALL
-        SELECT evidence FROM jsonb_array_elements(NEW.details->'experimental_evidence'->'rescue') AS evidence
-    ) AS all_evidence;
-    
-    experimental_score := LEAST(experimental_total, 6.0);
-    
-    -- Update the record with calculated scores
-    NEW.genetic_evidence_score := genetic_score;
-    NEW.experimental_evidence_score := experimental_score;
+    -- Only calculate scores if not in draft mode and has evidence data
+    IF NOT NEW.is_draft AND jsonb_typeof(NEW.evidence_data) = 'object' AND NEW.evidence_data != '{}' THEN
+        -- Extract scoring engine name
+        scoring_engine := schema_config->>'engine';
+        
+        -- Call appropriate scoring function based on schema
+        CASE scoring_engine
+            WHEN 'clingen_sop_v11' THEN
+                scoring_result := calculate_clingen_scores(NEW.evidence_data, schema_config);
+            WHEN 'gencc_based' THEN
+                scoring_result := calculate_gencc_scores(NEW.evidence_data, schema_config);
+            WHEN 'qualitative_assessment' THEN
+                scoring_result := calculate_qualitative_scores(NEW.evidence_data, schema_config);
+            WHEN 'custom_institutional' THEN
+                scoring_result := calculate_custom_scores(NEW.evidence_data, schema_config);
+            ELSE
+                RAISE EXCEPTION 'Unknown scoring engine: %', scoring_engine;
+        END CASE;
+        
+        -- Update computed fields with results
+        NEW.computed_scores := scoring_result->'scores';
+        NEW.computed_verdict := scoring_result->>'verdict';
+        NEW.computed_summary := scoring_result->>'summary';
+    END IF;
     
     RETURN NEW;
 END;
@@ -408,170 +450,571 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_calculate_scores
     BEFORE INSERT OR UPDATE ON curations
     FOR EACH ROW
-    EXECUTE FUNCTION calculate_clingen_scores();
+    EXECUTE FUNCTION calculate_dynamic_scores();
 ```
 
-### Content Hash Generation
+### Individual Scoring Function Examples
+
+#### ClinGen SOP v11 Scoring Function
 
 ```sql
-CREATE OR REPLACE FUNCTION generate_record_hash()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION calculate_clingen_scores(evidence_data JSONB, config JSONB)
+RETURNS JSONB AS $$
+DECLARE
+    genetic_score NUMERIC(4,2) := 0.0;
+    experimental_score NUMERIC(4,2) := 0.0;
+    total_score NUMERIC(4,2);
+    verdict TEXT;
+    has_contradictory BOOLEAN;
 BEGIN
-    NEW.record_hash := encode(
-        digest(
-            NEW.gene_id::text || 
-            NEW.mondo_id || 
-            NEW.mode_of_inheritance || 
-            NEW.details::text ||
-            EXTRACT(epoch FROM NEW.created_at)::text,
-            'sha256'
+    -- Calculate genetic evidence score (max 12 per SOP v11)
+    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
+    INTO genetic_score
+    FROM (
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'genetic_evidence'->'case_level_data') AS evidence
+        UNION ALL
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'genetic_evidence'->'segregation_data') AS evidence
+        UNION ALL
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'genetic_evidence'->'case_control_data') AS evidence
+    ) AS all_genetic;
+    
+    genetic_score := LEAST(genetic_score, 12.0);
+    
+    -- Calculate experimental evidence score (max 6 per SOP v11)
+    SELECT COALESCE(SUM((evidence->>'points')::NUMERIC), 0)
+    INTO experimental_score
+    FROM (
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'experimental_evidence'->'function') AS evidence
+        UNION ALL
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'experimental_evidence'->'models') AS evidence
+        UNION ALL
+        SELECT evidence FROM jsonb_array_elements(evidence_data->'experimental_evidence'->'rescue') AS evidence
+    ) AS all_experimental;
+    
+    experimental_score := LEAST(experimental_score, 6.0);
+    
+    -- Calculate total score
+    total_score := genetic_score + experimental_score;
+    
+    -- Check for contradictory evidence
+    has_contradictory := jsonb_array_length(evidence_data->'contradictory_evidence') > 0;
+    
+    -- Determine verdict based on ClinGen SOP v11 rules
+    IF has_contradictory THEN
+        verdict := 'Disputed';
+    ELSIF total_score >= 12 THEN
+        verdict := 'Definitive';
+    ELSIF total_score >= 7 THEN
+        verdict := 'Strong';
+    ELSIF total_score >= 4 THEN
+        verdict := 'Moderate';
+    ELSIF total_score >= 1 THEN
+        verdict := 'Limited';
+    ELSE
+        verdict := 'No Known Disease Relationship';
+    END IF;
+    
+    RETURN jsonb_build_object(
+        'scores', jsonb_build_object(
+            'genetic_evidence_score', genetic_score,
+            'experimental_evidence_score', experimental_score,
+            'total_score', total_score
         ),
-        'hex'
+        'verdict', verdict,
+        'summary', format('ClinGen SOP v11: Genetic=%s, Experimental=%s, Total=%s → %s', 
+            genetic_score, experimental_score, total_score, verdict)
     );
-    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_generate_hash
-    BEFORE INSERT ON curations
-    FOR EACH ROW
-    EXECUTE FUNCTION generate_record_hash();
 ```
 
-## Audit and Support Tables
+#### GenCC-Based Scoring Function
 
-### Change Log Table
 ```sql
-CREATE TABLE change_log (
-    id BIGSERIAL PRIMARY KEY,
-    entity_type TEXT NOT NULL, -- 'gene', 'precuration', 'curation'
-    entity_id UUID NOT NULL,
-    operation TEXT NOT NULL, -- 'CREATE', 'UPDATE', 'APPROVE', 'PUBLISH', 'DELETE'
-    record_hash VARCHAR(64) NOT NULL,
-    previous_hash VARCHAR(64),
-    changes JSONB, -- Detailed change information
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    ip_address INET,
-    user_agent TEXT,
+CREATE OR REPLACE FUNCTION calculate_gencc_scores(evidence_data JSONB, config JSONB)
+RETURNS JSONB AS $$
+DECLARE
+    confidence_score NUMERIC(4,2) := 0.0;
+    verdict TEXT;
+BEGIN
+    -- GenCC-based calculation (example implementation)
+    SELECT 
+        CASE 
+            WHEN evidence_data->'clinical_evidence'->>'phenotype_overlap' = 'complete' THEN 3.0
+            WHEN evidence_data->'clinical_evidence'->>'phenotype_overlap' = 'partial' THEN 2.0
+            ELSE 1.0
+        END +
+        CASE 
+            WHEN evidence_data->'clinical_evidence'->>'inheritance_pattern' = 'consistent' THEN 2.0
+            ELSE 0.0
+        END +
+        COALESCE((evidence_data->'clinical_evidence'->>'population_data')::NUMERIC, 0.0)
+    INTO confidence_score;
     
-    CONSTRAINT valid_entity_type CHECK (entity_type IN ('gene', 'precuration', 'curation')),
-    CONSTRAINT valid_operation CHECK (operation IN ('CREATE', 'UPDATE', 'APPROVE', 'PUBLISH', 'DELETE'))
-);
+    -- Determine verdict
+    IF confidence_score >= 8 THEN
+        verdict := 'Definitive';
+    ELSIF confidence_score >= 6 THEN
+        verdict := 'Strong';
+    ELSIF confidence_score >= 4 THEN
+        verdict := 'Moderate';
+    ELSE
+        verdict := 'Limited';
+    END IF;
+    
+    RETURN jsonb_build_object(
+        'scores', jsonb_build_object('confidence_score', confidence_score),
+        'verdict', verdict,
+        'summary', format('GenCC-based: Confidence=%s → %s', confidence_score, verdict)
+    );
+END;
+$$ LANGUAGE plpgsql;
 ```
 
-### User Sessions Table
+## Schema Examples in Database
+
+### ClinGen SOP v11 Schema (Stored in curation_schemas table)
+
+```json
+{
+  "field_definitions": {
+    "genetic_evidence": {
+      "type": "object",
+      "properties": {
+        "case_level_data": {
+          "type": "array",
+          "item_schema": {
+            "pmid": {"type": "string", "required": true, "validation": "pmid_format"},
+            "proband_label": {"type": "string", "required": true},
+            "variant_type": {"type": "enum", "options": ["null", "missense"]},
+            "points": {"type": "number", "min": 0, "max": 2}
+          }
+        }
+      }
+    },
+    "experimental_evidence": {
+      "type": "object",
+      "properties": {
+        "function": {"type": "array"},
+        "models": {"type": "array"},
+        "rescue": {"type": "array"}
+      }
+    }
+  },
+  "scoring_configuration": {
+    "engine": "clingen_sop_v11",
+    "max_genetic_score": 12,
+    "max_experimental_score": 6,
+    "verdicts": {
+      "Definitive": {"min_score": 12, "no_contradictory": true},
+      "Strong": {"min_score": 7, "max_score": 11, "no_contradictory": true},
+      "Moderate": {"min_score": 4, "max_score": 6},
+      "Limited": {"min_score": 1, "max_score": 3},
+      "No Known Disease Relationship": {"score": 0}
+    }
+  },
+  "workflow_states": {
+    "states": ["Draft", "In_Primary_Review", "In_Secondary_Review", "Approved", "Published"],
+    "transitions": {
+      "Draft": ["In_Primary_Review"],
+      "In_Primary_Review": ["Draft", "In_Secondary_Review"],
+      "In_Secondary_Review": ["In_Primary_Review", "Approved"],
+      "Approved": ["Published"]
+    }
+  }
+}
+```
+
+## Database Indexes (Performance Optimization)
+
+### Core Indexes
+
 ```sql
-CREATE TABLE user_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_jti VARCHAR(255) NOT NULL UNIQUE, -- JWT ID claim
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_accessed TIMESTAMPTZ DEFAULT NOW(),
-    ip_address INET,
-    user_agent TEXT,
-    is_active BOOLEAN DEFAULT true
+-- Scope indexes
+CREATE INDEX idx_scopes_name ON scopes(name);
+CREATE INDEX idx_scopes_institution ON scopes(institution);
+CREATE INDEX idx_scopes_active ON scopes(is_active) WHERE is_active = true;
+
+-- Schema repository indexes
+CREATE INDEX idx_schemas_name_version ON curation_schemas(name, version);
+CREATE INDEX idx_schemas_institution ON curation_schemas(institution);
+CREATE INDEX idx_schemas_active ON curation_schemas(is_active) WHERE is_active = true;
+
+-- Workflow pair indexes
+CREATE INDEX idx_workflow_pairs_name ON workflow_pairs(name, version);
+CREATE INDEX idx_workflow_pairs_schemas ON workflow_pairs(precuration_schema_id, curation_schema_id);
+
+-- User preference indexes
+CREATE INDEX idx_schema_selections_user ON schema_selections(user_id);
+CREATE INDEX idx_schema_selections_default ON schema_selections(user_id, is_default) WHERE is_default = true;
+
+-- User scope access indexes
+CREATE INDEX idx_users_assigned_scopes ON users USING GIN (assigned_scopes);
+
+-- Gene indexes
+CREATE INDEX idx_genes_hgnc_id ON genes(hgnc_id);
+CREATE INDEX idx_genes_symbol ON genes(approved_symbol);
+CREATE INDEX idx_genes_details_gin ON genes USING GIN (details);
+
+-- Gene-scope assignment indexes
+CREATE INDEX idx_gene_scope_assignments_gene ON gene_scope_assignments(gene_id);
+CREATE INDEX idx_gene_scope_assignments_scope ON gene_scope_assignments(scope_id);
+CREATE INDEX idx_gene_scope_assignments_curator ON gene_scope_assignments(assigned_curator_id);
+CREATE INDEX idx_gene_scope_assignments_active ON gene_scope_assignments(is_active) WHERE is_active = true;
+
+-- Precuration indexes (scope-based)
+CREATE INDEX idx_precurations_gene_scope ON precurations(gene_id, scope_id);
+CREATE INDEX idx_precurations_schema ON precurations(precuration_schema_id);
+CREATE INDEX idx_precurations_status ON precurations(status);
+CREATE INDEX idx_precurations_creator ON precurations(created_by);
+CREATE INDEX idx_precurations_draft ON precurations(is_draft) WHERE is_draft = true;
+CREATE INDEX idx_precurations_evidence_gin ON precurations USING GIN (evidence_data);
+
+-- Curation indexes (scope-based)
+CREATE INDEX idx_curations_gene_scope ON curations(gene_id, scope_id);
+CREATE INDEX idx_curations_precuration ON curations(precuration_id);
+CREATE INDEX idx_curations_schema ON curations(curation_schema_id);
+CREATE INDEX idx_curations_status ON curations(status);
+CREATE INDEX idx_curations_verdict ON curations(computed_verdict);
+CREATE INDEX idx_curations_creator ON curations(created_by);
+CREATE INDEX idx_curations_draft ON curations(is_draft) WHERE is_draft = true;
+CREATE INDEX idx_curations_evidence_gin ON curations USING GIN (evidence_data);
+CREATE INDEX idx_curations_scores_gin ON curations USING GIN (computed_scores);
+
+-- Review indexes (4-eyes principle)
+CREATE INDEX idx_reviews_curation ON reviews(curation_id);
+CREATE INDEX idx_reviews_reviewer ON reviews(reviewer_id);  
+CREATE INDEX idx_reviews_status ON reviews(status);
+CREATE INDEX idx_reviews_pending ON reviews(status) WHERE status = 'pending';
+
+-- Active curation indexes
+CREATE INDEX idx_active_curations_gene_scope ON active_curations(gene_id, scope_id);
+CREATE INDEX idx_active_curations_curation ON active_curations(curation_id);
+CREATE INDEX idx_active_curations_activated_by ON active_curations(activated_by);
+```
+
+### Methodology-Specific Indexes
+
+```sql
+-- ClinGen-specific indexes (created when ClinGen schemas are active)
+CREATE INDEX idx_curations_clingen_genetic_score 
+ON curations ((computed_scores->>'genetic_evidence_score')::numeric)
+WHERE curation_schema_id IN (
+    SELECT cs.id FROM curation_schemas cs 
+    WHERE cs.name LIKE 'ClinGen%'
 );
+
+CREATE INDEX idx_curations_clingen_experimental_score 
+ON curations ((computed_scores->>'experimental_evidence_score')::numeric)  
+WHERE curation_schema_id IN (
+    SELECT cs.id FROM curation_schemas cs 
+    WHERE cs.name LIKE 'ClinGen%'
+);
+
+-- GenCC-specific indexes
+CREATE INDEX idx_curations_gencc_confidence_score 
+ON curations ((computed_scores->>'confidence_score')::numeric)
+WHERE curation_schema_id IN (
+    SELECT cs.id FROM curation_schemas cs 
+    WHERE cs.name LIKE 'GenCC%'
+);
+
+-- Scope-specific performance indexes
+CREATE INDEX idx_curations_kidney_genetics_verdict
+ON curations (computed_verdict)
+WHERE scope_id IN (SELECT id FROM scopes WHERE name = 'kidney-genetics');
+
+CREATE INDEX idx_curations_cardio_genetics_verdict
+ON curations (computed_verdict) 
+WHERE scope_id IN (SELECT id FROM scopes WHERE name = 'cardio-genetics');
 ```
 
 ## Database Views
 
-### Complete Curation View
+### Comprehensive Curation View (Scope-Based)
+
 ```sql
-CREATE VIEW curations_complete AS
+CREATE VIEW curations_comprehensive AS
 SELECT 
-    c.id,
+    c.id as curation_id,
     c.gene_id,
     g.approved_symbol,
     g.hgnc_id,
-    c.mondo_id,
-    c.mode_of_inheritance,
-    c.verdict,
-    c.genetic_evidence_score,
-    c.experimental_evidence_score,
-    c.total_score,
-    c.has_contradictory_evidence,
-    c.summary_text,
-    c.gcep_affiliation,
-    c.approved_at,
-    c.details,
+    
+    -- Scope information
+    c.scope_id,
+    s.name as scope_name,
+    s.display_name as scope_display_name,
+    
+    -- Workflow state
+    c.status as curation_status,
+    c.computed_verdict,
+    c.computed_scores,
+    c.is_draft,
+    
+    -- Schema information
+    cur_schema.name as curation_schema_name,
+    cur_schema.scoring_configuration->>'engine' as scoring_engine,
+    
+    -- Precuration reference
+    c.precuration_id,
+    p.status as precuration_status,
+    prec_schema.name as precuration_schema_name,
+    
+    -- Review information
+    r.id as review_id,
+    r.status as review_status,
+    r.reviewer_id,
+    reviewer.name as reviewer_name,
+    r.reviewed_at,
+    
+    -- Active status
+    ac.id is NOT NULL as is_active,
+    ac.activated_at,
+    ac.activated_by,
+    activator.name as activated_by_name,
+    
+    -- Metadata
     c.created_at,
     c.updated_at,
-    creator.name as created_by_name,
-    approver.name as approved_by_name
+    creator.name as created_by_name
 FROM curations c
 JOIN genes g ON c.gene_id = g.id
-LEFT JOIN users creator ON c.created_by = creator.id
-LEFT JOIN users approver ON c.approved_by = approver.id;
+JOIN scopes s ON c.scope_id = s.id
+JOIN curation_schemas cur_schema ON c.curation_schema_id = cur_schema.id
+JOIN precurations p ON c.precuration_id = p.id
+JOIN curation_schemas prec_schema ON p.precuration_schema_id = prec_schema.id
+LEFT JOIN reviews r ON r.curation_id = c.id
+LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
+LEFT JOIN active_curations ac ON ac.curation_id = c.id
+LEFT JOIN users activator ON ac.activated_by = activator.id
+LEFT JOIN users creator ON c.created_by = creator.id;
 ```
 
-### ClinGen Summary Statistics
+### Scope-Based Statistics View
+
 ```sql
-CREATE VIEW clingen_statistics AS
+CREATE VIEW scope_methodology_statistics AS
 SELECT 
-    gcep_affiliation,
-    verdict,
+    s.name as scope_name,
+    s.display_name as scope_display_name,
+    cur_schema.name as methodology_name,
+    cur_schema.scoring_configuration->>'engine' as scoring_engine,
+    c.computed_verdict,
     COUNT(*) as curation_count,
-    AVG(genetic_evidence_score) as avg_genetic_score,
-    AVG(experimental_evidence_score) as avg_experimental_score,
-    AVG(total_score) as avg_total_score,
-    COUNT(*) FILTER (WHERE approved_at IS NOT NULL) as approved_count
-FROM curations
-GROUP BY gcep_affiliation, verdict
-ORDER BY gcep_affiliation, verdict;
+    COUNT(*) FILTER (WHERE ac.id IS NOT NULL) as active_curation_count,
+    AVG((c.computed_scores->>'total_score')::numeric) as avg_total_score
+FROM curations c
+JOIN scopes s ON c.scope_id = s.id
+JOIN curation_schemas cur_schema ON c.curation_schema_id = cur_schema.id
+LEFT JOIN active_curations ac ON ac.curation_id = c.id
+WHERE c.computed_verdict IS NOT NULL AND NOT c.is_draft
+GROUP BY s.name, s.display_name, cur_schema.name, cur_schema.scoring_configuration->>'engine', c.computed_verdict
+ORDER BY scope_name, methodology_name, curation_count DESC;
 ```
 
-## Performance Optimizations
+### Review Workflow Statistics
 
-### JSONB Indexing Strategy
-- **GIN Indexes**: Fast queries on evidence structures
-- **Specific Path Indexes**: Targeted indexes on frequently queried JSONB paths
-- **Partial Indexes**: Workflow-specific indexes (e.g., only approved curations)
-
-### Query Optimization
-- **Computed Columns**: Total scores calculated automatically and indexed
-- **Materialized Views**: Complex analytics pre-computed
-- **Connection Pooling**: SQLAlchemy session management for concurrent access
-
-### Maintenance Procedures
 ```sql
--- Reindex JSONB columns monthly
-REINDEX INDEX CONCURRENTLY idx_curations_details_gin;
-
--- Update statistics weekly
-ANALYZE curations;
-
--- Vacuum full quarterly (during maintenance window)
-VACUUM FULL curations;
+CREATE VIEW review_workflow_statistics AS
+SELECT 
+    s.name as scope_name,
+    s.display_name as scope_display_name,
+    COUNT(c.id) as total_curations,
+    COUNT(r.id) as reviewed_curations,
+    COUNT(r.id) FILTER (WHERE r.status = 'approved') as approved_curations,
+    COUNT(r.id) FILTER (WHERE r.status = 'rejected') as rejected_curations,
+    COUNT(r.id) FILTER (WHERE r.status = 'pending') as pending_reviews,
+    AVG(r.review_duration_minutes) as avg_review_duration_minutes,
+    COUNT(DISTINCT r.reviewer_id) as unique_reviewers
+FROM curations c
+JOIN scopes s ON c.scope_id = s.id
+LEFT JOIN reviews r ON r.curation_id = c.id
+WHERE NOT c.is_draft
+GROUP BY s.name, s.display_name
+ORDER BY scope_name;
 ```
 
-## Migration and Backup Strategy
+### Active Curations by Scope
 
-### Data Migration
-1. **Schema Creation**: Run DDL scripts in sequence (001-004)
-2. **Data Export**: Extract Firebase collections using admin SDK
-3. **Data Transform**: Map Firebase documents to PostgreSQL records
-4. **Validation**: Verify all scores and relationships are correct
-5. **Cutover**: Switch API endpoints to PostgreSQL backend
-
-### Backup Procedures
-```bash
-# Daily automated backups
-pg_dump -Fc gene_curator > backup_$(date +%Y%m%d).dump
-
-# Point-in-time recovery setup
-pg_basebackup -D /backup/base -Ft -z -P
-
-# Test restore procedures monthly
-pg_restore -d gene_curator_test backup_latest.dump
+```sql
+CREATE VIEW active_curations_by_scope AS
+SELECT 
+    s.name as scope_name,
+    s.display_name as scope_display_name,
+    g.approved_symbol,
+    g.hgnc_id,
+    c.computed_verdict,
+    c.computed_scores,
+    cur_schema.name as methodology_name,
+    ac.activated_at,
+    activator.name as activated_by_name,
+    creator.name as curator_name
+FROM active_curations ac
+JOIN curations c ON ac.curation_id = c.id
+JOIN genes g ON ac.gene_id = g.id
+JOIN scopes s ON ac.scope_id = s.id
+JOIN curation_schemas cur_schema ON c.curation_schema_id = cur_schema.id
+LEFT JOIN users activator ON ac.activated_by = activator.id
+LEFT JOIN users creator ON c.created_by = creator.id
+ORDER BY s.name, g.approved_symbol;
 ```
 
----
+## Performance Considerations
 
-## Related Documentation
+### JSONB Query Optimization
 
-- [ClinGen Compliance](./CLINGEN_COMPLIANCE.md) - SOP v11 implementation details
-- [API Reference](./API_REFERENCE.md) - Database model mappings
-- [Architecture](./ARCHITECTURE.md) - Overall system design
-- [Workflow Documentation](./WORKFLOW.md) - Data flow and state transitions
+```sql
+-- Efficient JSONB queries using indexes (scope-aware)
+EXPLAIN (ANALYZE, BUFFERS) 
+SELECT * FROM curations c
+JOIN scopes s ON c.scope_id = s.id
+WHERE s.name = 'kidney-genetics' 
+  AND c.evidence_data @> '{"genetic_evidence": {"case_level_data": [{"points": 2.0}]}}';
+
+-- Use functional indexes for common score queries
+CREATE INDEX idx_curations_total_score_computed 
+ON curations (((computed_scores->>'total_score')::numeric))
+WHERE computed_scores->>'total_score' IS NOT NULL;
+
+-- Scope-specific query optimization
+CREATE INDEX idx_curations_scope_verdict_created 
+ON curations (scope_id, computed_verdict, created_at DESC);
+```
+
+### Scope-Based Caching Strategy
+
+The database design supports application-level caching optimized for scope-based workflows:
+
+1. **Schema Definitions**: Cached after first load, invalidated on schema updates
+2. **Scope Configurations**: Cached per scope with default schema preferences
+3. **User Scope Access**: Cached per user session for permission checks
+4. **Active Curations**: Cached per scope for fast active status lookups
+5. **Draft States**: Cached temporarily for auto-save functionality
+6. **Review Assignments**: Cached for pending review notifications
+
+## Migration Strategy
+
+### From ClinGen-Centric to Scope-Based Schema-Agnostic
+
+1. **Create Scope Infrastructure**: New tables for scopes, gene-scope assignments, multi-stage workflow
+2. **Establish Schema Repository**: Convert existing ClinGen logic to schema definitions
+3. **Create Default Scope**: Set up initial clinical specialty (e.g., 'kidney-genetics')
+4. **Migrate Gene Data**: Convert to scope-based assignments
+5. **Transform Workflow**: Split existing curations into precurations and curations
+6. **Implement Review System**: Add 4-eyes principle with review tracking
+7. **Update Triggers**: Replace fixed scoring with scope-aware dynamic scoring
+8. **Validate Continuity**: Ensure existing functionality is preserved
+
+### Data Migration Script Example
+
+```sql
+-- Step 1: Create default scope for existing work
+INSERT INTO scopes (name, display_name, description, is_active)
+VALUES (
+    'kidney-genetics',
+    'Kidney Genetics',
+    'Default scope for existing ClinGen kidney genetics curations',
+    true
+);
+
+-- Step 2: Create ClinGen schema definitions
+INSERT INTO curation_schemas (name, version, schema_type, field_definitions, scoring_configuration, workflow_states, ui_configuration, description)
+VALUES 
+(
+    'ClinGen_SOP_v11_Precuration',
+    '1.0.0',
+    'precuration',
+    '{"initial_assessment": {...}}',  -- ClinGen precuration fields
+    '{}',  -- No scoring for precurations
+    '{"states": ["draft", "in_review", "completed"]}',
+    '{"layout": {...}}',
+    'ClinGen SOP v11 Precuration Schema'
+),
+(
+    'ClinGen_SOP_v11_Curation',
+    '1.0.0',
+    'curation',
+    '{"genetic_evidence": {...}, "experimental_evidence": {...}}',  -- Full ClinGen fields
+    '{"engine": "clingen_sop_v11", ...}',  -- ClinGen scoring config
+    '{"states": ["draft", "pending_review", "completed"]}',
+    '{"layout": {...}}',
+    'ClinGen SOP v11 Curation Schema'
+);
+
+-- Step 3: Assign all existing genes to default scope
+INSERT INTO gene_scope_assignments (gene_id, scope_id, assigned_at, is_active)
+SELECT 
+    g.id,
+    s.id,
+    NOW(),
+    true
+FROM genes g
+CROSS JOIN scopes s
+WHERE s.name = 'kidney-genetics';
+
+-- Step 4: Create precurations from existing curation data
+INSERT INTO precurations (gene_id, scope_id, precuration_schema_id, evidence_data, status, is_draft, created_by, created_at)
+SELECT 
+    c.gene_id,
+    s.id,
+    ps.id,
+    jsonb_extract_path(c.precuration_data, 'initial_assessment'),  -- Extract precuration subset
+    'completed',
+    false,
+    c.created_by,
+    c.created_at
+FROM curations c  -- Old curations table
+CROSS JOIN scopes s
+JOIN curation_schemas ps ON ps.name = 'ClinGen_SOP_v11_Precuration'
+WHERE s.name = 'kidney-genetics'
+  AND c.precuration_data != '{}';
+
+-- Step 5: Transform existing curations to new structure
+INSERT INTO curations (gene_id, scope_id, curation_schema_id, precuration_id, evidence_data, computed_scores, computed_verdict, computed_summary, status, is_draft, created_by, created_at)
+SELECT 
+    old_c.gene_id,
+    s.id,
+    cs.id,
+    p.id,
+    old_c.curation_data,
+    old_c.computed_scores,
+    old_c.computed_verdict,
+    old_c.computed_summary,
+    'completed',
+    false,
+    old_c.created_by,
+    old_c.created_at
+FROM curations old_c  -- Old curations table
+CROSS JOIN scopes s
+JOIN curation_schemas cs ON cs.name = 'ClinGen_SOP_v11_Curation'
+JOIN precurations p ON p.gene_id = old_c.gene_id AND p.scope_id = s.id
+WHERE s.name = 'kidney-genetics'
+  AND old_c.curation_data != '{}';
+
+-- Step 6: Set active status for completed curations
+INSERT INTO active_curations (gene_id, scope_id, curation_id, activated_at, activated_by)
+SELECT 
+    c.gene_id,
+    c.scope_id,
+    c.id,
+    c.created_at,
+    c.created_by
+FROM curations c
+WHERE c.status = 'completed' 
+  AND c.computed_verdict IS NOT NULL;
+```
+
+## Conclusion
+
+This database design provides the foundation for a **scope-based, schema-agnostic** curation platform that can adapt to any scientific methodology while maintaining:
+
+- **Clinical Specialty Organization**: Scopes enable specialized teams to work efficiently
+- **Quality Assurance**: 4-eyes principle ensures rigorous peer review
+- **Workflow Flexibility**: Multi-stage pipeline supports complex curation processes
+- **Methodology Freedom**: Schema-driven approach accommodates any curation approach
+- **Data Integrity**: Complete audit trails with immutable provenance tracking
+- **Performance**: Optimized indexing for scope-based queries and multi-curation management
+- **Scalability**: Architecture supports unlimited scopes, methodologies, and concurrent workflows
+
+The platform becomes truly **methodology-agnostic and workflow-comprehensive**: as flexible as science itself, as rigorous as clinical practice demands.
