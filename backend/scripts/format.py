@@ -16,19 +16,16 @@ def run_command(cmd: List[str], description: str) -> bool:
     print(f"🔧 {description}...")
     try:
         result = subprocess.run(
-            cmd, 
-            cwd=Path(__file__).parent.parent,
-            text=True, 
-            check=False
+            cmd, cwd=Path(__file__).parent.parent, text=True, check=False
         )
-        
+
         if result.returncode == 0:
             print(f"✅ {description} completed")
             return True
         else:
             print(f"❌ {description} failed with exit code {result.returncode}")
             return False
-            
+
     except FileNotFoundError:
         print(f"❌ {description} failed - command not found: {' '.join(cmd)}")
         return False
@@ -38,20 +35,20 @@ def main() -> int:
     """Run all formatting tools."""
     print("🎨 Starting Gene Curator Backend Auto-Formatting")
     print("=" * 60)
-    
+
     formatters = [
         (["ruff", "check", "--fix", "app/"], "Ruff auto-fixes"),
         (["ruff", "format", "app/"], "Ruff formatting"),
     ]
-    
+
     failed_formatters = []
-    
+
     for cmd, description in formatters:
         if not run_command(cmd, description):
             failed_formatters.append(description)
-    
+
     print("\n" + "=" * 60)
-    
+
     if failed_formatters:
         print(f"❌ {len(failed_formatters)} formatter(s) failed:")
         for formatter in failed_formatters:

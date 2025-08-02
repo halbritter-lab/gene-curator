@@ -30,8 +30,7 @@
             <template #item="{ props, item }">
               <v-list-item v-bind="props">
                 <v-list-item-title>{{ item.raw.approved_symbol }}</v-list-item-title>
-                <v-list-item-subtitle>{{ item.raw.hgnc_id }}</v-list-item-subtitle
-                >
+                <v-list-item-subtitle>{{ item.raw.hgnc_id }}</v-list-item-subtitle>
               </v-list-item>
             </template>
           </v-autocomplete>

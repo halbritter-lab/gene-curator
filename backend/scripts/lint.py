@@ -17,13 +17,13 @@ def run_command(cmd: List[str], description: str) -> bool:
     print(f"🔍 {description}...")
     try:
         result = subprocess.run(
-            cmd, 
+            cmd,
             cwd=Path(__file__).parent.parent,
-            capture_output=True, 
-            text=True, 
-            check=False
+            capture_output=True,
+            text=True,
+            check=False,
         )
-        
+
         if result.returncode == 0:
             print(f"✅ {description} passed")
             if result.stdout.strip():
@@ -36,7 +36,7 @@ def run_command(cmd: List[str], description: str) -> bool:
             if result.stderr.strip():
                 print(f"   stderr: {result.stderr.strip()}")
             return False
-            
+
     except FileNotFoundError:
         print(f"❌ {description} failed - command not found: {' '.join(cmd)}")
         return False
@@ -46,7 +46,7 @@ def main() -> int:
     """Run all linting checks."""
     print("🚀 Starting Gene Curator Backend Linting Suite")
     print("=" * 60)
-    
+
     checks = [
         (["poetry", "check"], "Poetry configuration check"),
         (["ruff", "check", "app/"], "Ruff linting"),
@@ -54,15 +54,15 @@ def main() -> int:
         (["mypy", "app/"], "MyPy type checking"),
         (["bandit", "-r", "app/", "-f", "json"], "Bandit security check"),
     ]
-    
+
     failed_checks = []
-    
+
     for cmd, description in checks:
         if not run_command(cmd, description):
             failed_checks.append(description)
-    
+
     print("\n" + "=" * 60)
-    
+
     if failed_checks:
         print(f"❌ {len(failed_checks)} check(s) failed:")
         for check in failed_checks:

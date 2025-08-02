@@ -174,19 +174,13 @@ class CurationSearchQuery(BaseModel):
     query: str | None = Field(
         None, description="Search term for gene symbol, disease name, or GCEP"
     )
-    gene_id: str | uuid.UUID | None = Field(
-        None, description="Filter by gene ID"
-    )
+    gene_id: str | uuid.UUID | None = Field(None, description="Filter by gene ID")
     mondo_id: str | None = Field(None, description="Filter by MONDO ID")
     verdict: CurationVerdict | None = Field(
         None, description="Filter by curation verdict"
     )
-    status: WorkflowStatus | None = Field(
-        None, description="Filter by workflow status"
-    )
-    gcep_affiliation: str | None = Field(
-        None, description="Filter by GCEP affiliation"
-    )
+    status: WorkflowStatus | None = Field(None, description="Filter by workflow status")
+    gcep_affiliation: str | None = Field(None, description="Filter by GCEP affiliation")
     min_total_score: float | None = Field(
         None, ge=0, le=18, description="Minimum total score"
     )
@@ -196,9 +190,7 @@ class CurationSearchQuery(BaseModel):
     has_contradictory_evidence: bool | None = Field(
         None, description="Filter by contradictory evidence"
     )
-    created_by: str | uuid.UUID | None = Field(
-        None, description="Filter by creator"
-    )
+    created_by: str | uuid.UUID | None = Field(None, description="Filter by creator")
     skip: int = Field(0, ge=0, description="Number of records to skip")
     limit: int = Field(
         50, ge=1, le=500, description="Maximum number of records to return"

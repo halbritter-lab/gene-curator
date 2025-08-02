@@ -43,7 +43,7 @@ class UserResponse(UserBase):
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         from_attributes=True,
-        json_encoders={uuid.UUID: str}  # Convert UUID to string in JSON
+        json_encoders={uuid.UUID: str},  # Convert UUID to string in JSON
     )
 
 

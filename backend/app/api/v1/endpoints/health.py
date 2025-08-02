@@ -56,18 +56,20 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         clingen_status = f"unhealthy: {e!s}"
 
     return {
-        "status": "healthy"
-        if db_status == "healthy" and clingen_status == "healthy"
-        else "unhealthy",
+        "status": (
+            "healthy"
+            if db_status == "healthy" and clingen_status == "healthy"
+            else "unhealthy"
+        ),
         "timestamp": time.time(),
         "version": "2.0.0",
         "environment": settings.ENVIRONMENT,
         "components": {
             "database": {
                 "status": db_status,
-                "response_time_ms": db_response_time * 1000
-                if db_response_time
-                else None,
+                "response_time_ms": (
+                    db_response_time * 1000 if db_response_time else None
+                ),
             },
             "clingen_engine": {
                 "status": clingen_status,

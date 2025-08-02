@@ -65,7 +65,7 @@ async def list_precurations(
             "updated_at": p.updated_at.isoformat() if p.updated_at else None,
             "created_by": str(p.created_by) if p.created_by else None,
             "updated_by": str(p.updated_by) if p.updated_by else None,
-            "gene": None  # Exclude gene info for now
+            "gene": None,  # Exclude gene info for now
         }
         precuration_dicts.append(precuration_dict)
 
@@ -132,9 +132,9 @@ async def get_precurations_summary(
             "lumping_splitting_decision": precuration.lumping_splitting_decision,
             "status": precuration.status,
             "created_at": precuration.created_at,
-            "gene_symbol": precuration.gene.approved_symbol
-            if precuration.gene
-            else None,
+            "gene_symbol": (
+                precuration.gene.approved_symbol if precuration.gene else None
+            ),
             "gene_hgnc_id": precuration.gene.hgnc_id if precuration.gene else None,
         }
         for precuration in precurations
@@ -198,11 +198,15 @@ async def create_precuration(
         "details": precuration.details,
         "record_hash": precuration.record_hash,
         "previous_hash": precuration.previous_hash,
-        "created_at": precuration.created_at.isoformat() if precuration.created_at else None,
-        "updated_at": precuration.updated_at.isoformat() if precuration.updated_at else None,
+        "created_at": (
+            precuration.created_at.isoformat() if precuration.created_at else None
+        ),
+        "updated_at": (
+            precuration.updated_at.isoformat() if precuration.updated_at else None
+        ),
         "created_by": str(precuration.created_by) if precuration.created_by else None,
         "updated_by": str(precuration.updated_by) if precuration.updated_by else None,
-        "gene": None  # Exclude gene info for now
+        "gene": None,  # Exclude gene info for now
     }
 
 

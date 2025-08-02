@@ -126,19 +126,13 @@ class PrecurationSearchQuery(BaseModel):
     query: str | None = Field(
         None, description="Search term for gene symbol, MONDO ID, or rationale"
     )
-    gene_id: str | uuid.UUID | None = Field(
-        None, description="Filter by gene ID"
-    )
+    gene_id: str | uuid.UUID | None = Field(None, description="Filter by gene ID")
     mondo_id: str | None = Field(None, description="Filter by MONDO ID")
     lumping_splitting_decision: PrecurationDecision | None = Field(
         None, description="Filter by decision"
     )
-    status: WorkflowStatus | None = Field(
-        None, description="Filter by workflow status"
-    )
-    created_by: str | uuid.UUID | None = Field(
-        None, description="Filter by creator"
-    )
+    status: WorkflowStatus | None = Field(None, description="Filter by workflow status")
+    created_by: str | uuid.UUID | None = Field(None, description="Filter by creator")
     skip: int = Field(0, ge=0, description="Number of records to skip")
     limit: int = Field(
         50, ge=1, le=500, description="Maximum number of records to return"

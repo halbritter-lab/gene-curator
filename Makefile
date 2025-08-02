@@ -25,7 +25,7 @@ dev:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 	@echo "Development environment started!"
 	@echo "API: http://localhost:8000"
-	@echo "Frontend: http://localhost:3000"
+	@echo "Frontend: http://localhost:3001"
 	@echo "Database: localhost:5433"
 
 dev-build:
@@ -85,7 +85,7 @@ clean:
 health:
 	@echo "Checking service health..."
 	@curl -s http://localhost:8000/health | jq . || echo "Backend not responding"
-	@curl -s http://localhost:3000 | head -1 || echo "Frontend not responding"
+	@curl -s http://localhost:3001 | head -1 || echo "Frontend not responding"
 
 # Database access
 db-shell:

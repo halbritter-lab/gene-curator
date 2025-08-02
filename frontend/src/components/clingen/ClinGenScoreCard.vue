@@ -141,7 +141,7 @@
     }
   })
 
-  const emit = defineEmits(['view-details', 'edit-curation'])
+  defineEmits(['view-details', 'edit-curation'])
 
   const verdictColor = computed(() => {
     const colors = {

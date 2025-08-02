@@ -372,9 +372,7 @@ class CurationCRUD:
             "published_count": published_count,
         }
 
-    def approve(
-        self, db: Session, curation_id: str, user_id: str
-    ) -> Curation | None:
+    def approve(self, db: Session, curation_id: str, user_id: str) -> Curation | None:
         """Approve a curation."""
         db_curation = self.get(db, curation_id)
         if not db_curation:
@@ -392,9 +390,7 @@ class CurationCRUD:
         db.refresh(db_curation)
         return db_curation
 
-    def publish(
-        self, db: Session, curation_id: str, user_id: str
-    ) -> Curation | None:
+    def publish(self, db: Session, curation_id: str, user_id: str) -> Curation | None:
         """Publish a curation (must be approved first)."""
         db_curation = self.get(db, curation_id)
         if not db_curation:

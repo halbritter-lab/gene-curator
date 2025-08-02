@@ -40,7 +40,7 @@
     router.push({ name: 'Curations' })
   }
 
-  const handleSaved = curation => {
+  const handleSaved = () => {
     showSuccess('Curation saved successfully')
   }
 </script>

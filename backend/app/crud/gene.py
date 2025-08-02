@@ -90,7 +90,6 @@ class GeneCRUD:
         if search_params.chromosome:
             query = query.filter(Gene.chromosome == search_params.chromosome)
 
-
         # Filter by HGNC ID
         if search_params.hgnc_id:
             query = query.filter(Gene.hgnc_id == search_params.hgnc_id)
@@ -220,11 +219,7 @@ class GeneCRUD:
 
         # Genes with ClinGen dyadic names (indicates curation readiness)
         genes_with_dyadic_names = (
-            db.query(Gene)
-            .filter(
-                Gene.details.isnot(None)
-            )
-            .count()
+            db.query(Gene).filter(Gene.details.isnot(None)).count()
         )
 
         return {

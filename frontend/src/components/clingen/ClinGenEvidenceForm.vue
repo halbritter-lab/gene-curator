@@ -329,7 +329,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, watch } from 'vue'
+  import { ref, watch } from 'vue'
   import EvidenceEntryForm from './EvidenceEntryForm.vue'
 
   const props = defineProps({

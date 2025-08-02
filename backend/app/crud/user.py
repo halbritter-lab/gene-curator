@@ -2,7 +2,6 @@
 CRUD operations for User model.
 """
 
-
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -45,9 +44,7 @@ class UserCRUD:
         db.refresh(db_user)
         return db_user
 
-    def update(
-        self, db: Session, user_id: str, user_update: UserUpdate
-    ) -> User | None:
+    def update(self, db: Session, user_id: str, user_update: UserUpdate) -> User | None:
         """Update user information."""
         db_user = self.get(db, user_id)
         if not db_user:

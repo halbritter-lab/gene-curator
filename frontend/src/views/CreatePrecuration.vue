@@ -38,7 +38,7 @@
     router.push({ name: 'Precurations' })
   }
 
-  const handleSaved = precuration => {
+  const handleSaved = () => {
     showSuccess('Pre-curation saved successfully')
   }
 </script>

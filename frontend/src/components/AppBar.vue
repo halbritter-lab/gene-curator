@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, onMounted, nextTick } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useTheme } from 'vuetify'
   import { useAuthStore } from '@/stores/auth.js'

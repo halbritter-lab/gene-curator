@@ -172,30 +172,47 @@ try:
     from .gene_complete import (
         GeneComplete,
         GeneCreateComplete,
-        GeneUpdateComplete, 
-        GeneResponseComplete,
         GeneDetailsComplete,
+        GeneResponseComplete,
+        GeneUpdateComplete,
         LegacyGeneData,
-        validate_gene_completeness
+        validate_gene_completeness,
     )
-    
+
     # Export the complete schemas for use in advanced features
     __all__ = [
         # Core schemas
-        'GeneBase', 'GeneCreate', 'GeneUpdate', 'GeneResponse',
-        'GeneListResponse', 'GeneSearchQuery', 'GeneSummary',
-        'GeneStatistics', 'GeneBulkCreate', 'GeneBulkCreateResponse',
-        
+        "GeneBase",
+        "GeneCreate",
+        "GeneUpdate",
+        "GeneResponse",
+        "GeneListResponse",
+        "GeneSearchQuery",
+        "GeneSummary",
+        "GeneStatistics",
+        "GeneBulkCreate",
+        "GeneBulkCreateResponse",
         # Complete schemas
-        'GeneComplete', 'GeneCreateComplete', 'GeneUpdateComplete',
-        'GeneResponseComplete', 'GeneDetailsComplete',
-        'LegacyGeneData', 'validate_gene_completeness'
+        "GeneComplete",
+        "GeneCreateComplete",
+        "GeneUpdateComplete",
+        "GeneResponseComplete",
+        "GeneDetailsComplete",
+        "LegacyGeneData",
+        "validate_gene_completeness",
     ]
-    
+
 except ImportError:
     # Fallback if complete schemas are not available
     __all__ = [
-        'GeneBase', 'GeneCreate', 'GeneUpdate', 'GeneResponse',
-        'GeneListResponse', 'GeneSearchQuery', 'GeneSummary', 
-        'GeneStatistics', 'GeneBulkCreate', 'GeneBulkCreateResponse'
+        "GeneBase",
+        "GeneCreate",
+        "GeneUpdate",
+        "GeneResponse",
+        "GeneListResponse",
+        "GeneSearchQuery",
+        "GeneSummary",
+        "GeneStatistics",
+        "GeneBulkCreate",
+        "GeneBulkCreateResponse",
     ]

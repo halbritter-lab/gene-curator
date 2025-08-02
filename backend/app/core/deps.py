@@ -2,7 +2,6 @@
 FastAPI dependencies for authentication and database access.
 """
 
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -74,7 +73,7 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
 
 
 def get_current_admin_user(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
 ) -> User:
     """
     Get current admin user.
@@ -96,7 +95,7 @@ def get_current_admin_user(
 
 
 def get_current_curator_or_admin(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
 ) -> User:
     """
     Get current user if they are curator or admin.
