@@ -218,6 +218,7 @@ export const useGenesStore = defineStore('genes', {
       }
     },
 
+
     clearError() {
       this.error = null
     }

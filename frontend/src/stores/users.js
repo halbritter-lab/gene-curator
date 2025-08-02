@@ -299,6 +299,7 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
+
   function clearSearch() {
     searchQuery.value = ''
     searchResults.value = []

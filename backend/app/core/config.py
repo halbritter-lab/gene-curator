@@ -10,18 +10,16 @@ class Settings(BaseSettings):
     """Application settings with environment variable support."""
 
     # Database settings
-    DATABASE_URL: str = (
-        "postgresql://dev_user:dev_password@postgres:5432/gene_curator_dev"
-    )
+    DATABASE_URL: str
 
     # Security settings
-    SECRET_KEY: str = "dev-secret-key-change-in-production"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Application settings
-    ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    ENVIRONMENT: str = "production"
+    DEBUG: bool = False
     LOG_LEVEL: str = "info"
 
     # ClinGen settings
@@ -29,14 +27,7 @@ class Settings(BaseSettings):
     CLINGEN_TEMPLATE_VERSION: str = "v5.1"
 
     # CORS settings
-    ALLOWED_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-    ]
+    ALLOWED_ORIGINS: list[str] = []
 
     # Redis settings (optional)
     REDIS_URL: str | None = None

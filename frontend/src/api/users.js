@@ -148,7 +148,8 @@ export const usersApi = {
   async getUserActivity(userId) {
     const response = await apiClient.get(`/${userId}/activity`)
     return response.data
-  }
+  },
+
 }
 
 export default usersApi

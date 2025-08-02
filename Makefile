@@ -22,78 +22,78 @@ help:
 # Development environment
 dev:
 	@echo "Starting Gene Curator development environment..."
-	docker-compose up -d
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 	@echo "Development environment started!"
 	@echo "API: http://localhost:8001"
-	@echo "Frontend: http://localhost:3000"
-	@echo "Database: localhost:5432"
+	@echo "Frontend: http://localhost:3001"
+	@echo "Database: localhost:5433"
 
 dev-build:
 	@echo "Building and starting development environment..."
-	docker-compose up -d --build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 
 dev-down:
 	@echo "Stopping development environment..."
-	docker-compose down
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 dev-logs:
-	docker-compose logs -f
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
 
 # Database commands
 db-init:
 	@echo "Initializing database..."
-	docker-compose exec postgres /bin/bash -c "cd /docker-entrypoint-initdb.d && ./init.sh"
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec postgres /bin/bash -c "cd /docker-entrypoint-initdb.d && ./init.sh"
 
 db-reset:
 	@echo "Resetting database..."
-	docker-compose down -v
-	docker-compose up -d postgres
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
 	sleep 10
 	make db-init
 
 # Testing
 test:
 	@echo "Running tests..."
-	docker-compose exec backend python -m pytest
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python -m pytest
 
 test-backend:
 	@echo "Running backend tests..."
-	docker-compose exec backend python -m pytest app/tests/
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python -m pytest app/tests/
 
 test-frontend:
 	@echo "Running frontend tests..."
-	docker-compose exec frontend npm run test
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec frontend npm run test
 
 # Code quality
 lint:
 	@echo "Running linting..."
-	docker-compose exec backend python scripts/lint.py
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python scripts/lint.py
 
 format:
 	@echo "Formatting code..."
-	docker-compose exec backend python scripts/format.py
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python scripts/format.py
 
 # Cleanup
 clean:
 	@echo "Cleaning up Docker resources..."
-	docker-compose down -v --remove-orphans
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v --remove-orphans
 	docker system prune -f
 
 # Health checks
 health:
 	@echo "Checking service health..."
 	@curl -s http://localhost:8001/api/v1/health/ | jq . || echo "Backend not responding"
-	@curl -s http://localhost:3000 | head -1 || echo "Frontend not responding"
+	@curl -s http://localhost:3001 | head -1 || echo "Frontend not responding"
 
 # Database access
 db-shell:
-	docker-compose exec postgres psql -U dev_user -d gene_curator_dev
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec postgres psql -U dev_user -d gene_curator_dev
 
 # Backend shell
 backend-shell:
-	docker-compose exec backend /bin/bash
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend /bin/bash
 
 # Show status
 status:
 	@echo "Service Status:"
-	@docker-compose ps
+	@docker-compose -f docker-compose.yml -f docker-compose.dev.yml ps
