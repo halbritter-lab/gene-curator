@@ -3,7 +3,6 @@ Scoring engine registry for managing pluggable scoring methodologies.
 Provides centralized registration and selection of scoring engines.
 """
 
-
 from .base import ScoringEngine, ScoringResult
 from .clingen import ClinGenEngine
 from .gencc import GenCCEngine

@@ -54,11 +54,11 @@ db-reset:
 # Testing
 test:
 	@echo "Running tests..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run pytest
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend uv run pytest
 
 test-backend:
 	@echo "Running backend tests..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run pytest app/tests/
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend uv run pytest app/tests/
 
 test-frontend:
 	@echo "Running frontend tests..."
@@ -67,13 +67,11 @@ test-frontend:
 # Code quality
 lint:
 	@echo "Running linting..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run flake8 app/
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run mypy app/
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend uv run python scripts/lint.py
 
 format:
 	@echo "Formatting code..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run black app/
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend poetry run isort app/
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec backend uv run python scripts/format.py
 
 # Cleanup
 clean:

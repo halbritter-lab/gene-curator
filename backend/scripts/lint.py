@@ -48,11 +48,11 @@ def main() -> int:
     print("=" * 60)
 
     checks = [
-        (["poetry", "check"], "Poetry configuration check"),
-        (["ruff", "check", "app/"], "Ruff linting"),
-        (["ruff", "format", "--check", "app/"], "Ruff formatting check"),
-        (["mypy", "app/"], "MyPy type checking"),
-        (["bandit", "-r", "app/", "-f", "json"], "Bandit security check"),
+        (["uv", "tree"], "uv dependency tree check"),
+        (["uv", "run", "ruff", "check", "app/"], "Ruff linting"),
+        (["uv", "run", "ruff", "format", "--check", "app/"], "Ruff formatting check"),
+        (["uv", "run", "mypy", "app/"], "MyPy type checking"),
+        (["uv", "run", "bandit", "-r", "app/", "-f", "json"], "Bandit security check"),
     ]
 
     failed_checks = []
@@ -68,11 +68,11 @@ def main() -> int:
         for check in failed_checks:
             print(f"   - {check}")
         print("\n💡 Run individual tools to see detailed error messages:")
-        print("   - poetry check")
-        print("   - ruff check app/ tests/")
-        print("   - ruff format --diff app/ tests/")
-        print("   - mypy app/")
-        print("   - bandit -r app/")
+        print("   - uv tree")
+        print("   - uv run ruff check app/ tests/")
+        print("   - uv run ruff format --diff app/ tests/")
+        print("   - uv run mypy app/")
+        print("   - uv run bandit -r app/")
         return 1
     else:
         print("✅ All linting checks passed!")

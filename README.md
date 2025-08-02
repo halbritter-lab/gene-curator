@@ -13,7 +13,7 @@ Gene Curator is a containerized schema-agnostic platform that supports multiple 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
 | **Database** | PostgreSQL 15+ | JSONB schemas, multi-methodology support |
-| **Backend** | FastAPI + SQLAlchemy | Schema-driven API, pluggable scoring engines |
+| **Backend** | FastAPI + SQLAlchemy + uv | Schema-driven API, pluggable scoring engines |
 | **Frontend** | Vue 3 + Vite + Pinia | Dynamic UI, methodology-agnostic components |
 | **Orchestration** | Docker Compose | Development and deployment |
 
@@ -25,6 +25,7 @@ Gene Curator is a containerized schema-agnostic platform that supports multiple 
 - **Dynamic Validation**: Real-time evidence validation with business rules
 - **Multi-Stage Workflow**: Entry → Precuration → Curation → Review → Active
 - **4-Eyes Principle**: Mandatory peer review for quality assurance
+- **Modern Tooling**: Backend uses [uv](https://docs.astral.sh/uv/) for blazing-fast Python package management
 
 ## Quick Start
 
@@ -253,8 +254,11 @@ gene-curator/
 
 3. **Development workflow:**
    ```bash
-   # Backend linting
-   cd backend && poetry run ruff check app/ && poetry run ruff format app/
+   # Backend linting (using modern uv)
+   cd backend && uv run python scripts/lint.py
+   
+   # Backend formatting
+   cd backend && uv run python scripts/format.py
    
    # Frontend linting  
    cd frontend && npm run lint && npm run format
@@ -265,6 +269,7 @@ gene-curator/
 
 ### Development Tools
 
+- **Package Management**: uv (backend) - blazing-fast Python package manager, npm (frontend)
 - **Code Quality**: ESLint + Prettier (frontend), Ruff + MyPy (backend)
 - **Hot Reload**: Vite dev server (frontend), Uvicorn reload (backend)
 - **API Testing**: OpenAPI docs at `/docs` with interactive testing

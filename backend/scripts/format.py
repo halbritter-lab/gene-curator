@@ -37,8 +37,8 @@ def main() -> int:
     print("=" * 60)
 
     formatters = [
-        (["ruff", "check", "--fix", "app/"], "Ruff auto-fixes"),
-        (["ruff", "format", "app/"], "Ruff formatting"),
+        (["uv", "run", "ruff", "check", "--fix", "app/"], "Ruff auto-fixes"),
+        (["uv", "run", "ruff", "format", "app/"], "Ruff formatting"),
     ]
 
     failed_formatters = []

@@ -248,12 +248,12 @@ class GenCCEngine(ScoringEngine):
             # Validate PMID
             pmid = case.get("pmid", "")
             if not pmid or not pmid.isdigit() or len(pmid) < 7:
-                errors.append(f"Case-level item {i+1}: Invalid PMID format")
+                errors.append(f"Case-level item {i + 1}: Invalid PMID format")
 
             # Validate points (GenCC uses similar point system)
             points = case.get("points", 0)
             if not isinstance(points, int | float) or points < 0 or points > 2:
-                errors.append(f"Case-level item {i+1}: Points must be 0-2")
+                errors.append(f"Case-level item {i + 1}: Points must be 0-2")
 
         # Validate required evidence for classification
         if not genetic_evidence and not evidence_data.get("experimental_evidence"):

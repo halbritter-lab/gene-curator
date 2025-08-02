@@ -423,7 +423,23 @@
 
   // Lifecycle
   onMounted(async () => {
-    await loadGenes()
+    // Wait for authentication to initialize before loading genes
+    if (!authStore.isAuthenticated) {
+      // Watch for auth initialization
+      const unwatch = watch(
+        () => authStore.isAuthenticated,
+        async (isAuthenticated) => {
+          if (isAuthenticated) {
+            await loadGenes()
+            unwatch() // Stop watching once loaded
+          }
+        },
+        { immediate: true }
+      )
+    } else {
+      // Already authenticated, load immediately
+      await loadGenes()
+    }
   })
 </script>
 

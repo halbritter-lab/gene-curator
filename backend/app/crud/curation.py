@@ -236,7 +236,7 @@ class CurationCRUD:
                 )
 
         # Verify precuration exists if precuration_id is being updated
-        if "precuration_id" in update_data and update_data["precuration_id"]:
+        if update_data.get("precuration_id"):
             precuration = (
                 db.query(Precuration)
                 .filter(Precuration.id == update_data["precuration_id"])

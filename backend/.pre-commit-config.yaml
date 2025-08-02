@@ -35,12 +35,8 @@ repos:
         args: [-c, pyproject.toml]
         additional_dependencies: ["bandit[toml]"]
 
-  - repo: https://github.com/python-poetry/poetry
-    rev: 1.7.1
-    hooks:
-      - id: poetry-check
-      - id: poetry-lock
-        args: [--no-update]
+  # Note: uv doesn't have equivalent pre-commit hooks
+  # Project validation is handled by uv lock --check
 
 ci:
   autofix_commit_msg: |

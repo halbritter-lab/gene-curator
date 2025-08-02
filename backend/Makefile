@@ -7,25 +7,25 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install dependencies
-	poetry install
+	uv sync --extra dev
 
 lint: ## Run all linting checks
-	python scripts/lint.py
+	uv run python scripts/lint.py
 
 format: ## Auto-format code
-	python scripts/format.py
+	uv run python scripts/format.py
 
 type-check: ## Run type checking only
-	mypy app/
+	uv run mypy app/
 
 security-check: ## Run security checks only
-	bandit -r app/ -f json
+	uv run bandit -r app/ -f json
 
 test: ## Run tests
-	pytest tests/ -v
+	uv run pytest tests/ -v
 
 test-cov: ## Run tests with coverage
-	pytest tests/ --cov=app --cov-report=html --cov-report=term
+	uv run pytest tests/ --cov=app --cov-report=html --cov-report=term
 
 clean: ## Clean build artifacts and cache
 	find . -type f -name "*.pyc" -delete
@@ -43,5 +43,5 @@ pre-commit: ## Run pre-commit hooks manually
 	pre-commit run --all-files
 
 update-deps: ## Update dependencies
-	poetry update
+	uv lock --upgrade
 	pre-commit autoupdate

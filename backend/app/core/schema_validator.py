@@ -912,9 +912,9 @@ class SchemaValidator:
             field_value = evidence_data.get(field_name)
 
             if field_value is not None and field_value != "":
-                if isinstance(field_value, str) and field_value.strip():
-                    completed_fields += 1
-                elif not isinstance(field_value, str):
+                if (
+                    isinstance(field_value, str) and field_value.strip()
+                ) or not isinstance(field_value, str):
                     completed_fields += 1
 
         result.completeness_score = (

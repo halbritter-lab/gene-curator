@@ -8,9 +8,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api import deps
+from app.core import deps
 from app.crud.scope import scope_crud
-from app.models.schema_agnostic_models import UserNew
+from app.models.database_models import User
 from app.schemas.scope import (
     Scope,
     ScopeCreate,
@@ -29,15 +29,15 @@ def get_scopes(
     limit: int = 100,
     active_only: bool = Query(True, description="Filter for active scopes only"),
     institution: str | None = Query(None, description="Filter by institution"),
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> list[Scope]:
     """
     Retrieve scopes with optional filtering.
     """
     # Check if user has admin access or is assigned to view scopes
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         # Regular users can only see scopes they're assigned to
-        user_scope_ids = current_user.assigned_scopes or []
+        user_scope_ids = []  # TODO: Implement scope assignments for regular users
         scopes = scope_crud.get_user_scopes(
             db, user_scope_ids=user_scope_ids, active_only=active_only
         )
@@ -55,12 +55,12 @@ def create_scope(
     *,
     db: Session = Depends(deps.get_db),
     scope_in: ScopeCreate,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> Scope:
     """
     Create new scope. Requires admin privileges.
     """
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Check if scope name already exists
@@ -78,7 +78,7 @@ def get_scope(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> ScopeWithStats:
     """
     Get scope by ID with statistics.
@@ -88,7 +88,7 @@ def get_scope(
         raise HTTPException(status_code=404, detail="Scope not found")
 
     # Check if user has access to this scope
-    if current_user.role not in ["admin", "scope_admin"] and scope_id not in (
+    if current_user.role.value not in ["admin", "scope_admin"] and scope_id not in (
         current_user.assigned_scopes or []
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -103,7 +103,7 @@ def update_scope(
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
     scope_in: ScopeUpdate,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> Scope:
     """
     Update scope. Requires admin privileges.
@@ -112,7 +112,7 @@ def update_scope(
     if not scope:
         raise HTTPException(status_code=404, detail="Scope not found")
 
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     scope = scope_crud.update(db, db_obj=scope, obj_in=scope_in)
@@ -124,7 +124,7 @@ def delete_scope(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
     """
     Delete scope. Requires admin privileges.
@@ -151,7 +151,7 @@ def get_scope_statistics(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> ScopeStatistics:
     """
     Get detailed statistics for a scope.
@@ -161,7 +161,7 @@ def get_scope_statistics(
         raise HTTPException(status_code=404, detail="Scope not found")
 
     # Check if user has access to this scope
-    if current_user.role not in ["admin", "scope_admin"] and scope_id not in (
+    if current_user.role.value not in ["admin", "scope_admin"] and scope_id not in (
         current_user.assigned_scopes or []
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -175,7 +175,7 @@ def get_scope_workflow_pairs(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> list[dict]:
     """
     Get available workflow pairs for a scope.
@@ -185,7 +185,7 @@ def get_scope_workflow_pairs(
         raise HTTPException(status_code=404, detail="Scope not found")
 
     # Check if user has access to this scope
-    if current_user.role not in ["admin", "scope_admin"] and scope_id not in (
+    if current_user.role.value not in ["admin", "scope_admin"] and scope_id not in (
         current_user.assigned_scopes or []
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -200,7 +200,7 @@ def assign_users_to_scope(
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
     user_ids: list[UUID],
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
     """
     Assign users to a scope. Requires admin privileges.
@@ -209,7 +209,7 @@ def assign_users_to_scope(
     if not scope:
         raise HTTPException(status_code=404, detail="Scope not found")
 
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Assign users to scope
@@ -228,7 +228,7 @@ def remove_users_from_scope(
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
     user_ids: list[UUID],
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
     """
     Remove users from a scope. Requires admin privileges.
@@ -237,7 +237,7 @@ def remove_users_from_scope(
     if not scope:
         raise HTTPException(status_code=404, detail="Scope not found")
 
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Remove users from scope
@@ -255,7 +255,7 @@ def get_scope_users(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> list[dict]:
     """
     Get users assigned to a scope.
@@ -265,7 +265,7 @@ def get_scope_users(
         raise HTTPException(status_code=404, detail="Scope not found")
 
     # Check if user has access to this scope
-    if current_user.role not in ["admin", "scope_admin"] and scope_id not in (
+    if current_user.role.value not in ["admin", "scope_admin"] and scope_id not in (
         current_user.assigned_scopes or []
     ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -280,7 +280,7 @@ def set_default_workflow_pair(
     db: Session = Depends(deps.get_db),
     scope_id: UUID,
     workflow_pair_id: UUID,
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
     """
     Set default workflow pair for a scope. Requires admin privileges.
@@ -289,7 +289,7 @@ def set_default_workflow_pair(
     if not scope:
         raise HTTPException(status_code=404, detail="Scope not found")
 
-    if current_user.role not in ["admin", "scope_admin"]:
+    if current_user.role.value not in ["admin", "scope_admin"]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Update default workflow pair

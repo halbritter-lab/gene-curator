@@ -258,7 +258,7 @@ class CurationWorkflowAction(BaseModel):
             "publish",
         ]
         if v not in allowed_actions:
-            raise ValueError(f'Action must be one of: {", ".join(allowed_actions)}')
+            raise ValueError(f"Action must be one of: {', '.join(allowed_actions)}")
         return v
 
 

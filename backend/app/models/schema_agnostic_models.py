@@ -579,7 +579,7 @@ class CurationNew(Base):
     submitter = relationship("UserNew", foreign_keys=[submitted_by])
     approver = relationship("UserNew", foreign_keys=[approved_by])
     reviews = relationship("Review", back_populates="curation")
-    active_curation = relationship("ActiveCuration", back_populates="curation")
+    active_curation = relationship("ActiveCuration", back_populates="curation", foreign_keys="[ActiveCuration.curation_id]")
 
     __table_args__ = (
         Index("idx_curations_new_gene_scope", "gene_id", "scope_id"),
@@ -692,7 +692,7 @@ class ActiveCuration(Base):
     # Relationships
     gene = relationship("GeneNew", back_populates="active_curations")
     scope = relationship("Scope", back_populates="active_curations")
-    curation = relationship("CurationNew", back_populates="active_curation")
+    curation = relationship("CurationNew", back_populates="active_curation", foreign_keys=[curation_id])
     activator = relationship("UserNew", foreign_keys=[activated_by])
     archiver = relationship("UserNew", foreign_keys=[archived_by])
     replaced_curation = relationship("CurationNew", foreign_keys=[replaced_curation_id])

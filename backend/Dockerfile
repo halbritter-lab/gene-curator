@@ -1,71 +1,69 @@
 # Multi-stage build for production optimization
 FROM python:3.11-slim AS base
 
-# Set environment variables
+# Set environment variables for Python and uv
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    UV_CACHE_DIR=/tmp/uv_cache \
+    UV_LINK_MODE=copy
 
-# Install system dependencies
+# Install system dependencies and uv globally
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Poetry
-RUN pip install poetry==1.7.1
-
-# Configure Poetry
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && cp /root/.local/bin/uv /usr/local/bin/uv \
+    && cp /root/.local/bin/uvx /usr/local/bin/uvx \
+    && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
 
 WORKDIR /app
 
-# Copy Poetry files
-COPY pyproject.toml ./
+# Copy dependency files
+COPY pyproject.toml uv.lock* ./
 
 # Development stage
 FROM base AS development
 
-# Copy Poetry files first for dependency installation
-COPY pyproject.toml poetry.lock* ./
+# Create non-root user first
+RUN useradd --create-home --shell /bin/bash app
 
 # Install dependencies including dev dependencies
-RUN poetry install --with dev && rm -rf $POETRY_CACHE_DIR
+RUN uv sync --frozen --extra dev && rm -rf $UV_CACHE_DIR
 
-# Copy application code
+# Copy application code and set ownership
 COPY . .
+RUN chown -R app:app /app
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
+# Switch to non-root user and set environment
 USER app
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose port
 EXPOSE 8000
 
 # Development command (will be overridden by docker-compose)
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # Production stage
 FROM base AS production
 
+# Create non-root user first
+RUN useradd --create-home --shell /bin/bash app
+
 # Install only production dependencies
-RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+RUN uv sync --frozen --no-dev && rm -rf $UV_CACHE_DIR
 
-# Copy application code
+# Copy application code and set ownership
 COPY . .
+RUN chown -R app:app /app
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
+# Switch to non-root user
 USER app
 
 # Expose port
 EXPOSE 8000
 
 # Production command
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

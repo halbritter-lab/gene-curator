@@ -324,27 +324,27 @@ class ClinGenEngine(ScoringEngine):
             # Validate PMID
             pmid = case.get("pmid", "")
             if not pmid or not pmid.isdigit() or len(pmid) < 7:
-                errors.append(f"Case-level item {i+1}: Invalid PMID format")
+                errors.append(f"Case-level item {i + 1}: Invalid PMID format")
 
             # Validate points
             points = case.get("points", 0)
             if not isinstance(points, int | float) or points < 0 or points > 2:
-                errors.append(f"Case-level item {i+1}: Points must be 0-2")
+                errors.append(f"Case-level item {i + 1}: Points must be 0-2")
 
             # Validate required fields
             if not case.get("proband_label"):
-                errors.append(f"Case-level item {i+1}: Proband label required")
+                errors.append(f"Case-level item {i + 1}: Proband label required")
 
         # Validate segregation data
         segregation_data = genetic_evidence.get("segregation_data", [])
         for i, seg in enumerate(segregation_data):
             pmid = seg.get("pmid", "")
             if not pmid or not pmid.isdigit() or len(pmid) < 7:
-                errors.append(f"Segregation item {i+1}: Invalid PMID format")
+                errors.append(f"Segregation item {i + 1}: Invalid PMID format")
 
             points = seg.get("points", 0)
             if not isinstance(points, int | float) or points < 0 or points > 3:
-                errors.append(f"Segregation item {i+1}: Points must be 0-3")
+                errors.append(f"Segregation item {i + 1}: Points must be 0-3")
 
         # Validate experimental evidence
         experimental_evidence = evidence_data.get("experimental_evidence", {})
@@ -353,11 +353,11 @@ class ClinGenEngine(ScoringEngine):
         for i, func in enumerate(function_data):
             pmid = func.get("pmid", "")
             if not pmid or not pmid.isdigit() or len(pmid) < 7:
-                errors.append(f"Function evidence item {i+1}: Invalid PMID format")
+                errors.append(f"Function evidence item {i + 1}: Invalid PMID format")
 
             points = func.get("points", 0)
             if not isinstance(points, int | float) or points < 0 or points > 2:
-                errors.append(f"Function evidence item {i+1}: Points must be 0-2")
+                errors.append(f"Function evidence item {i + 1}: Points must be 0-2")
 
         return errors
 

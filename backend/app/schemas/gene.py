@@ -206,13 +206,13 @@ except ImportError:
     # Fallback if complete schemas are not available
     __all__ = [
         "GeneBase",
-        "GeneCreate",
-        "GeneUpdate",
-        "GeneResponse",
-        "GeneListResponse",
-        "GeneSearchQuery",
-        "GeneSummary",
-        "GeneStatistics",
         "GeneBulkCreate",
         "GeneBulkCreateResponse",
+        "GeneCreate",
+        "GeneListResponse",
+        "GeneResponse",
+        "GeneSearchQuery",
+        "GeneStatistics",
+        "GeneSummary",
+        "GeneUpdate",
     ]

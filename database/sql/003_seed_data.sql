@@ -22,9 +22,9 @@ INSERT INTO users (
     role,
     is_active
 ) VALUES (
-    'admin@gene-curator.org',
+    'admin@gene-curator.dev',
     -- Password: 'admin123' - CHANGE IN PRODUCTION
-    '$2b$12$LQv3c1yqBwEHxPiehz5.ZOKy0QLT4UqhsN8H8T0LkzKq5Q5Q5Q5Q5',
+    '$2b$12$n2CCh96f373m/RtsoolNYunVBbJpv8LvNbzftQF9vdFIJGkrOJDJa',
     'System Administrator',
     'admin',
     true
@@ -38,9 +38,9 @@ INSERT INTO users (
     role,
     is_active
 ) VALUES (
-    'curator@gene-curator.org',
+    'curator@gene-curator.dev',
     -- Password: 'curator123' - CHANGE IN PRODUCTION  
-    '$2b$12$LQv3c1yqBwEHxPiehz5.ZOKy0QLT4UqhsN8H8T0LkzKq5Q5Q5Q5Q5',
+    '$2b$12$VoVX0LHUYLTykgYwenRtLeWZdIp8IeRl5rcH/P3EFoH7mBg6ShCG2',
     'Sample Curator',
     'curator',
     true
@@ -54,9 +54,9 @@ INSERT INTO users (
     role,
     is_active
 ) VALUES (
-    'viewer@gene-curator.org',
+    'viewer@gene-curator.dev',
     -- Password: 'viewer123' - CHANGE IN PRODUCTION
-    '$2b$12$LQv3c1yqBwEHxPiehz5.ZOKy0QLT4UqhsN8H8T0LkzKq5Q5Q5Q5Q5',
+    '$2b$12$k1oiYMZAskzu0z6J3mt4vuVW.MMTIdmrbmRlJlm8FA8Eq.w3B9vWa',
     'Sample Viewer',
     'viewer',
     true
@@ -108,8 +108,6 @@ INSERT INTO genes (
     ARRAY['APKD2', 'ADPKD2'],
     '4',
     '4q22.1',
-    ARRAY['Polycystin family', 'TRP channels'],
-    'PKD2-related polycystic kidney disease',
     '{
         "gene_type": "protein-coding",
         "gene_description": "polycystin 2, transient receptor potential cation channel",
@@ -137,8 +135,6 @@ INSERT INTO genes (
     ARRAY['nephrocystin-1'],
     '2',
     '2q13',
-    ARRAY['Nephrocystin family'],
-    'NPHP1-related nephronophthisis',
     '{
         "gene_type": "protein-coding", 
         "gene_description": "nephrocystin 1",
@@ -166,8 +162,6 @@ INSERT INTO genes (
     ARRAY['BRCAI', 'BRCC1'],
     '17',
     '17q21.31',
-    ARRAY['BRCA family', 'RING finger proteins'],
-    'BRCA1-related hereditary breast and ovarian cancer',
     '{
         "gene_type": "protein-coding",
         "gene_description": "BRCA1 DNA repair associated",
@@ -195,8 +189,6 @@ INSERT INTO genes (
     ARRAY['BRCAI2', 'FANCD1'],
     '13',
     '13q13.1',
-    ARRAY['BRCA family', 'Fanconi anemia proteins'],
-    'BRCA2-related hereditary breast and ovarian cancer',
     '{
         "gene_type": "protein-coding",
         "gene_description": "BRCA2 DNA repair associated", 
@@ -224,8 +216,6 @@ INSERT INTO genes (
     ARRAY['hereditary neuropathy with liability to pressure palsies'],
     '17',
     '17p12',
-    ARRAY['PMP22 family'],
-    'HNPP1-related hereditary neuropathy with liability to pressure palsies',
     '{
         "gene_type": "protein-coding",
         "gene_description": "hereditary neuropathy with liability to pressure palsies 1",
@@ -253,8 +243,6 @@ INSERT INTO genes (
     ARRAY['PCSK9'],
     '1',
     '1p32.3',
-    ARRAY['Proprotein convertase family'],
-    'PCSK9-related hypercholesterolemia',
     '{
         "gene_type": "protein-coding",
         "gene_description": "proprotein convertase subtilisin/kexin type 9",
@@ -282,8 +270,6 @@ INSERT INTO genes (
     ARRAY['Alport syndrome, X-linked'],
     'X',
     'Xq22.3',
-    ARRAY['Collagen family', 'Type IV collagen'],
-    'COL4A5-related Alport syndrome',
     '{
         "gene_type": "protein-coding",
         "gene_description": "collagen type IV alpha 5 chain",
@@ -329,7 +315,7 @@ INSERT INTO precurations (
         "age_of_onset": "Adult onset (typically 30-50 years)",
         "prevalence": "1 in 400-1000 individuals"
     }',
-    (SELECT id FROM users WHERE email = 'curator@gene-curator.org')
+    (SELECT id FROM users WHERE email = 'curator@gene-curator.dev')
 );
 
 -- Sample curation with ClinGen evidence
@@ -500,7 +486,7 @@ INSERT INTO curations (
             }
         }
     }',
-    (SELECT id FROM users WHERE email = 'curator@gene-curator.org')
+    (SELECT id FROM users WHERE email = 'curator@gene-curator.dev')
 );
 
 -- The curation above should automatically calculate scores via triggers
@@ -532,7 +518,7 @@ INSERT INTO api_keys (
 ) VALUES (
     'Development API Key',
     encode(digest('dev-api-key-12345', 'sha256'), 'hex'),
-    (SELECT id FROM users WHERE email = 'admin@gene-curator.org'),
+    (SELECT id FROM users WHERE email = 'admin@gene-curator.dev'),
     ARRAY['read', 'write', 'admin'],
     NOW() + INTERVAL '1 year',
     true

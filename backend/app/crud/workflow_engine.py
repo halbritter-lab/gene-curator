@@ -38,24 +38,24 @@ class WorkflowEngine:
     def __init__(self):
         self.valid_transitions = {
             # Precuration workflow
-            WorkflowStage.entry: [WorkflowStage.precuration],
-            WorkflowStage.precuration: [
-                WorkflowStage.curation,
-                WorkflowStage.entry,
+            WorkflowStage.ENTRY: [WorkflowStage.PRECURATION],
+            WorkflowStage.PRECURATION: [
+                WorkflowStage.CURATION,
+                WorkflowStage.ENTRY,
             ],  # Can go back to entry
             # Curation workflow
-            WorkflowStage.curation: [
-                WorkflowStage.review,
-                WorkflowStage.precuration,
+            WorkflowStage.CURATION: [
+                WorkflowStage.REVIEW,
+                WorkflowStage.PRECURATION,
             ],  # Can go back to precuration
             # Review workflow
-            WorkflowStage.review: [
-                WorkflowStage.active,
-                WorkflowStage.curation,
+            WorkflowStage.REVIEW: [
+                WorkflowStage.ACTIVE,
+                WorkflowStage.CURATION,
             ],  # Can send back to curation
             # Active state
-            WorkflowStage.active: [
-                WorkflowStage.review
+            WorkflowStage.ACTIVE: [
+                WorkflowStage.REVIEW
             ],  # Can be sent back for re-review
         }
 
