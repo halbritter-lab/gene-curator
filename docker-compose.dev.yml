@@ -19,7 +19,6 @@ services:
       LOG_LEVEL: debug
     volumes:
       - ./backend:/app
-      - ./plan/archived/current_codebase/src/config:/app/legacy_config  # For migration reference
 
   frontend:
     build:
