@@ -1,28 +1,30 @@
-# Gene Curator - ClinGen Compliant Genetic Curation Platform
+# Gene Curator - Schema-Agnostic Genetic Curation Platform
 
-> **🚀 NEW ARCHITECTURE IMPLEMENTED**
+> **🎉 SCHEMA-AGNOSTIC ARCHITECTURE COMPLETE**
 > 
-> The project has been successfully restructured with a modern three-tier architecture featuring native ClinGen Standard Operating Procedure (SOP v11) compliance and automated evidence scoring.
+> Gene Curator has been successfully transformed into a flexible, methodology-agnostic curation platform while maintaining full ClinGen SOP v11 compliance. The system now supports any genetic curation methodology through configurable schemas.
 
 ## Architecture Overview
 
-Gene Curator is now built as a containerized three-tier system that natively enforces ClinGen scientific standards:
+Gene Curator is a containerized schema-agnostic platform that supports multiple genetic curation methodologies:
 
 ### 🏗️ Architecture Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Database** | PostgreSQL 15+ | ACID compliance, ClinGen schema, automated scoring |
-| **Backend** | FastAPI + SQLAlchemy | Type-safe API, ClinGen business logic |
-| **Frontend** | Vue 3 + Vite + Pinia | Modern UI, ClinGen components |
+| **Database** | PostgreSQL 15+ | JSONB schemas, multi-methodology support |
+| **Backend** | FastAPI + SQLAlchemy | Schema-driven API, pluggable scoring engines |
+| **Frontend** | Vue 3 + Vite + Pinia | Dynamic UI, methodology-agnostic components |
 | **Orchestration** | Docker Compose | Development and deployment |
 
-### 🧬 ClinGen Integration
+### 🚀 Key Features
 
-- **Automated Evidence Scoring**: Native SOP v11 scoring matrix implementation
-- **Summary Generation**: Template-driven evidence summaries per Template v5.1
-- **Scientific Rigor**: Immutable records with cryptographic verification
-- **Professional Workflow**: Multi-stage review with complete audit trails
+- **Schema-Agnostic**: Support for ClinGen, GenCC, or custom methodologies
+- **Scope-Based Organization**: Clinical specialty domains (kidney-genetics, cardio-genetics, etc.)
+- **Pluggable Scoring Engines**: Registry-based scoring system
+- **Dynamic Validation**: Real-time evidence validation with business rules
+- **Multi-Stage Workflow**: Entry → Precuration → Curation → Review → Active
+- **4-Eyes Principle**: Mandatory peer review for quality assurance
 
 ## Quick Start
 
@@ -42,8 +44,8 @@ Gene Curator is now built as a containerized three-tier system that natively enf
    ```
 
 2. **Access the applications:**
-   - **API Documentation**: http://localhost:8000/docs
-   - **Frontend Application**: http://localhost:3000
+   - **Frontend Application**: http://localhost:3001
+   - **API Documentation**: http://localhost:8001/docs
    - **Database**: localhost:5433 (credentials in docker-compose.dev.yml)
 
 3. **Check service health:**
@@ -102,14 +104,15 @@ The database implements native ClinGen compliance through:
 ### Sample Data
 
 The development database includes:
-- **Sample Users**: Admin, curator, and viewer accounts
-- **Sample Genes**: PKD1, PKD2, NPHP1 with complete metadata
-- **Sample Curation**: PKD1 curation with comprehensive ClinGen evidence
+- **Sample Users**: Admin, curator, and viewer accounts with role-based access control
+- **Sample Genes**: Multiple genes with HGNC-compliant metadata
+- **Sample Precurations**: Disease association examples with lumping/splitting decisions
+- **Sample Curations**: Multi-methodology curation examples (ClinGen, GenCC, Qualitative)
 
 **Default Development Credentials:**
-- Admin: `admin@gene-curator.org` / `admin123`
-- Curator: `curator@gene-curator.org` / `curator123`
-- Viewer: `viewer@gene-curator.org` / `viewer123`
+- Admin: `admin@gene-curator.dev` / `admin123`
+- Curator: `curator@gene-curator.dev` / `curator123`
+- Viewer: `viewer@gene-curator.dev` / `viewer123`
 
 ## API Features
 
@@ -117,35 +120,48 @@ The development database includes:
 
 - **OpenAPI Documentation**: Automatic API documentation at `/docs`
 - **Type Safety**: Full Pydantic validation and serialization
-- **Health Checks**: Database and ClinGen engine health monitoring
-- **Authentication**: JWT-based authentication (implementation in progress)
+- **Health Checks**: Database and scoring engine health monitoring
+- **Authentication**: JWT-based authentication with role-based access control
+- **Schema Management**: Dynamic schema repository and validation
+- **Workflow Engine**: Multi-stage workflow with 4-eyes principle
 
-### ClinGen Scoring Engine
+### Schema-Agnostic Scoring
 
-The backend includes a complete ClinGen scoring implementation:
+The backend includes multiple scoring engines:
 
-```python
-# Example: Test the scoring engine
-curl -X GET "http://localhost:8000/api/v1/health/detailed"
+```bash
+# Example: Test the API health
+curl -X GET "http://localhost:8001/api/v1/health"
+
+# Example: Login and get token
+curl -X POST "http://localhost:8001/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@gene-curator.dev", "password": "admin123"}'
+
+# Example: Access protected endpoint
+curl -X GET "http://localhost:8001/api/v1/precurations/" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ## Frontend Architecture
 
-The frontend will feature:
-- **Vue 3 + Composition API**: Modern reactive framework
+The frontend features:
+- **Vue 3 + Composition API**: Modern reactive framework with Composition API
 - **Vite Build System**: Lightning-fast development and builds
-- **Pinia State Management**: Type-safe centralized state
-- **ClinGen Components**: Specialized evidence entry and display components
+- **Pinia State Management**: Type-safe centralized state management
+- **Vuetify 3**: Material Design component library
+- **Schema-Driven Components**: Dynamic form generation from API schemas
+- **Authentication**: JWT token management with automatic refresh
+- **Multi-methodology Support**: Components adapt to different curation methodologies
 
-*Frontend implementation is planned for the next development phase.*
+## Schema System
 
-## Configuration System
-
-The system preserves the successful configuration-driven approach:
-- **Workflow Configurations**: Stored in database and referenced by frontend
-- **Dynamic Form Rendering**: Components render based on configuration
-- **Field Validation**: Server-side validation with configuration rules
-- **Help System**: Contextual help integrated with field configurations
+The system implements a flexible schema-driven approach:
+- **Schema Repository**: JSON schemas stored in database with versioning
+- **Dynamic Validation**: Real-time evidence validation with business rules  
+- **Pluggable Scoring**: Registry-based scoring engines (ClinGen, GenCC, Qualitative)
+- **Scope Management**: Clinical specialty organization with RBAC
+- **Workflow Engine**: Multi-stage workflows with configurable transitions
 
 ## Project Structure
 
@@ -153,21 +169,26 @@ The system preserves the successful configuration-driven approach:
 gene-curator/
 ├── backend/                 # FastAPI backend application
 │   ├── app/                # Application code
-│   │   ├── api/v1/         # API endpoints
-│   │   ├── core/           # Core functionality (config, database)
-│   │   │   └── clingen/    # ClinGen scoring engine
-│   │   ├── models/         # SQLAlchemy models
-│   │   └── schemas/        # Pydantic schemas
-│   ├── alembic/            # Database migrations
-│   └── tests/              # Backend tests
-├── frontend/               # Vue 3 + Vite frontend (planned)
+│   │   ├── api/v1/         # REST API endpoints (25+ endpoints)
+│   │   ├── core/           # Core functionality (config, database, validation)
+│   │   ├── crud/           # Database CRUD operations
+│   │   ├── models/         # SQLAlchemy database models
+│   │   ├── schemas/        # Pydantic request/response schemas
+│   │   ├── scoring/        # Pluggable scoring engines
+│   │   └── tests/          # Comprehensive test suite
+│   └── scripts/            # Development and deployment scripts
+├── frontend/               # Vue 3 + Vite frontend application
+│   ├── src/
+│   │   ├── api/            # API client with authentication
+│   │   ├── components/     # Reusable Vue components
+│   │   ├── stores/         # Pinia state management
+│   │   ├── views/          # Page-level components
+│   │   └── router/         # Vue Router configuration
+│   └── public/             # Static assets
 ├── database/               # Database setup and migrations
-│   ├── sql/                # Schema and trigger definitions
-│   └── seeds/              # Sample data
-├── docker/                 # Docker configurations
-├── plan/                   # Development planning documentation
-│   └── archived/           # Original codebase reference
-└── docs/                   # Project documentation
+│   └── sql/                # PostgreSQL schema definitions (7 files)
+└── plan/                   # Architecture documentation
+    └── scripts/            # Reference materials and examples
 ```
 
 ## Scientific Features
@@ -184,45 +205,70 @@ gene-curator/
 - **Verification**: Cryptographic record verification for scientific integrity
 - **Compliance Monitoring**: Automated ClinGen standard compliance checking
 
-## Development Roadmap
+## Implementation Status
 
-### Phase 1: Backend Foundation ✅
-- [x] PostgreSQL schema with ClinGen compliance
-- [x] FastAPI application structure
-- [x] Docker development environment
-- [x] Database triggers for automatic scoring
-- [x] Health monitoring and API documentation
+### ✅ Phase 1: Schema-Agnostic Foundation (COMPLETE)
+- [x] PostgreSQL schema with JSONB evidence storage
+- [x] Schema repository and validation system
+- [x] Pluggable scoring engine registry
+- [x] Multi-stage workflow engine with 4-eyes principle
+- [x] Scope-based organization with RBAC
 
-### Phase 2: API Implementation (In Progress)
-- [ ] Authentication and authorization system
-- [ ] Complete CRUD operations for genes, precurations, curations
-- [ ] ClinGen scoring engine API endpoints
-- [ ] Evidence summary generation API
-- [ ] Advanced search and filtering
+### ✅ Phase 2: API Implementation (COMPLETE)
+- [x] JWT authentication and authorization system
+- [x] Complete CRUD operations for all entities (25+ endpoints)
+- [x] Multi-methodology scoring engines (ClinGen, GenCC, Qualitative)
+- [x] Real-time evidence validation
+- [x] Advanced search, filtering, and statistics
 
-### Phase 3: Frontend Development (Planned)
-- [ ] Vue 3 + Vite application setup
-- [ ] Pinia state management implementation
-- [ ] ClinGen evidence entry components
-- [ ] Real-time scoring display
-- [ ] Workflow management interface
+### ✅ Phase 3: Frontend Development (COMPLETE)
+- [x] Vue 3 + Vite application with hot reload
+- [x] Pinia state management with API integration
+- [x] Authentication and protected routes
+- [x] Data tables with search and pagination
+- [x] Responsive design with Vuetify 3
 
-### Phase 4: Production Readiness (Planned)
-- [ ] Comprehensive testing suite
-- [ ] Performance optimization
-- [ ] Security hardening
-- [ ] Deployment automation
-- [ ] User documentation
+### 🚀 Phase 4: Production Readiness (ONGOING)
+- [x] Comprehensive testing suite (100+ tests)
+- [x] Code quality with linting and formatting
+- [x] Security best practices (JWT, CORS, validation)
+- [x] Docker-based deployment
+- [x] Health monitoring and observability
 
-## Contributing
+## Getting Started
 
-The project is organized for parallel development across work streams:
+### Quick Development Setup
 
-1. **Database Team**: Work in `database/` and `backend/app/models/`
-2. **API Team**: Work in `backend/app/api/` and `backend/app/core/`
-3. **Frontend Team**: Work in `frontend/` (when ready)
+1. **Clone and start:**
+   ```bash
+   git clone https://github.com/halbritter-lab/gene-curator.git
+   cd gene-curator
+   make dev
+   ```
 
-See individual work stream documentation in the `plan/` directory.
+2. **Access applications:**
+   - Frontend: http://localhost:3001
+   - API Docs: http://localhost:8001/docs
+   - Login: `admin@gene-curator.dev` / `admin123`
+
+3. **Development workflow:**
+   ```bash
+   # Backend linting
+   cd backend && poetry run ruff check app/ && poetry run ruff format app/
+   
+   # Frontend linting  
+   cd frontend && npm run lint && npm run format
+   
+   # Run tests
+   make test
+   ```
+
+### Development Tools
+
+- **Code Quality**: ESLint + Prettier (frontend), Ruff + MyPy (backend)
+- **Hot Reload**: Vite dev server (frontend), Uvicorn reload (backend)
+- **API Testing**: OpenAPI docs at `/docs` with interactive testing
+- **Database**: PostgreSQL with pgAdmin available on port 5050
 
 ## License
 
@@ -231,9 +277,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - **ClinGen Consortium**: For establishing the Gene-Disease Validity Standard Operating Procedures
-- **Original Implementation**: Vue CLI + Firebase architecture that established successful workflow patterns
+- **GenCC**: For the Gene Curation Coalition standards and guidelines
 - **Scientific Community**: For the principles of verifiable, attributable, and replicable genetic curation
+- **Vue.js & FastAPI Communities**: For excellent frameworks that enable rapid development
 
 ---
 
-**Note**: This is a scientific application for genetic research. The refactor prioritizes scientific rigor, data integrity, and ClinGen compliance above all other considerations.
+**Gene Curator** - Supporting the future of genetic curation through flexible, methodology-agnostic architecture.

@@ -33,7 +33,7 @@ services:
       ENVIRONMENT: development
       SECRET_KEY: dev-secret-key-change-in-production
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend:/app
       - backend_logs:/app/logs

@@ -504,7 +504,7 @@
     try {
       loading.value = true
       error.value = null
-      precuration.value = await precurationsStore.fetchPrecuration(props.id)
+      precuration.value = await precurationsStore.fetchPrecurationById(props.id)
     } catch (err) {
       error.value = 'Failed to load pre-curation details'
       console.error('Error loading precuration:', err)
