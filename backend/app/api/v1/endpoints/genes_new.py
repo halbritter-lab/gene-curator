@@ -198,16 +198,21 @@ def get_gene_statistics(
     *,
     db: Session = Depends(deps.get_db),
     scope_id: UUID | None = Query(None, description="Filter by scope"),
-    current_user: UserNew = Depends(deps.get_current_active_user),
+    current_user: UserNew | None = Depends(deps.get_current_user_optional),
 ) -> GeneNewStatistics:
     """
     Get gene database statistics.
+    Public endpoint with optional authentication for scope filtering.
     """
-    # Check scope permissions
-    if current_user.role not in ["admin"] and scope_id:
-        user_scope_ids = current_user.assigned_scopes or []
-        if scope_id not in user_scope_ids:
-            raise HTTPException(status_code=403, detail="Not enough permissions")
+    # Check scope permissions (only if user is authenticated and scope is specified)
+    if current_user and scope_id:
+        if current_user.role not in ["admin"]:
+            user_scope_ids = current_user.assigned_scopes or []
+            if scope_id not in user_scope_ids:
+                raise HTTPException(status_code=403, detail="Not enough permissions")
+    elif scope_id and not current_user:
+        # If scope is specified but user is not authenticated, ignore scope filter
+        scope_id = None
 
     statistics = gene_new_crud.get_statistics(db, scope_id=scope_id)
     return GeneNewStatistics(**statistics)

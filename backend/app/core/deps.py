@@ -17,6 +17,7 @@ from app.models import User, UserRole
 
 # Security scheme
 security = HTTPBearer()
+security_optional = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
@@ -120,7 +121,7 @@ def get_current_curator_or_admin(
 # Optional authentication (for public endpoints that can benefit from user context)
 def get_current_user_optional(
     db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_optional),
 ) -> User | None:
     """
     Get current user optionally (doesn't raise exception if no token).
