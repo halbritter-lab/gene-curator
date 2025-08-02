@@ -9,6 +9,7 @@ const Dashboard = () => import('@/views/Dashboard.vue')
 const ScopeSelection = () => import('@/views/ScopeSelection.vue')
 const GenesTable = () => import('@/views/GenesTable.vue')
 const GeneDetail = () => import('@/views/GeneDetail.vue')
+const GeneAdmin = () => import('@/views/GeneAdmin.vue')
 const GeneAssignments = () => import('@/views/GeneAssignments.vue')
 const AssignmentDetail = () => import('@/views/AssignmentDetail.vue')
 const CreateAssignment = () => import('@/views/CreateAssignment.vue')
@@ -84,6 +85,16 @@ const routes = [
     meta: {
       title: 'Gene Details',
       requiresAuth: false
+    }
+  },
+  {
+    path: '/admin/genes',
+    name: 'GeneAdmin',
+    component: GeneAdmin,
+    meta: {
+      title: 'Gene Administration',
+      requiresAuth: true,
+      requiredRoles: ['admin']
     }
   },
   {

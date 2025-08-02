@@ -149,6 +149,40 @@ export const useAuthStore = defineStore('auth', {
 
     hasAnyRole(requiredRoles) {
       return requiredRoles.some(role => this.hasRole(role))
+    },
+
+    async getUserScopes() {
+      try {
+        if (!this.user) return []
+        
+        // For now, return empty array until user scopes are properly implemented
+        // This method can be extended when user-scope relationships are added
+        return []
+      } catch (error) {
+        console.warn('Failed to fetch user scopes:', error)
+        return []
+      }
+    },
+
+    async fetchDashboardStats() {
+      try {
+        // Mock dashboard stats for now
+        // This can be replaced with real API calls when backend supports it
+        return {
+          active_assignments: 0,
+          completed_curations: 0,
+          pending_reviews: 0,
+          active_scopes: 0
+        }
+      } catch (error) {
+        console.warn('Failed to fetch dashboard stats:', error)
+        return {
+          active_assignments: 0,
+          completed_curations: 0,
+          pending_reviews: 0,
+          active_scopes: 0
+        }
+      }
     }
   }
 })
