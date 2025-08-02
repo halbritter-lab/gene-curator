@@ -5,19 +5,21 @@ import { useAuthStore } from '@/stores/auth.js'
 const Home = () => import('@/views/Home.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
+const Dashboard = () => import('@/views/Dashboard.vue')
+const ScopeSelection = () => import('@/views/ScopeSelection.vue')
 const GenesTable = () => import('@/views/GenesTable.vue')
 const GeneDetail = () => import('@/views/GeneDetail.vue')
-const GeneAdmin = () => import('@/views/GeneAdmin.vue')
+const GeneAssignments = () => import('@/views/GeneAssignments.vue')
+const AssignmentDetail = () => import('@/views/AssignmentDetail.vue')
+const CreateAssignment = () => import('@/views/CreateAssignment.vue')
+const SchemaManagement = () => import('@/views/SchemaManagement.vue')
+const SchemaEditor = () => import('@/views/SchemaEditor.vue')
+const WorkflowManagement = () => import('@/views/WorkflowManagement.vue')
+const ValidationDashboard = () => import('@/views/ValidationDashboard.vue')
 const UserProfile = () => import('@/views/UserProfile.vue')
 const UserManagement = () => import('@/views/UserManagement.vue')
 const About = () => import('@/views/About.vue')
 const FAQ = () => import('@/views/FAQ.vue')
-const PrecurationsTable = () => import('@/views/PrecurationsTable.vue')
-const PrecurationDetail = () => import('@/views/PrecurationDetail.vue')
-const CreatePrecuration = () => import('@/views/CreatePrecuration.vue')
-const CurationsTable = () => import('@/views/CurationsTable.vue')
-const CurationDetail = () => import('@/views/CurationDetail.vue')
-const CreateCuration = () => import('@/views/CreateCuration.vue')
 const NotAuthorized = () => import('@/views/NotAuthorized.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
@@ -34,7 +36,7 @@ const routes = [
     component: Login,
     meta: {
       title: 'Login',
-      requiresGuest: true // Redirect authenticated users away
+      requiresGuest: true
     }
   },
   {
@@ -47,12 +49,31 @@ const routes = [
     }
   },
   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard,
+    meta: {
+      title: 'Dashboard',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/scope-selection',
+    name: 'ScopeSelection',
+    component: ScopeSelection,
+    meta: {
+      title: 'Select Clinical Scope',
+      requiresAuth: true,
+      requiredRoles: ['curator', 'admin']
+    }
+  },
+  {
     path: '/genes',
     name: 'Genes',
     component: GenesTable,
     meta: {
       title: 'Genes',
-      requiresAuth: false // Public access for viewing
+      requiresAuth: false
     }
   },
   {
@@ -66,73 +87,73 @@ const routes = [
     }
   },
   {
-    path: '/admin/genes',
-    name: 'GeneAdmin',
-    component: GeneAdmin,
+    path: '/assignments',
+    name: 'GeneAssignments',
+    component: GeneAssignments,
     meta: {
-      title: 'Gene Administration',
-      requiresAuth: true,
-      requiredRoles: ['admin'] // Only admins can manage genes (bulk upload/delete)
-    }
-  },
-  {
-    path: '/precurations',
-    name: 'Precurations',
-    component: PrecurationsTable,
-    meta: {
-      title: 'Pre-curations',
+      title: 'Gene Assignments',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
     }
   },
   {
-    path: '/precurations/create',
-    name: 'CreatePrecuration',
-    component: CreatePrecuration,
+    path: '/assignments/create',
+    name: 'CreateAssignment',
+    component: CreateAssignment,
     meta: {
-      title: 'Create Pre-curation',
+      title: 'Create Assignment',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
     }
   },
   {
-    path: '/precurations/:id',
-    name: 'PrecurationDetail',
-    component: PrecurationDetail,
+    path: '/assignments/:id',
+    name: 'AssignmentDetail',
+    component: AssignmentDetail,
     props: true,
     meta: {
-      title: 'Pre-curation Details',
+      title: 'Assignment Details',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
     }
   },
   {
-    path: '/curations',
-    name: 'Curations',
-    component: CurationsTable,
+    path: '/admin/schemas',
+    name: 'SchemaManagement',
+    component: SchemaManagement,
     meta: {
-      title: 'Curations',
+      title: 'Schema Management',
       requiresAuth: true,
-      requiredRoles: ['curator', 'admin']
+      requiredRoles: ['admin']
     }
   },
   {
-    path: '/curations/create',
-    name: 'CreateCuration',
-    component: CreateCuration,
-    meta: {
-      title: 'Create Curation',
-      requiresAuth: true,
-      requiredRoles: ['curator', 'admin']
-    }
-  },
-  {
-    path: '/curations/:id',
-    name: 'CurationDetail',
-    component: CurationDetail,
+    path: '/admin/schemas/:id/edit',
+    name: 'SchemaEditor',
+    component: SchemaEditor,
     props: true,
     meta: {
-      title: 'Curation Details',
+      title: 'Schema Editor',
+      requiresAuth: true,
+      requiredRoles: ['admin']
+    }
+  },
+  {
+    path: '/admin/workflows',
+    name: 'WorkflowManagement',
+    component: WorkflowManagement,
+    meta: {
+      title: 'Workflow Management',
+      requiresAuth: true,
+      requiredRoles: ['admin']
+    }
+  },
+  {
+    path: '/validation',
+    name: 'ValidationDashboard',
+    component: ValidationDashboard,
+    meta: {
+      title: 'Validation Dashboard',
       requiresAuth: true,
       requiredRoles: ['curator', 'admin']
     }

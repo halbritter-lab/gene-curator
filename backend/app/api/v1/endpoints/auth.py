@@ -18,7 +18,7 @@ from app.core.security import (
     verify_token,
 )
 from app.crud.user import user_crud
-from app.models.database_models import User
+from app.models import User
 from app.schemas.auth import (
     PasswordChange,
     Token,

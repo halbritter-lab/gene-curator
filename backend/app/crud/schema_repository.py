@@ -9,7 +9,7 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.schema_agnostic_models import (
+from app.models import (
     CurationNew,
     CurationSchema,
     PrecurationNew,
@@ -262,7 +262,7 @@ class CRUDWorkflowPair(CRUDBase[WorkflowPair, WorkflowPairCreate, WorkflowPairUp
     def is_workflow_pair_in_use(self, db: Session, *, workflow_pair_id: UUID) -> bool:
         """Check if workflow pair is currently in use."""
         # Check if any scopes are using this as default workflow pair
-        from app.models.schema_agnostic_models import Scope
+        from app.models import Scope
 
         scope_count = (
             db.query(func.count(Scope.id))
@@ -324,7 +324,7 @@ class CRUDWorkflowPair(CRUDBase[WorkflowPair, WorkflowPairCreate, WorkflowPairUp
             return {}
 
         # Count scopes using this as default
-        from app.models.schema_agnostic_models import Scope
+        from app.models import Scope
 
         scope_count = (
             db.query(func.count(Scope.id))

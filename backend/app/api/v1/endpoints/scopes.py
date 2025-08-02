@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core import deps
 from app.crud.scope import scope_crud
-from app.models.database_models import User
+from app.models import User
 from app.schemas.scope import (
     Scope,
     ScopeCreate,

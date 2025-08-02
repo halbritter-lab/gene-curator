@@ -13,7 +13,7 @@ from app.core.security import (
     verify_token,
 )
 from app.crud.user import user_crud
-from app.models.database_models import User, UserRole
+from app.models import User, UserRole
 
 # Security scheme
 security = HTTPBearer()
@@ -47,7 +47,7 @@ def get_current_user(
         raise credentials_exception
 
     # Get user from database
-    user = user_crud.get(db, user_id=user_id)
+    user = user_crud.get(db, id=user_id)
     if user is None:
         raise credentials_exception
 
@@ -147,7 +147,7 @@ def get_current_user_optional(
             return None
 
         # Get user from database
-        user = user_crud.get(db, user_id=user_id)
+        user = user_crud.get(db, id=user_id)
         if user is None or not user_crud.is_active(user):
             return None
 

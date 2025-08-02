@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
 
-from app.models.schema_agnostic_models import ReviewStatus, WorkflowStage
+from app.models import ReviewStatus, WorkflowStage
 
 
 # Workflow Transition Schemas

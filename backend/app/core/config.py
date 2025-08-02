@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # Database settings
     DATABASE_URL: str = (
-        "postgresql://gene_curator:gene_curator_dev@postgres:5432/gene_curator"
+        "postgresql://dev_user:dev_password@postgres:5432/gene_curator_dev"
     )
 
     # Security settings

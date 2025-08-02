@@ -1,80 +1,80 @@
 """
-CRUD operations for User model.
+User CRUD operations.
 """
 
-from sqlalchemy import func
+from typing import List, Optional, Dict, Any
+from uuid import UUID
+
 from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, func
 
 from app.core.security import get_password_hash, verify_password
-from app.models.database_models import User
+from app.crud.base import CRUDBase
+from app.models import UserNew as User, UserRoleNew as UserRole
 from app.schemas.auth import UserCreate, UserUpdate
 
 
-class UserCRUD:
+class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     """CRUD operations for User model."""
 
-    def get(self, db: Session, user_id: str) -> User | None:
-        """Get user by ID."""
-        return db.query(User).filter(User.id == user_id).first()
-
-    def get_by_email(self, db: Session, email: str) -> User | None:
-        """Get user by email."""
+    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+        """Get user by email address."""
         return db.query(User).filter(User.email == email).first()
 
-    def get_multi(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-        """Get multiple users with pagination."""
-        return db.query(User).offset(skip).limit(limit).all()
-
-    def create(self, db: Session, user_create: UserCreate) -> User:
-        """Create a new user."""
-        # Hash the password
-        hashed_password = get_password_hash(user_create.password)
-
-        # Create user object
-        db_user = User(
+    def create(self, db: Session, *, user_create: UserCreate) -> User:
+        """Create a new user with hashed password."""
+        db_obj = User(
             email=user_create.email,
-            hashed_password=hashed_password,
+            hashed_password=get_password_hash(user_create.password),
             name=user_create.name,
             role=user_create.role,
+            institution=user_create.institution,
+            orcid_id=user_create.orcid_id,
+            expertise_areas=user_create.expertise_areas or [],
+            assigned_scopes=user_create.assigned_scopes or [],
             is_active=user_create.is_active,
         )
-
-        db.add(db_user)
+        db.add(db_obj)
         db.commit()
-        db.refresh(db_user)
-        return db_user
+        db.refresh(db_obj)
+        return db_obj
 
-    def update(self, db: Session, user_id: str, user_update: UserUpdate) -> User | None:
-        """Update user information."""
-        db_user = self.get(db, user_id)
-        if not db_user:
+    def update(
+        self, db: Session, *, user_id: str, user_update: UserUpdate
+    ) -> Optional[User]:
+        """Update user data."""
+        db_obj = self.get(db, id=user_id)
+        if not db_obj:
             return None
 
-        update_data = user_update.dict(exclude_unset=True)
+        update_data = user_update.model_dump(exclude_unset=True)
 
-        for field, value in update_data.items():
-            setattr(db_user, field, value)
+        # Handle password update separately
+        if "password" in update_data:
+            update_data["hashed_password"] = get_password_hash(
+                update_data.pop("password")
+            )
+
+        for key, value in update_data.items():
+            setattr(db_obj, key, value)
 
         db.commit()
-        db.refresh(db_user)
-        return db_user
+        db.refresh(db_obj)
+        return db_obj
 
-    def update_password(
-        self, db: Session, user_id: str, new_password: str
-    ) -> User | None:
+    def update_password(self, db: Session, *, user_id: str, new_password: str) -> bool:
         """Update user password."""
-        db_user = self.get(db, user_id)
-        if not db_user:
-            return None
+        db_obj = self.get(db, id=user_id)
+        if not db_obj:
+            return False
 
-        db_user.hashed_password = get_password_hash(new_password)
+        db_obj.hashed_password = get_password_hash(new_password)
         db.commit()
-        db.refresh(db_user)
-        return db_user
+        return True
 
-    def authenticate(self, db: Session, email: str, password: str) -> User | None:
-        """Authenticate user with email and password."""
-        user = self.get_by_email(db, email)
+    def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
+        """Authenticate user by email and password."""
+        user = self.get_by_email(db, email=email)
         if not user:
             return None
         if not verify_password(password, user.hashed_password):
@@ -86,168 +86,139 @@ class UserCRUD:
         return user.is_active
 
     def is_admin(self, user: User) -> bool:
-        """Check if user is admin."""
-        return user.role == "admin"
+        """Check if user has admin role."""
+        return user.role == UserRole.ADMIN
 
-    def delete(self, db: Session, user_id: str) -> User | None:
-        """Delete user."""
-        db_user = self.get(db, user_id)
-        if not db_user:
-            return None
+    def has_role(self, user: User, role: UserRole) -> bool:
+        """Check if user has specific role."""
+        return user.role == role
 
-        db.delete(db_user)
-        db.commit()
-        return db_user
+    def has_any_role(self, user: User, roles: List[UserRole]) -> bool:
+        """Check if user has any of the specified roles."""
+        return user.role in roles
 
-    def update_last_login(self, db: Session, user_id: str) -> User | None:
-        """Update user's last login timestamp."""
-        from sqlalchemy import func
-
-        db_user = self.get(db, user_id)
-        if not db_user:
-            return None
-
-        db_user.last_login = func.now()
-        db.commit()
-        db.refresh(db_user)
-        return db_user
+    def get_by_role(
+        self, db: Session, *, role: UserRole, skip: int = 0, limit: int = 100
+    ) -> List[User]:
+        """Get users by role."""
+        return (
+            db.query(User)
+            .filter(User.role == role)
+            .filter(User.is_active == True)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def search(
-        self, db: Session, query: str, skip: int = 0, limit: int = 100
-    ) -> list[User]:
+        self, db: Session, *, query: str, skip: int = 0, limit: int = 100
+    ) -> List[User]:
         """Search users by name or email."""
-        from sqlalchemy import func, or_
-
-        search_filter = or_(
-            func.lower(User.name).contains(func.lower(query)),
-            func.lower(User.email).contains(func.lower(query)),
+        search_filter = (
+            or_(
+                User.name.ilike(f"%{query}%"),
+                User.email.ilike(f"%{query}%"),
+                User.institution.ilike(f"%{query}%"),
+            )
+            if query
+            else True
         )
 
         return db.query(User).filter(search_filter).offset(skip).limit(limit).all()
 
-    def get_statistics(self, db: Session) -> dict:
+    def get_statistics(self, db: Session) -> Dict[str, Any]:
         """Get user statistics."""
-        from sqlalchemy import func
-
         total_users = db.query(func.count(User.id)).scalar()
         active_users = (
-            db.query(func.count(User.id)).filter(User.is_active is True).scalar()
+            db.query(func.count(User.id)).filter(User.is_active == True).scalar()
         )
 
-        # Count by role
-        role_counts = db.query(User.role, func.count(User.id)).group_by(User.role).all()
-        roles_dict = dict(role_counts)
-
-        # Recent registrations (last 30 days)
-        from datetime import datetime, timedelta
-
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-        recent_registrations = (
-            db.query(func.count(User.id))
-            .filter(User.created_at >= thirty_days_ago)
-            .scalar()
-        )
+        role_counts = {}
+        for role in UserRole:
+            count = db.query(func.count(User.id)).filter(User.role == role).scalar()
+            role_counts[role.value] = count
 
         return {
             "total_users": total_users,
             "active_users": active_users,
             "inactive_users": total_users - active_users,
-            "roles": roles_dict,
-            "recent_registrations": recent_registrations,
+            "role_distribution": role_counts,
         }
 
-    def get_user_activity(self, db: Session, user_id: str) -> dict:
+    def get_user_activity(self, db: Session, *, user_id: str) -> Dict[str, Any]:
         """Get user activity summary."""
-        user = self.get(db, user_id)
+        user = self.get(db, id=user_id)
         if not user:
             return {}
 
-        # Get basic user info
-        activity = {
+        # This would be expanded with actual activity tracking
+        return {
             "user_id": str(user.id),
             "name": user.name,
             "email": user.email,
-            "role": user.role,
+            "role": user.role.value,
             "last_login": user.last_login,
-            "created_at": user.created_at,
+            "assigned_scopes": len(user.assigned_scopes) if user.assigned_scopes else 0,
+            "expertise_areas": len(user.expertise_areas) if user.expertise_areas else 0,
             "is_active": user.is_active,
         }
 
-        # Get counts from related tables (if they exist)
-        try:
-            from app.models.database_models import Curation, Gene, Precuration
+    def get_users_by_scope(
+        self, db: Session, *, scope_id: UUID, skip: int = 0, limit: int = 100
+    ) -> List[User]:
+        """Get users assigned to a specific scope."""
+        return (
+            db.query(User)
+            .filter(User.assigned_scopes.contains([str(scope_id)]))
+            .filter(User.is_active == True)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-            # Count genes created/updated by user
-            genes_created = (
-                db.query(func.count(Gene.id))
-                .filter(Gene.created_by == user.id)
-                .scalar()
-                or 0
-            )
-            genes_updated = (
-                db.query(func.count(Gene.id))
-                .filter(Gene.updated_by == user.id)
-                .scalar()
-                or 0
-            )
+    def assign_to_scope(self, db: Session, *, user_id: str, scope_id: UUID) -> bool:
+        """Assign user to a scope."""
+        user = self.get(db, id=user_id)
+        if not user:
+            return False
 
-            # Count precurations created/updated by user
-            precurations_created = (
-                db.query(func.count(Precuration.id))
-                .filter(Precuration.created_by == user.id)
-                .scalar()
-                or 0
-            )
-            precurations_updated = (
-                db.query(func.count(Precuration.id))
-                .filter(Precuration.updated_by == user.id)
-                .scalar()
-                or 0
-            )
+        scope_id_str = str(scope_id)
+        current_scopes = user.assigned_scopes or []
 
-            # Count curations created/updated by user
-            curations_created = (
-                db.query(func.count(Curation.id))
-                .filter(Curation.created_by == user.id)
-                .scalar()
-                or 0
-            )
-            curations_updated = (
-                db.query(func.count(Curation.id))
-                .filter(Curation.updated_by == user.id)
-                .scalar()
-                or 0
-            )
-            curations_approved = (
-                db.query(func.count(Curation.id))
-                .filter(Curation.approved_by == user.id)
-                .scalar()
-                or 0
-            )
+        if scope_id_str not in current_scopes:
+            current_scopes.append(scope_id_str)
+            user.assigned_scopes = current_scopes
+            db.commit()
 
-            activity.update(
-                {
-                    "genes_created": genes_created,
-                    "genes_updated": genes_updated,
-                    "precurations_created": precurations_created,
-                    "precurations_updated": precurations_updated,
-                    "curations_created": curations_created,
-                    "curations_updated": curations_updated,
-                    "curations_approved": curations_approved,
-                    "total_contributions": genes_created
-                    + genes_updated
-                    + precurations_created
-                    + precurations_updated
-                    + curations_created
-                    + curations_updated,
-                }
-            )
-        except Exception:
-            # If models don't exist yet, just return basic info
-            pass
+        return True
 
-        return activity
+    def remove_from_scope(self, db: Session, *, user_id: str, scope_id: UUID) -> bool:
+        """Remove user from a scope."""
+        user = self.get(db, id=user_id)
+        if not user:
+            return False
+
+        scope_id_str = str(scope_id)
+        current_scopes = user.assigned_scopes or []
+
+        if scope_id_str in current_scopes:
+            current_scopes.remove(scope_id_str)
+            user.assigned_scopes = current_scopes
+            db.commit()
+
+        return True
+
+    def update_last_login(self, db: Session, user_id: str) -> bool:
+        """Update user's last login timestamp."""
+        user = self.get(db, id=user_id)
+        if not user:
+            return False
+        
+        from datetime import datetime
+        user.last_login = datetime.now()
+        db.commit()
+        return True
 
 
 # Create instance
-user_crud = UserCRUD()
+user_crud = CRUDUser(User)

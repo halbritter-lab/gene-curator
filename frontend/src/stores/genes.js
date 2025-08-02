@@ -5,10 +5,9 @@ export const useGenesStore = defineStore('genes', {
   state: () => ({
     genes: [],
     currentGene: null,
-    geneHistory: [],
-    statistics: null,
-    summary: [],
-    searchResults: null,
+    searchResults: [],
+    geneAssignments: {},
+    geneCurationProgress: {},
     loading: false,
     error: null,
     pagination: {
@@ -19,6 +18,9 @@ export const useGenesStore = defineStore('genes', {
     },
     searchParams: {
       query: '',
+      scope_id: null,
+      assignment_status: null,
+      curation_status: null,
       sort_by: 'approved_symbol',
       sort_order: 'asc'
     }
@@ -29,112 +31,70 @@ export const useGenesStore = defineStore('genes', {
       return state.genes.find(gene => gene.id === id)
     },
 
-    getGeneByHgnc: state => hgncId => {
-      return state.genes.find(gene => gene.hgnc_id === hgncId)
+    getGenesByScope: state => scopeId => {
+      return state.genes.filter(gene => 
+        gene.assignments?.some(assignment => assignment.scope_id === scopeId)
+      )
     },
 
-    filteredGenes: state => {
-      if (!state.searchResults) return state.genes
-      return state.searchResults.genes || []
+    getGeneAssignments: state => geneId => {
+      return state.geneAssignments[geneId] || []
     },
 
-    totalGenes: state => {
-      return state.searchResults?.total || state.pagination.total
+    getGeneCurationProgress: state => geneId => {
+      return state.geneCurationProgress[geneId] || {}
     },
 
-    hasNextPage: state => {
-      return state.pagination.page < state.pagination.pages
-    },
-
-    hasPrevPage: state => {
-      return state.pagination.page > 1
+    getUnassignedGenes: state => {
+      return state.genes.filter(gene => 
+        !gene.assignments || gene.assignments.length === 0
+      )
     }
   },
 
   actions: {
     async fetchGenes(params = {}) {
+      this.loading = true
+      this.error = null
       try {
-        this.loading = true
-        this.error = null
-
-        const queryParams = {
-          page: params.page || this.pagination.page,
-          per_page: params.per_page || this.pagination.per_page,
-          sort_by: params.sort_by || this.searchParams.sort_by,
-          sort_order: params.sort_order || this.searchParams.sort_order
-        }
-
-        const response = await genesAPI.getGenes(queryParams)
-
-        this.genes = response.genes
-        this.pagination = {
-          page: response.page,
-          per_page: response.per_page,
-          total: response.total,
-          pages: response.pages
-        }
-
-        return response
-      } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch genes'
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async searchGenes(searchParams = {}) {
-      try {
-        this.loading = true
-        this.error = null
-
-        const params = {
+        const response = await genesAPI.getGenes({
           ...this.searchParams,
-          ...searchParams
+          ...params
+        })
+        
+        this.genes = response.genes || response.data || response
+        
+        if (response.pagination) {
+          this.pagination = response.pagination
         }
-
-        this.searchParams = params
-        const response = await genesAPI.searchGenes(params)
-
-        this.searchResults = response
-
+        
         return response
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Search failed'
+        this.error = error.message
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    async fetchGeneById(geneId) {
+    async fetchGeneById(id) {
+      this.loading = true
+      this.error = null
       try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.getGeneById(geneId)
-        this.currentGene = response
-
-        return response
+        const gene = await genesAPI.getGeneById(id)
+        this.currentGene = gene
+        
+        // Update the gene in the list if it exists
+        const index = this.genes.findIndex(g => g.id === id)
+        if (index !== -1) {
+          this.genes[index] = gene
+        } else {
+          this.genes.push(gene)
+        }
+        
+        return gene
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch gene'
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async fetchGeneByHgnc(hgncId) {
-      try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.getGeneByHgnc(hgncId)
-        this.currentGene = response
-
-        return response
-      } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch gene'
+        this.error = error.message
         throw error
       } finally {
         this.loading = false
@@ -142,184 +102,124 @@ export const useGenesStore = defineStore('genes', {
     },
 
     async createGene(geneData) {
+      this.loading = true
+      this.error = null
       try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.createGene(geneData)
-
-        // Add to local state
-        this.genes.unshift(response)
-        this.pagination.total += 1
-
-        return response
+        const newGene = await genesAPI.createGene(geneData)
+        this.genes.push(newGene)
+        return newGene
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to create gene'
+        this.error = error.message
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    async updateGene(geneId, geneData) {
+    async updateGene(id, geneData) {
+      this.loading = true
+      this.error = null
       try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.updateGene(geneId, geneData)
-
-        // Update local state
-        const index = this.genes.findIndex(gene => gene.id === geneId)
+        const updatedGene = await genesAPI.updateGene(id, geneData)
+        const index = this.genes.findIndex(g => g.id === id)
         if (index !== -1) {
-          this.genes[index] = response
+          this.genes[index] = updatedGene
         }
-
-        if (this.currentGene?.id === geneId) {
-          this.currentGene = response
+        if (this.currentGene && this.currentGene.id === id) {
+          this.currentGene = updatedGene
         }
-
-        return response
+        return updatedGene
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to update gene'
+        this.error = error.message
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    async deleteGene(geneId) {
+    async deleteGene(id) {
+      this.loading = true
+      this.error = null
       try {
-        this.loading = true
-        this.error = null
-
-        await genesAPI.deleteGene(geneId)
-
-        // Remove from local state
-        this.genes = this.genes.filter(gene => gene.id !== geneId)
-        this.pagination.total -= 1
-
-        if (this.currentGene?.id === geneId) {
+        await genesAPI.deleteGene(id)
+        this.genes = this.genes.filter(g => g.id !== id)
+        if (this.currentGene && this.currentGene.id === id) {
           this.currentGene = null
         }
-
         return true
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to delete gene'
+        this.error = error.message
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    async bulkCreateGenes(genes) {
+    async fetchGeneAssignments(id) {
       try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.bulkCreateGenes(genes)
-
-        // Refresh the genes list after bulk creation
-        await this.fetchGenes()
-
-        return response
+        const assignments = await genesAPI.getGeneAssignments(id)
+        this.geneAssignments[id] = assignments
+        return assignments
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Bulk creation failed'
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async fetchGeneHistory(geneId) {
-      try {
-        this.loading = true
-        this.error = null
-
-        const response = await genesAPI.getGeneHistory(geneId)
-        this.geneHistory = response
-
-        return response
-      } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch gene history'
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async fetchStatistics() {
-      try {
-        const response = await genesAPI.getGeneStatistics()
-        this.statistics = response
-
-        return response
-      } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch statistics'
+        this.error = error.message
         throw error
       }
     },
 
-    async fetchSummary() {
+    async fetchGeneCurationProgress(id) {
       try {
-        const response = await genesAPI.getGeneSummary()
-        this.summary = response
-
-        return response
+        const progress = await genesAPI.getGeneCurationProgress(id)
+        this.geneCurationProgress[id] = progress
+        return progress
       } catch (error) {
-        this.error = error.response?.data?.detail || 'Failed to fetch summary'
+        this.error = error.message
         throw error
       }
     },
 
-    // Navigation helpers
-    async nextPage() {
-      if (this.hasNextPage) {
-        this.pagination.page += 1
-        await this.fetchGenes()
-      }
-    },
-
-    async prevPage() {
-      if (this.hasPrevPage) {
-        this.pagination.page -= 1
-        await this.fetchGenes()
-      }
-    },
-
-    async setPage(page) {
-      this.pagination.page = page
-      await this.fetchGenes()
-    },
-
-    async setSorting(sortBy, sortOrder = 'asc') {
-      this.searchParams.sort_by = sortBy
-      this.searchParams.sort_order = sortOrder
-      this.pagination.page = 1
-
-      if (this.searchResults) {
-        await this.searchGenes()
-      } else {
-        await this.fetchGenes()
-      }
-    },
-
-    clearSearch() {
-      this.searchResults = null
-      this.searchParams = {
-        query: '',
-        sort_by: 'approved_symbol',
-        sort_order: 'asc'
-      }
-      this.pagination.page = 1
-    },
-
-    clearError() {
+    async searchGenes(searchParams) {
+      this.loading = true
       this.error = null
+      try {
+        const response = await genesAPI.searchGenes(searchParams)
+        this.searchResults = response.genes || response.data || response
+        return response
+      } catch (error) {
+        this.error = error.message
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    updateSearchParams(params) {
+      this.searchParams = { ...this.searchParams, ...params }
+    },
+
+    setCurrentGene(gene) {
+      this.currentGene = gene
     },
 
     clearCurrentGene() {
       this.currentGene = null
-      this.geneHistory = []
+    },
+
+    clearSearchResults() {
+      this.searchResults = []
+    },
+
+    async fetchStatistics() {
+      try {
+        const stats = await genesAPI.getStatistics()
+        return stats
+      } catch (error) {
+        this.error = error.message
+        throw error
+      }
+    },
+
+    clearError() {
+      this.error = null
     }
   }
 })

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_admin_user, get_db
 from app.crud.user import user_crud
-from app.models.database_models import User
+from app.models import User
 from app.schemas.auth import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()

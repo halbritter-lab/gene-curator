@@ -4,9 +4,9 @@ services:
     image: postgres:15-alpine
     container_name: gene_curator_db
     environment:
-      POSTGRES_DB: gene_curator
-      POSTGRES_USER: gene_curator
-      POSTGRES_PASSWORD: gene_curator_dev
+      POSTGRES_DB: gene_curator_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
@@ -16,7 +16,7 @@ services:
     networks:
       - gene_curator_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gene_curator -d gene_curator"]
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d gene_curator_dev"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       target: development
     container_name: gene_curator_api
     environment:
-      DATABASE_URL: postgresql://gene_curator:gene_curator_dev@postgres:5432/gene_curator
+      DATABASE_URL: postgresql://dev_user:dev_password@postgres:5432/gene_curator_dev
       ENVIRONMENT: development
       SECRET_KEY: dev-secret-key-change-in-production
     ports:
@@ -64,9 +64,9 @@ services:
       dockerfile: Dockerfile
     container_name: gene_curator_ui
     environment:
-      VITE_API_BASE_URL: http://localhost:8000
+      VITE_API_BASE_URL: http://localhost:8001
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - backend
     networks:

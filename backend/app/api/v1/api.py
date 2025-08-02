@@ -6,12 +6,9 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
-    curations,
-    genes,
     genes_new,
     gene_assignments,
     health,
-    precurations,
     schemas,
     schema_validation,
     scopes,
@@ -26,7 +23,7 @@ api_router = APIRouter()
 api_router.include_router(health.router, prefix="/health", tags=["health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 
-# Schema-agnostic system endpoints
+# Methodology-agnostic system endpoints
 api_router.include_router(scopes.router, prefix="/scopes", tags=["scopes"])
 api_router.include_router(schemas.router, prefix="/schemas", tags=["schemas"])
 api_router.include_router(
@@ -38,10 +35,5 @@ api_router.include_router(
 api_router.include_router(workflow.router, prefix="/workflow", tags=["workflow"])
 
 # Core entity endpoints
-api_router.include_router(genes.router, prefix="/genes", tags=["genes"])
-api_router.include_router(genes_new.router, prefix="/genes-new", tags=["genes-new"])
+api_router.include_router(genes_new.router, prefix="/genes", tags=["genes"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
-api_router.include_router(
-    precurations.router, prefix="/precurations", tags=["precurations"]
-)
-api_router.include_router(curations.router, prefix="/curations", tags=["curations"])

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db, engine
 from app.crud.user import user_crud
 from app.schemas.auth import UserCreate
-from app.models.database_models import UserRole
+from app.models import UserRole
 
 
 def create_default_user():

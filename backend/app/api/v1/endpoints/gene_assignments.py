@@ -8,9 +8,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api import deps
+from app.core import deps
 from app.crud.gene_assignment import gene_assignment_crud
-from app.models.schema_agnostic_models import UserNew
+from app.models import UserNew
 from app.schemas.gene_assignment import (
     AvailableGene,
     BulkGeneScopeAssignmentCreate,

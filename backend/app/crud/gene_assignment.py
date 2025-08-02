@@ -10,7 +10,7 @@ from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.schema_agnostic_models import (
+from app.models import (
     CurationNew,
     GeneNew,
     GeneScopeAssignment,

@@ -117,6 +117,13 @@
       requiresAuth: false
     },
     {
+      name: 'dashboard',
+      title: 'Dashboard',
+      to: { name: 'Dashboard' },
+      icon: 'mdi-view-dashboard',
+      requiresAuth: true
+    },
+    {
       name: 'genes',
       title: 'Genes',
       to: { name: 'Genes' },
@@ -131,28 +138,22 @@
       requiredRoles: ['admin', 'curator'],
       children: [
         {
-          name: 'precurations',
-          title: 'Pre-curations',
-          to: { name: 'Precurations' },
-          icon: 'mdi-clipboard-text'
+          name: 'assignments',
+          title: 'Gene Assignments',
+          to: { name: 'GeneAssignments' },
+          icon: 'mdi-account-group'
         },
         {
-          name: 'curations',
-          title: 'Curations',
-          to: { name: 'Curations' },
-          icon: 'mdi-clipboard-check-multiple'
-        },
-        {
-          name: 'create-precuration',
-          title: 'Create Pre-curation',
-          to: { name: 'CreatePrecuration' },
+          name: 'new-assignment',
+          title: 'New Assignment',
+          to: { name: 'ScopeSelection' },
           icon: 'mdi-plus-circle'
         },
         {
-          name: 'create-curation',
-          title: 'Create Curation',
-          to: { name: 'CreateCuration' },
-          icon: 'mdi-plus-circle-multiple'
+          name: 'validation',
+          title: 'Validation Dashboard',
+          to: { name: 'ValidationDashboard' },
+          icon: 'mdi-check-decagram'
         }
       ]
     },
@@ -164,10 +165,17 @@
       requiredRoles: ['admin'],
       children: [
         {
-          name: 'gene-admin',
-          title: 'Gene Management',
-          to: { name: 'GeneAdmin' },
-          icon: 'mdi-database-edit',
+          name: 'schemas',
+          title: 'Schema Management',
+          to: { name: 'SchemaManagement' },
+          icon: 'mdi-file-document-outline',
+          requiredRoles: ['admin']
+        },
+        {
+          name: 'workflows',
+          title: 'Workflow Management',
+          to: { name: 'WorkflowManagement' },
+          icon: 'mdi-workflow',
           requiredRoles: ['admin']
         },
         {

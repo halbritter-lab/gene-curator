@@ -9,9 +9,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api import deps
+from app.core import deps
 from app.crud.workflow_engine import workflow_engine
-from app.models.schema_agnostic_models import UserNew
+from app.models import UserNew
 from app.schemas.workflow_engine import (
     BulkWorkflowTransitionRequest,
     BulkWorkflowTransitionResult,
@@ -202,7 +202,7 @@ def get_my_review_assignments(
     """
     Get peer review assignments for the current user.
     """
-    from app.models.schema_agnostic_models import Review, ReviewStatus
+    from app.models import Review, ReviewStatus
 
     query = db.query(Review).filter(Review.reviewer_id == current_user.id)
 
@@ -279,7 +279,7 @@ def get_workflow_dashboard(
             raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Build dashboard data (simplified implementation)
-    from app.models.schema_agnostic_models import (
+    from app.models import (
         GeneScopeAssignment,
         Review,
         ReviewStatus,

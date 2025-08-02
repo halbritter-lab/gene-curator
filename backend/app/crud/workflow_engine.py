@@ -10,7 +10,7 @@ from uuid import UUID
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from app.models.schema_agnostic_models import (
+from app.models import (
     ActiveCuration,
     CurationNew,
     CurationStatus,

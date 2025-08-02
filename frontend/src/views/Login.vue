@@ -102,6 +102,14 @@
                 size="small"
                 variant="outlined"
                 :loading="authStore.loading"
+                @click="quickLogin('reviewer')"
+              >
+                Login as Reviewer
+              </v-btn>
+              <v-btn
+                size="small"
+                variant="outlined"
+                :loading="authStore.loading"
                 @click="quickLogin('viewer')"
               >
                 Login as Viewer
@@ -141,7 +149,7 @@
 
   // Development mode check
   const isDevelopment = computed(() => {
-    return import.meta.env.DEV || import.meta.env.MODE === 'development'
+    return import.meta.env.DEV || import.meta.env.MODE === 'development' || import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
   })
 
   // Validation rules
@@ -157,9 +165,10 @@
 
   // Development quick login credentials
   const devCredentials = {
-    admin: { email: 'admin@gene-curator.dev', password: 'admin123' },
-    curator: { email: 'curator@gene-curator.dev', password: 'curator123' },
-    viewer: { email: 'viewer@gene-curator.dev', password: 'viewer123' }
+    admin: { email: 'admin@genecurator.org', password: 'admin123' },
+    curator: { email: 'dev@example.com', password: 'admin123' },
+    reviewer: { email: 'reviewer@example.org', password: 'admin123' },
+    viewer: { email: 'test@example.com', password: 'admin123' }
   }
 
   const handleLogin = async () => {

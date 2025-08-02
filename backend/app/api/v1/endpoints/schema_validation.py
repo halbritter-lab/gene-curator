@@ -10,10 +10,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api import deps
+from app.core import deps
 from app.core.schema_validator import schema_validator
 from app.crud.schema_repository import schema_crud
-from app.models.schema_agnostic_models import UserNew
+from app.models import UserNew
 
 router = APIRouter()
 
