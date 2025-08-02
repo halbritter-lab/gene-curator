@@ -68,7 +68,7 @@ async def get_user(
     """
     Get a specific user by ID (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -107,7 +107,7 @@ async def update_user(
     """
     Update a user (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -136,7 +136,7 @@ async def update_user_password(
     """
     Update a user's password (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -155,7 +155,7 @@ async def activate_user(
     """
     Activate a user account (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -174,7 +174,7 @@ async def deactivate_user(
     """
     Deactivate a user account (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -200,7 +200,7 @@ async def delete_user(
     """
     Delete a user (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -226,7 +226,7 @@ async def get_user_activity(
     """
     Get user activity summary (admin only).
     """
-    user = user_crud.get(db=db, user_id=user_id)
+    user = user_crud.get(db=db, id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"

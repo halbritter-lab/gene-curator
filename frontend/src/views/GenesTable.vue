@@ -76,7 +76,7 @@
         <v-col>
           <div class="d-flex align-center">
             <v-chip color="primary" variant="outlined" class="mr-3">
-              {{ genesStore.totalGenes }} genes
+              {{ genesStore.genes.length }} genes
             </v-chip>
             <v-chip
               v-if="isSearching"
@@ -108,7 +108,7 @@
       <v-card>
         <v-data-table
           :headers="headers"
-          :items="genesStore.filteredGenes"
+          :items="genesStore.genes"
           :loading="genesStore.loading"
           :items-per-page="genesStore.pagination.per_page"
           class="gene-table"
@@ -357,12 +357,15 @@
 
   const handleSortChange = async () => {
     const [field, order] = sortBy.value.split('_')
-    await genesStore.setSorting(field, order)
+    // Update search params instead of calling non-existent method
+    genesStore.updateSearchParams({ sort_by: field, sort_order: order })
+    await performSearch()
   }
 
   const handlePageChange = async page => {
     currentPage.value = page
-    await genesStore.setPage(page)
+    // Update pagination and fetch new page
+    await genesStore.fetchGenes({ page })
   }
 
   const handleRowClick = (event, { item }) => {
@@ -378,7 +381,7 @@
     selectedFamily.value = null
     selectedChromosome.value = null
     currentPage.value = 1
-    genesStore.clearSearch()
+    genesStore.clearSearchResults()
     loadGenes()
   }
 

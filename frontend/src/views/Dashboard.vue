@@ -214,10 +214,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore, useAssignmentsStore, useScopesStore } from '@/stores'
+import { useAuthStore, useScopesStore } from '@/stores'
 
 const authStore = useAuthStore()
-const assignmentsStore = useAssignmentsStore()
 const scopesStore = useScopesStore()
 
 const loading = ref(false)
@@ -231,7 +230,10 @@ const recentActivity = ref([])
 
 const currentUser = computed(() => authStore.user)
 const isAdmin = computed(() => authStore.hasRole('admin'))
-const userScopes = computed(() => scopesStore.getUserScopes(currentUser.value?.id))
+const userScopes = computed(() => {
+  // For now, return empty array until user scopes are properly implemented
+  return []
+})
 
 const getActivityColor = (type) => {
   const colorMap = {
@@ -298,17 +300,19 @@ const getActivityLink = (activity) => {
 const loadDashboardData = async () => {
   loading.value = true
   try {
-    // Load dashboard statistics
-    const [statsData, activityData] = await Promise.all([
-      assignmentsStore.fetchDashboardStats(),
-      assignmentsStore.fetchRecentActivity({ limit: 10 })
-    ])
+    // Load scopes to get active scopes count
+    await scopesStore.fetchScopes()
     
-    stats.value = statsData
-    recentActivity.value = activityData
+    // Update stats with available data
+    stats.value.active_scopes = scopesStore.getActiveScopesCount
     
-    // Load user scopes
-    await scopesStore.fetchUserScopes(currentUser.value?.id)
+    // For now, set some mock data for demonstration
+    stats.value.active_assignments = 0
+    stats.value.completed_curations = 0
+    stats.value.pending_reviews = 0
+    
+    // Clear recent activity for now
+    recentActivity.value = []
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
   } finally {
